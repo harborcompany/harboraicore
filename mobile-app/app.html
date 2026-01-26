@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Kled — Earn from Your Data</title>
+    <meta name="description" content="Upload photos and videos to earn money. Join the data economy.">
+    <link rel="stylesheet" href="css/kled.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <span class="live-badge">LIVE</span>
+            </div>
+            <div class="header-right">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+                </svg>
+                <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <circle cx="12" cy="16" r="1"></circle>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <svg class="header-icon" id="settings-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"></path>
+                </svg>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tab 1: Upload Assets -->
+            <div class="tab-view active" id="tab-upload">
+                <h1 class="header-title">Upload Assets</h1>
+                <p class="header-subtitle">Select and upload files to earn money</p>
+
+                <!-- Warning Banner -->
+                <div class="warning-banner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <p><strong>Multiple Accounts Ban Risk</strong><br>Multiple accounts are strictly prohibited. Duplicates will be detected, all accounts banned permanently.</p>
+                </div>
+
+                <div class="warning-banner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <p><strong>Upload Violation Ban Risk</strong><br>Kled is temporarily prioritizing image uploads. Video uploads will resume soon.</p>
+                </div>
+
+                <!-- Upload Dial -->
+                <div class="upload-dial-container">
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" viewBox="0 0 220 220">
+                            <circle class="progress-ring-bg" cx="110" cy="110" r="100"/>
+                            <circle class="progress-ring-fill" id="progress-circle" cx="110" cy="110" r="100" 
+                                stroke-dasharray="628" stroke-dashoffset="628"/>
+                        </svg>
+                        <div class="upload-dial" id="upload-dial">
+                            <div class="upload-dial-inner">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="progress-text" id="progress-text">0%</span>
+                    </div>
+                </div>
+
+                <!-- My Uploads Link -->
+                <div class="upload-actions">
+                    <a href="#" class="my-uploads-link" onclick="switchTab('uploads')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                            <polyline points="13 2 13 9 20 9"></polyline>
+                        </svg>
+                        My Uploads
+                    </a>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">→</span>
+                </div>
+            </div>
+
+            <!-- Tab 2: Special Tasks -->
+            <div class="tab-view" id="tab-tasks">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <a href="#" onclick="switchTab('upload')" style="color: var(--text-secondary); text-decoration: none;">← Back</a>
+                </div>
+                <h1 class="header-title">Special Tasks <span class="section-badge">12</span></h1>
+                <p class="header-subtitle">Missions for special data uploads</p>
+
+                <!-- Featured Task -->
+                <div class="section-header" style="margin-top: 24px;">
+                    <h2 class="section-title">Featured Tasks</h2>
+                    <span class="section-badge">⭐</span>
+                </div>
+
+                <div class="featured-task">
+                    <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&h=400&fit=crop" 
+                         alt="Homework" class="featured-task-image" onerror="this.style.background='#1a1a1a'">
+                    <div class="featured-task-overlay">
+                        <span class="featured-task-tag">EDUCATION</span>
+                        <h3 class="featured-task-title">Upload Your Homework</h3>
+                        <p class="featured-task-desc">Share your handwritten notes, assignments and academic materials</p>
+                        <button class="btn btn-secondary" style="margin-top: 12px;" onclick="alert('Task details coming soon!')">View Task</button>
+                    </div>
+                </div>
+
+                <!-- All Tasks -->
+                <div class="section-header">
+                    <h2 class="section-title">All Special Tasks</h2>
+                    <span class="section-badge">12</span>
+                </div>
+
+                <div class="task-list">
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">📸 Street Photography</div>
+                            <div class="task-reward">+$0.05 per image</div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">🍔 Food Photos</div>
+                            <div class="task-reward">+$0.03 per image</div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">🏠 Interior Shots</div>
+                            <div class="task-reward">+$0.08 per image</div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">🚗 Vehicles</div>
+                            <div class="task-reward">+$0.04 per image</div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: All Uploads -->
+            <div class="tab-view" id="tab-uploads">
+                <h1 class="header-title">All Uploads</h1>
+                <p class="header-subtitle">Your upload history</p>
+
+                <!-- Segmented Control -->
+                <div class="segmented-control">
+                    <button class="segment-btn active" data-segment="regular">Regular</button>
+                    <button class="segment-btn" data-segment="tasks">Tasks</button>
+                    <button class="segment-btn" data-segment="integrations">Integrations</button>
+                </div>
+
+                <!-- Upload List -->
+                <div id="uploads-list">
+                    <div class="upload-item">
+                        <div class="upload-thumb">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <div class="upload-info">
+                            <div class="upload-name">IMG_2847.jpg</div>
+                            <div class="upload-meta">2 hours ago • 2.4 MB</div>
+                        </div>
+                        <span class="upload-status pending">Pending</span>
+                    </div>
+                    <div class="upload-item">
+                        <div class="upload-thumb">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <div class="upload-info">
+                            <div class="upload-name">IMG_2846.jpg</div>
+                            <div class="upload-meta">3 hours ago • 1.8 MB</div>
+                        </div>
+                        <span class="upload-status approved">Approved</span>
+                    </div>
+                    <div class="upload-item">
+                        <div class="upload-thumb">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <div class="upload-info">
+                            <div class="upload-name">IMG_2845.jpg</div>
+                            <div class="upload-meta">Yesterday • 3.1 MB</div>
+                        </div>
+                        <span class="upload-status paid">Paid</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Wallet -->
+            <div class="tab-view" id="tab-wallet">
+                <h1 class="header-title">Wallet</h1>
+                <p class="header-subtitle">Your earnings and payout history</p>
+
+                <!-- Threshold Info -->
+                <div class="info-banner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <p><strong>Pending Items Payout Threshold</strong><br>Payouts are generated when you have at least 100 pending uploads worth over $1 combined.</p>
+                </div>
+
+                <!-- Wallet Card -->
+                <div class="wallet-card">
+                    <div class="wallet-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        Cash
+                    </div>
+                    <div class="wallet-amount">$0.00</div>
+                    <div class="wallet-status">
+                        <span class="wallet-status-text">3 items pending sale</span>
+                        <button class="btn btn-secondary btn-disabled" disabled>Cashout</button>
+                    </div>
+                </div>
+
+                <!-- Wallet Tabs -->
+                <div class="segmented-control">
+                    <button class="segment-btn active" data-wallet-tab="payouts">Payouts</button>
+                    <button class="segment-btn" data-wallet-tab="cashouts">Cashouts</button>
+                    <button class="segment-btn" data-wallet-tab="ledger">Ledger</button>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+                    </svg>
+                    <p>No transactions yet.<br>Start uploading to earn!</p>
+                </div>
+            </div>
+
+            <!-- Tab 5: Profile -->
+            <div class="tab-view" id="tab-profile">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1 class="header-title">My Account</h1>
+                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="cursor: pointer;">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </div>
+
+                <!-- Player ID Card -->
+                <div class="player-id-card">
+                    <div class="player-id-label">Player ID</div>
+                    <div class="player-id-number">#135 012</div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Total Uploads</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            <span class="leaderboard-badge badge-bronze">🥉 Bronze</span>
+                        </div>
+                        <div class="stat-label">Leaderboard</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$0.72</div>
+                        <div class="stat-label">Earnings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Affiliates</div>
+                    </div>
+                </div>
+
+                <!-- Phone Verification -->
+                <div class="account-section">
+                    <div class="account-section-title">Verify & link phone number</div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">
+                        Required for payout processing
+                    </p>
+                    <div class="info-banner" style="margin-bottom: 16px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <p>Payouts will only be processed to users with verified phone numbers.</p>
+                    </div>
+                    <div class="phone-input-group">
+                        <input type="tel" class="phone-input" placeholder="Phone number">
+                        <button class="btn btn-primary btn-full">Send verification code</button>
+                    </div>
+                </div>
+
+                <!-- Stats for Nerds -->
+                <div class="section-header">
+                    <h2 class="section-title">Stats for Nerds</h2>
+                </div>
+                <div class="nerds-grid">
+                    <div class="nerd-stat">
+                        <div class="nerd-stat-value">$ 0.03</div>
+                        <div class="nerd-stat-label">Avg. per Image</div>
+                    </div>
+                    <div class="nerd-stat">
+                        <div class="nerd-stat-value">2.8 / Day</div>
+                        <div class="nerd-stat-label">Weekly Avg</div>
+                    </div>
+                    <div class="nerd-stat">
+                        <div class="nerd-stat-value">$ 0.00</div>
+                        <div class="nerd-stat-label">Best Payout</div>
+                    </div>
+                    <div class="nerd-stat">
+                        <div class="nerd-stat-value">$ 0.00</div>
+                        <div class="nerd-stat-label">Yearly Proj</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Bar -->
+        <div class="status-bar" id="status-bar" style="display: none;">
+            <div class="status-bar-left">
+                <span class="count" id="completed-count">3</span> completed
+            </div>
+            <div class="status-bar-right">
+                <button onclick="clearCompleted()">Clear</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="upload">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Upload</span>
+            </button>
+            <button class="nav-item" data-tab="tasks">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Tasks</span>
+            </button>
+            <button class="nav-item" data-tab="uploads">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <polyline points="13 2 13 9 20 9"></polyline>
+                </svg>
+                <span>History</span>
+            </button>
+            <button class="nav-item" data-tab="wallet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+                </svg>
+                <span>Wallet</span>
+            </button>
+            <button class="nav-item" data-tab="profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Profile</span>
+            </button>
+        </nav>
+
+        <!-- Upload Modal -->
+        <div class="upload-modal" id="upload-modal">
+            <div class="upload-modal-content">
+                <h2 class="upload-modal-title">Upload Content</h2>
+                <p class="upload-modal-subtitle">Select photos to upload</p>
+                <div class="upload-options">
+                    <div class="upload-option" onclick="selectFromLibrary()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <span>Library</span>
+                        <small>Choose Existing</small>
+                    </div>
+                    <div class="upload-option" onclick="openCamera()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span>Camera</span>
+                        <small>Capture New</small>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-full" style="margin-top: 16px;" onclick="closeUploadModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

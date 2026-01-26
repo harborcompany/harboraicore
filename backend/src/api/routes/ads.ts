@@ -86,60 +86,9 @@ adsRouter.get('/projects', requireScope('ads:read'), async (req: AuthenticatedRe
     });
 });
 
-/**
- * Submit intake form
- * POST /api/ads/projects/:projectId/intake
- */
-adsRouter.post('/projects/:projectId/intake', requireScope('ads:write'), async (req: Request, res: Response) => {
-    const { projectId } = req.params;
+// No longer using separate intake flow in simplified build doc schema
 
-    try {
-        const project = await clientIntakeService.submitIntake(projectId, req.body);
-
-        // Validate intake
-        const validation = clientIntakeService.validateIntake(project);
-
-        res.json({
-            data: project,
-            validation,
-            message: validation.valid ? 'Intake complete' : 'Intake submitted with missing items',
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Intake failed', message: String(error) });
-    }
-});
-
-/**
- * Upload asset to project
- * POST /api/ads/projects/:projectId/assets
- */
-adsRouter.post('/projects/:projectId/assets', requireScope('ads:write'), async (req: Request, res: Response) => {
-    const { projectId } = req.params;
-    const { type, name, url, mimeType, sizeBytes, metadata } = req.body;
-
-    if (!type || !name || !url) {
-        res.status(400).json({
-            error: 'Bad Request',
-            message: 'type, name, and url are required',
-        });
-        return;
-    }
-
-    try {
-        const asset = await clientIntakeService.uploadAsset(projectId, {
-            type,
-            name,
-            url,
-            mimeType: mimeType || 'application/octet-stream',
-            sizeBytes: sizeBytes || 0,
-            metadata,
-        });
-
-        res.status(201).json({ data: asset });
-    } catch (error) {
-        res.status(500).json({ error: 'Asset upload failed', message: String(error) });
-    }
-});
+// No longer using separate projectAsset model
 
 // ============================================
 // CONTENT SELECTION ENDPOINTS

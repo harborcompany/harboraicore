@@ -1,0 +1,184 @@
+{
+  "datasets": [
+    {
+      "slug": "urban-street-4k",
+      "title": "Urban Street Scenes 4K",
+      "description": "High-resolution footage of city streets, pedestrians, and vehicles from 50+ cities worldwide. Includes full object detection bounding boxes and instance segmentation masks.",
+      "category": "video",
+      "subcategory": "surveillance",
+      "version": "3.1",
+      "stats": {
+        "clips": 124500,
+        "annotations": "2.3M",
+        "resolution": "4K",
+        "hours": 2450
+      },
+      "tags": ["urban", "street", "pedestrian", "vehicle", "4k", "detection", "segmentation"],
+      "license": "training",
+      "faqs": [
+        {
+          "question": "What resolution is the Urban Street Scenes dataset?",
+          "answer": "The Urban Street Scenes dataset is available in 4K (3840x2160) resolution, with all clips captured at 30fps or higher."
+        },
+        {
+          "question": "How many cities are included in this dataset?",
+          "answer": "This dataset includes footage from over 50 cities across North America, Europe, and Asia, representing diverse urban environments."
+        }
+      ],
+      "relatedDatasets": ["indoor-activities", "driving-scenarios", "pedestrian-actions"]
+    },
+    {
+      "slug": "conversational-english",
+      "title": "Conversational English",
+      "description": "Natural multi-turn conversations between native speakers with word-level timestamps, speaker diarization, and emotion annotations.",
+      "category": "audio",
+      "subcategory": "speech",
+      "version": "4.2",
+      "stats": {
+        "clips": 89000,
+        "annotations": "1.1M",
+        "hours": 8500,
+        "languages": 1
+      },
+      "tags": ["speech", "conversation", "english", "transcription", "diarization"],
+      "license": "training",
+      "faqs": [
+        {
+          "question": "Does the Conversational English dataset include speaker labels?",
+          "answer": "Yes, all conversations include speaker diarization with distinct speaker IDs, turn boundaries, and overlap detection."
+        }
+      ],
+      "relatedDatasets": ["multilingual-speech", "podcast-transcripts", "meeting-recordings"]
+    },
+    {
+      "slug": "indoor-activities",
+      "title": "Indoor Activities",
+      "description": "People performing everyday activities in home and office environments. Includes activity labels, pose estimation, and object interactions.",
+      "category": "video",
+      "subcategory": "activities",
+      "version": "2.8",
+      "stats": {
+        "clips": 67200,
+        "annotations": "890K",
+        "resolution": "1080p",
+        "activities": 150
+      },
+      "tags": ["indoor", "activities", "human", "pose", "action-recognition"],
+      "license": "training",
+      "relatedDatasets": ["urban-street-4k", "cooking-videos", "fitness-exercises"]
+    },
+    {
+      "slug": "instructional-videos",
+      "title": "Instructional Videos",
+      "description": "How-to content with synchronized narration, step boundaries, and audio-visual alignment. Perfect for multimodal AI training.",
+      "category": "multimodal",
+      "subcategory": "tutorial",
+      "version": "1.5",
+      "stats": {
+        "clips": 45000,
+        "annotations": "1.8M",
+        "hours": 3200
+      },
+      "tags": ["tutorial", "how-to", "narration", "multimodal", "steps"],
+      "license": "training",
+      "relatedDatasets": ["cooking-videos", "diy-projects", "tech-tutorials"]
+    },
+    {
+      "slug": "driving-scenarios",
+      "title": "Driving Scenarios",
+      "description": "Dashcam footage with road conditions, traffic signs, and vehicle tracking. Includes weather and lighting variations.",
+      "category": "video",
+      "subcategory": "automotive",
+      "version": "2.4",
+      "stats": {
+        "clips": 178000,
+        "annotations": "3.4M",
+        "resolution": "1080p",
+        "hours": 4500
+      },
+      "tags": ["driving", "automotive", "dashcam", "traffic", "road-signs"],
+      "license": "training",
+      "relatedDatasets": ["urban-street-4k", "parking-lot", "highway-footage"]
+    },
+    {
+      "slug": "facial-expressions",
+      "title": "Facial Expressions",
+      "description": "Diverse faces expressing emotions with consent forms and demographic metadata. Includes landmark detection and emotion labels.",
+      "category": "video",
+      "subcategory": "faces",
+      "version": "3.0",
+      "stats": {
+        "clips": 234000,
+        "annotations": "4.2M",
+        "resolution": "1080p",
+        "emotions": 8
+      },
+      "tags": ["faces", "emotions", "expressions", "landmarks", "diverse"],
+      "license": "training",
+      "relatedDatasets": ["talking-heads", "portrait-photos", "lip-sync"]
+    },
+    {
+      "slug": "multilingual-speech",
+      "title": "Multilingual Speech",
+      "description": "High-quality speech recordings in 50+ languages with transcriptions, translations, and accent labels.",
+      "category": "audio",
+      "subcategory": "speech",
+      "version": "2.1",
+      "stats": {
+        "clips": 520000,
+        "annotations": "8.5M",
+        "hours": 15000,
+        "languages": 52
+      },
+      "tags": ["speech", "multilingual", "translation", "accents", "global"],
+      "license": "training",
+      "relatedDatasets": ["conversational-english", "podcasts-global", "news-broadcasts"]
+    },
+    {
+      "slug": "nature-wildlife",
+      "title": "Nature & Wildlife",
+      "description": "Landscapes, animals, and natural phenomena captured in various environments. Includes species identification and scene labels.",
+      "category": "video",
+      "subcategory": "nature",
+      "version": "1.8",
+      "stats": {
+        "clips": 45800,
+        "annotations": "560K",
+        "resolution": "4K",
+        "species": 1200
+      },
+      "tags": ["nature", "wildlife", "animals", "landscape", "4k"],
+      "license": "training",
+      "relatedDatasets": ["birds-in-flight", "marine-life", "plant-identification"]
+    }
+  ],
+  "categories": {
+    "audio": {
+      "name": "Audio Datasets",
+      "description": "High-fidelity audio recordings with transcriptions, speaker diarization, and emotion tagging.",
+      "icon": "music",
+      "color": "blue",
+      "count": 12
+    },
+    "video": {
+      "name": "Video Datasets",
+      "description": "Frame-accurate video content with object detection, segmentation, and activity recognition.",
+      "icon": "video",
+      "color": "purple",
+      "count": 18
+    },
+    "multimodal": {
+      "name": "Multimodal Datasets",
+      "description": "Synchronized audio-video pairs with cross-modal annotations and semantic alignment.",
+      "icon": "layers",
+      "color": "green",
+      "count": 6
+    }
+  },
+  "meta": {
+    "totalDatasets": 36,
+    "totalClips": "1.2M",
+    "totalHours": "45,000+",
+    "lastUpdated": "2026-01-22"
+  }
+}

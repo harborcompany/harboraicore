@@ -1,0 +1,5 @@
+{
+  "name": "HARBOR",
+  "description": "A vertically integrated platform for collecting, annotating, curating, and deploying audio and video data for AI systems.",
+  "requestFramePermissions": []
+}

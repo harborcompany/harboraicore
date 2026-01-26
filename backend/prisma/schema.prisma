@@ -1,0 +1,579 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// 1. IDENTITY & ACCOUNT (Shared)
+// ==========================================
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+  CONTRIBUTOR // Supply side
+  ENTERPRISE  // Demand side
+}
+
+model User {
+  id               String           @id @default(uuid())
+  email            String           @unique
+  name             String?
+  role             UserRole         @default(VIEWER)
+  kycStatus        String           @default("pending") // pending, verified, failed
+  walletId         String?          @unique
+  profile          Profile?
+  
+  // Contributor relations
+  captureSessions  CaptureSession[]
+  consentRecords   ConsentRecord[]
+  annotations      UserAnnotation[]
+  earnings         EarningsLedger[]
+  payouts          Payout[]
+  
+  // Enterprise relations
+  orgMemberships   OrgUser[]
+  
+  // Sandbox/Trial access
+  sandboxAccount   SandboxAccount?
+  
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Profile {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username           String?  @unique
+  avatarUrl          String?
+  bio                String?
+  website            String?
+  onboardingComplete Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// ==========================================
+// 2. CONTRIBUTOR SCHEMA (Supply Side)
+// ==========================================
+
+enum SourceType {
+  MOBILE
+  GLASSES
+  TV
+  API
+}
+
+model CaptureSession {
+  id         String       @id @default(uuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+  sourceType SourceType   @default(MOBILE)
+  deviceId   String?
+  status     String       @default("active") // active, completed, failed
+  progress   Int          @default(0)
+  startTime  DateTime     @default(now())
+  endTime    DateTime?
+  assets     MediaAsset[]
+  createdAt  DateTime     @default(now())
+}
+
+model MediaAsset {
+  id             String           @id @default(uuid())
+  sessionId      String?
+  session        CaptureSession?  @relation(fields: [sessionId], references: [id])
+  datasetId      String?
+  dataset        Dataset?         @relation(fields: [datasetId], references: [id])
+  
+  type           String           // video, audio, multimodal
+  filename       String
+  sizeBytes      BigInt
+  duration       Float?           // in seconds
+  resolution     String?
+  checksum       String?
+  storagePointer String?          // s3 bucket/key
+  status         MediaStatus      @default(PROCESSING)
+  
+  consent        ConsentRecord[]
+  annotations    UserAnnotation[]
+  earnings       EarningsLedger[]
+  
+  createdAt      DateTime         @default(now())
+}
+
+model ConsentRecord {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  mediaId      String     @unique
+  asset        MediaAsset @relation(fields: [mediaId], references: [id])
+  
+  licenseType  String     // standard, premium, exclusive
+  usageScope   Json       // ["ai_training", "commercial_ads", etc.]
+  revSharePct  Float      @default(50.0)
+  timestamp    DateTime   @default(now())
+}
+
+model UserAnnotation {
+  id          String     @id @default(uuid())
+  mediaId     String
+  asset       MediaAsset @relation(fields: [mediaId], references: [id])
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  
+  labelType   String     // "object", "action", "scene", etc.
+  startTime   Float?     // Frame-accurate temporal indexing
+  endTime     Float?
+  boundingBox Json?      // { x, y, w, h } spatial metadata
+  labels      String[]
+  confidence  Float      @default(1.0)
+  status      String     @default("pending") // pending, approved, rejected
+  timestamp   DateTime   @default(now())
+}
+
+model EarningsLedger {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  mediaId   String?
+  asset     MediaAsset? @relation(fields: [mediaId], references: [id])
+  
+  eventType String     // upload, usage, resale
+  amount    Decimal    @db.Decimal(18, 8)
+  currency  String     @default("USD")
+  timestamp DateTime   @default(now())
+}
+
+model Payout {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Decimal  @db.Decimal(18, 8)
+  method    String   // bank, stripe, crypto
+  status    String   @default("pending") // pending, paid, failed
+  timestamp DateTime @default(now())
+}
+
+// ==========================================
+// 3. ENTERPRISE SCHEMA (Demand Side)
+// ==========================================
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  industry    String?
+  billingPlan String   @default("free")
+  
+  members     OrgUser[]
+  datasets    DatasetAccess[]
+  builds      DatasetBuild[]
+  adProjects  AdProject[]
+  apiKeys     APICredential[]
+  usage       UsageRecord[]
+  invoices    Invoice[]
+  outreachAssets OutreachAsset[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum OrgRole {
+  ADMIN
+  ANALYST
+  CREATIVE
+}
+
+model OrgUser {
+  id        String       @id @default(uuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id])
+  role      OrgRole      @default(ANALYST)
+}
+
+model Dataset {
+  id               String          @id @default(uuid())
+  name             String
+  version          String
+  
+  // Lab-Ready Data Platform Extensions
+  vertical         DatasetVertical @default(OTHER)
+  modalities       String[]        // ["video", "audio"]
+  annotationTypes  String[]        // ["scene", "action", "speech", "emotion"]
+  totalHours       Float?
+  datasetStatus    DatasetStatus   @default(DRAFT)
+  licenseType      LicenseType     @default(COMMERCIAL)
+  pricingModel     PricingModel    @default(USAGE)
+  
+  // Original fields
+  mediaType        String          // Mixed, Video, Audio
+  annotationSchema Json?           // Mapping of expected labels
+  licenseTerms     String?
+  ragEnabled       Boolean         @default(false)
+  description      String?
+  
+  // Governance & Quality links
+  governanceProfileId String?
+  governanceProfile   GovernanceProfile? @relation(fields: [governanceProfileId], references: [id])
+  qualityProfileId    String?
+  qualityProfile      QualityProfile?    @relation(fields: [qualityProfileId], references: [id])
+  
+  // Anchor dataset metadata
+  isAnchor            Boolean        @default(false)
+  intendedUseCases    String[]
+  modelReadinessScore Float?
+  benchmarkResults    Json?
+  
+  // Relations
+  mediaAssets      MediaAsset[]
+  access           DatasetAccess[]
+  annotationEvents AnnotationEvent[]
+  outreachAssets   OutreachAsset[]
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model DatasetAccess {
+  id         String       @id @default(uuid())
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id])
+  datasetId  String
+  dataset    Dataset      @relation(fields: [datasetId], references: [id])
+  
+  accessType String       // read, query, generate
+  expiresAt  DateTime?
+}
+
+model DatasetBuild {
+  id           String       @id @default(uuid())
+  orgId        String
+  org          Organization @relation(fields: [orgId], references: [id])
+  
+  sourceAssets Json         // List of IDs or filters
+  filters      Json?
+  ragRules     Json?
+  status       String       @default("queued") // queued, building, ready
+  
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model AdProject {
+  id              String             @id @default(uuid())
+  orgId           String
+  org             Organization       @relation(fields: [orgId], references: [id])
+  
+  name            String
+  goal            String
+  platform        String             // tiktok, meta, youtube
+  status          String             @default("draft")
+  runs            AdGenerationRun[]
+  
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+model AdGenerationRun {
+  id            String    @id @default(uuid())
+  projectId     String
+  project       AdProject @relation(fields: [projectId], references: [id])
+  
+  promptVersion String
+  model         String    // veo, sora
+  outputAssets  Json?     // List of generated asset URLs
+  metrics       Json?     // CTR, conversion, etc.
+  
+  createdAt     DateTime  @default(now())
+}
+
+model APICredential {
+  id        String       @id @default(uuid())
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id])
+  
+  apiKey    String       @unique
+  scope     String       // dataset_read, rag_query, ads_gen
+  rateLimit Int          @default(1000)
+  
+  createdAt DateTime     @default(now())
+}
+
+model UsageRecord {
+  id        String       @id @default(uuid())
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id])
+  
+  service   String       // rag_query, ad_gen, storage
+  units     Int
+  cost      Decimal      @db.Decimal(10, 4)
+  timestamp DateTime     @default(now())
+}
+
+model Invoice {
+  id        String       @id @default(uuid())
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id])
+  
+  amount    Decimal      @db.Decimal(10, 2)
+  period    String       // "2024-01"
+  status    String       @default("unpaid")
+  
+  createdAt DateTime     @default(now())
+}
+
+// ==========================================
+// 4. SHARED CORE ENUMS & METADATA
+// ==========================================
+
+enum MediaStatus {
+  PROCESSING
+  READY
+  ERROR
+}
+
+// Lab-Ready Data Platform Enums
+enum DatasetVertical {
+  AUTOMOTIVE
+  BROADCAST
+  GAMING
+  THERAPY
+  RETAIL
+  OTHER
+}
+
+enum DatasetStatus {
+  DRAFT
+  PUBLISHED
+  DEPRECATED
+}
+
+enum LicenseType {
+  COMMERCIAL
+  RESEARCH
+  HYBRID
+}
+
+enum PricingModel {
+  USAGE
+  SUBSCRIPTION
+  EXCLUSIVE
+}
+
+// Marketing / SEO Artifacts
+model Blog {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  content     String   @db.Text
+  excerpt     String?
+  author      String?
+  thumbnail   String?
+  published   Boolean  @default(false)
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SeoPage {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  h1          String?
+  description String?
+  content     Json?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// 5. LAB-READY DATA PLATFORM MODELS
+// ==========================================
+
+// Governance Profile - Compliance & consent tracking
+model GovernanceProfile {
+  id                     String    @id @default(uuid())
+  name                   String
+  consentSource          String    // "user_app", "enterprise", "broadcaster"
+  usageRights            String[]  // ["training", "evaluation", "commercial"]
+  geographicRestrictions String[]  // ["EU", "US"]
+  dataRetentionPolicy    String    @default("indefinite") // "indefinite", "5y", "2y"
+  auditLogEnabled        Boolean   @default(true)
+  complianceTags         String[]  // ["GDPR", "CCPA"]
+  
+  datasets               Dataset[]
+  
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+// Quality Profile - Annotation quality metrics
+model QualityProfile {
+  id                       String    @id @default(uuid())
+  name                     String
+  annotationConfidenceAvg  Float     @default(0)
+  interAnnotatorAgreement  Float     @default(0)
+  reviewPassRate           Float     @default(0)
+  benchmarkTasks           String[]  // ["asr", "action_detection"]
+  lastAuditAt              DateTime?
+  
+  datasets                 Dataset[]
+  
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+}
+
+// Annotation Event - Immutable audit trail for all annotation operations
+model AnnotationEvent {
+  id            String   @id @default(uuid())
+  datasetId     String
+  dataset       Dataset  @relation(fields: [datasetId], references: [id])
+  annotatorType String   // "human" | "model"
+  confidence    Float    @default(1.0)
+  reviewed      Boolean  @default(false)
+  version       String
+  metadata      Json?    // Additional event-specific data
+  createdAt     DateTime @default(now())
+}
+
+// Requirement IX: System Audit Log - Centralized audit trail for compliance
+model SystemAuditLog {
+  id          String   @id @default(uuid())
+  action      String   // "DATASET_PUBLISH", "GOVERNANCE_CHECK", "QUERY_EXECUTION", "CONTRACT_GENERATED"
+  actorId     String?  // User or System ID
+  resourceId  String?  // Dataset ID, Contract ID, etc.
+  details     Json?    // Contextual metadata (e.g. query params, diffs)
+  ipAddress   String?
+  status      String   // "SUCCESS", "FAILURE", "DENIED"
+  timestamp   DateTime @default(now())
+}
+
+// Outreach Asset - Auto-assembled marketing materials (One-pagers, diagrams)
+model OutreachAsset {
+  id          String   @id @default(uuid())
+  datasetId   String?
+  dataset     Dataset? @relation(fields: [datasetId], references: [id])
+  orgId       String?
+  org         Organization? @relation(fields: [orgId], references: [id])
+  
+  type        String   // "one_pager", "architecture_diagram", "security_doc"
+  format      String   // "pdf", "svg", "html"
+  url         String   // Storage location
+  generatedAt DateTime @default(now())
+}
+
+// Dataset Revenue Ledger - Marketplace transactions & revenue tracking
+model DatasetRevenueLedger {
+  id           String   @id @default(uuid())
+  datasetId    String
+  buyerType    String   // "lab", "enterprise", "startup"
+  buyerOrgId   String?  // Optional link to Organization
+  usageUnits   Int
+  priceUsd     Decimal  @db.Decimal(18, 2)
+  revenueShare Json     // { "harbor": 0.25, "contributor": 0.75 }
+  notes        String?
+  createdAt    DateTime @default(now())
+}
+
+// Sandbox Account - Trial/demo access with scoped permissions
+model SandboxAccount {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKeyScope       String[] // ["query", "rag"]
+  rateLimit         Int      @default(100) // requests per day
+  datasetsPreloaded String[] // anchor dataset IDs
+  expiresAt         DateTime
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+}
+
+// Quickstart Project - Guided integration flows for onboarding
+model QuickstartProject {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  type        String   // "notebook" | "api_demo"
+  datasetId   String?  // Optional anchor dataset for the project
+  steps       String[] // ["authenticate", "query", "train", "evaluate"]
+  difficulty  String   @default("beginner") // beginner, intermediate, advanced
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Tutorial - RAG tutorials and guides
+model Tutorial {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  summary       String?
+  datasetsUsed  String[]  // Dataset IDs
+  tools         String[]  // ["PyTorch", "Harbor SDK"]
+  estimatedTime String    // "30 min"
+  content       String    @db.Text
+  published     Boolean   @default(false)
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Endpoint Doc - Auto-generated API documentation
+model EndpointDoc {
+  id             String   @id @default(uuid())
+  endpoint       String   @unique  // "/datasets/query"
+  method         String   // "GET", "POST", etc.
+  description    String
+  parameters     Json?    // Parameter definitions
+  examples       Json     // [{ language: "python", code: "..." }]
+  avgLatencyMs   Float?
+  commonUseCases String[]
+  tags           String[] // For categorization
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// Contract Template - System-aware contract templates
+model ContractTemplate {
+  id           String              @id @default(uuid())
+  type         String              // "license", "dpa", "revenue_share"
+  name         String
+  description  String?
+  content      String              @db.Text
+  variables    String[]            // Variables to inject: ["dataset_id", "org_name", etc.]
+  isActive     Boolean             @default(true)
+  version      String              @default("1.0")
+  
+  contracts    GeneratedContract[]
+  
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+// Generated Contract - Contract instances linked to datasets/orgs
+model GeneratedContract {
+  id             String           @id @default(uuid())
+  templateId     String
+  template       ContractTemplate @relation(fields: [templateId], references: [id])
+  orgId          String?
+  datasetId      String?
+  variables      Json             // Filled variable values
+  content        String           @db.Text // Rendered contract content
+  status         String           @default("draft") // draft, pending_signature, signed, expired
+  signedAt       DateTime?
+  signedByUserId String?
+  expiresAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+

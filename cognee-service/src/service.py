@@ -48,10 +48,16 @@ class CogneeService:
         if COGNEE_AVAILABLE:
             try:
                 # Configure Cognee
-                cognee.config.set_llm_config({
+                llm_config = {
                     "provider": settings.COGNEE_LLM_PROVIDER,
-                    "api_key": settings.OPENAI_API_KEY,
-                })
+                    "api_key": settings.OPENAI_API_KEY
+                }
+                
+                if settings.COGNEE_LLM_PROVIDER == "gemini":
+                    llm_config["api_key"] = settings.GOOGLE_AI_API_KEY
+                    llm_config["model"] = settings.GEMINI_MODEL
+
+                cognee.config.set_llm_config(llm_config)
                 
                 if settings.COGNEE_GRAPH_DB == "neo4j":
                     cognee.config.set_graph_database_config({

@@ -13,6 +13,15 @@ import { apiRouter } from './api/index.js';
 const app = express();
 
 // ============================================
+// POLYFILLS & GLOBAL CONFIG
+// ============================================
+
+// BigInt serialization support for JSON.stringify (Prisma returns BigInt for some fields)
+(BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+};
+
+// ============================================
 // MIDDLEWARE
 // ============================================
 

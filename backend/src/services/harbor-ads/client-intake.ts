@@ -3,22 +3,16 @@
  * Onboard advertisers and collect brand assets
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { prisma } from '../../lib/prisma.js';
 import type {
-    ClientAdProject,
-    ClientAsset,
-    AdGoals,
     Platform
 } from '../../models/ad-project.js';
-
-// In-memory store (use database in production)
-const projectsStore: Map<string, ClientAdProject> = new Map();
 
 export interface IntakeFormData {
     clientId: string;
     projectName: string;
     platforms: Platform[];
-    goals?: AdGoals;
+    goals?: any;
     targetAudience?: {
         demographics?: string[];
         interests?: string[];
@@ -50,136 +44,77 @@ export class ClientIntakeService {
     /**
      * Create a new ad project
      */
-    async createProject(data: IntakeFormData): Promise<ClientAdProject> {
-        const project: ClientAdProject = {
-            id: uuidv4(),
-            clientId: data.clientId,
-            name: data.projectName,
-            platforms: data.platforms,
-            goals: data.goals,
-            targetAudience: data.targetAudience,
-            brandGuidelines: data.brandGuidelines,
-            assets: [],
-            status: 'draft',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+    async createProject(data: IntakeFormData): Promise<any> {
+        try {
+            const project = await prisma.adProject.create({
+                data: {
+                    orgId: data.clientId, // Map clientId to orgId
+                    name: data.projectName,
+                    platform: data.platforms[0] || 'tiktok',
+                    goal: data.goals?.primary || 'brand_awareness',
+                    status: 'draft'
+                },
+                include: {
+                    runs: true
+                },
+            });
 
-        projectsStore.set(project.id, project);
-        console.log(`[Intake] Created project: ${project.id}`);
-
-        return project;
+            console.log(`[Intake] Created project: ${project.id}`);
+            return project;
+        } catch (error) {
+            console.error('Error creating project:', error);
+            throw error;
+        }
     }
 
     /**
      * Get project by ID
      */
-    async getProject(projectId: string): Promise<ClientAdProject | null> {
-        return projectsStore.get(projectId) || null;
+    async getProject(projectId: string): Promise<any | null> {
+        try {
+            return await prisma.adProject.findUnique({
+                where: { id: projectId },
+                include: { runs: true },
+            });
+        } catch (error) {
+            console.error('Error fetching project:', error);
+            return null;
+        }
     }
 
     /**
-     * List projects for a client
+     * List projects for an organization
      */
-    async listProjects(clientId: string): Promise<ClientAdProject[]> {
-        return Array.from(projectsStore.values())
-            .filter(p => p.clientId === clientId);
+    async listProjects(orgId: string): Promise<any[]> {
+        try {
+            return await prisma.adProject.findMany({
+                where: { orgId },
+                include: { runs: true },
+                orderBy: { createdAt: 'desc' },
+            });
+        } catch (error) {
+            console.error('Error listing projects:', error);
+            return [];
+        }
     }
 
     /**
-     * Submit intake form
+     * Create an ad generation run (Veo/Sora)
      */
-    async submitIntake(
-        projectId: string,
-        data: Partial<IntakeFormData>
-    ): Promise<ClientAdProject> {
-        const project = projectsStore.get(projectId);
-        if (!project) {
-            throw new Error(`Project not found: ${projectId}`);
+    async createRun(projectId: string, promptVersion: string, model: string): Promise<any> {
+        try {
+            return await prisma.adGenerationRun.create({
+                data: {
+                    projectId,
+                    promptVersion,
+                    model,
+                    metrics: {}
+                }
+            });
+        } catch (error) {
+            console.error('Error creating generation run:', error);
+            throw error;
         }
-
-        // Update project with intake data
-        const updated: ClientAdProject = {
-            ...project,
-            ...data,
-            status: 'intake_complete',
-            updatedAt: new Date(),
-        };
-
-        projectsStore.set(projectId, updated);
-        console.log(`[Intake] Intake completed for project: ${projectId}`);
-
-        return updated;
-    }
-
-    /**
-     * Upload asset to project
-     */
-    async uploadAsset(
-        projectId: string,
-        asset: AssetUpload
-    ): Promise<ClientAsset> {
-        const project = projectsStore.get(projectId);
-        if (!project) {
-            throw new Error(`Project not found: ${projectId}`);
-        }
-
-        const newAsset: ClientAsset = {
-            id: uuidv4(),
-            type: asset.type,
-            name: asset.name,
-            url: asset.url,
-            mimeType: asset.mimeType,
-            sizeBytes: asset.sizeBytes,
-            metadata: asset.metadata,
-            uploadedAt: new Date(),
-        };
-
-        project.assets.push(newAsset);
-        project.updatedAt = new Date();
-        projectsStore.set(projectId, project);
-
-        console.log(`[Intake] Asset uploaded: ${newAsset.id} to project: ${projectId}`);
-        return newAsset;
-    }
-
-    /**
-     * Remove asset from project
-     */
-    async removeAsset(projectId: string, assetId: string): Promise<void> {
-        const project = projectsStore.get(projectId);
-        if (!project) {
-            throw new Error(`Project not found: ${projectId}`);
-        }
-
-        project.assets = project.assets.filter(a => a.id !== assetId);
-        project.updatedAt = new Date();
-        projectsStore.set(projectId, project);
-    }
-
-    /**
-     * Validate intake completeness
-     */
-    validateIntake(project: ClientAdProject): { valid: boolean; missing: string[] } {
-        const missing: string[] = [];
-
-        if (!project.platforms || project.platforms.length === 0) {
-            missing.push('platforms');
-        }
-        if (!project.goals) {
-            missing.push('goals');
-        }
-        if (project.assets.filter(a => a.type === 'video').length === 0) {
-            missing.push('product_video');
-        }
-        if (project.assets.filter(a => a.type === 'logo').length === 0) {
-            missing.push('logo');
-        }
-
-        return {
-            valid: missing.length === 0,
-            missing,
-        };
     }
 
     /**
@@ -187,18 +122,18 @@ export class ClientIntakeService {
      */
     async updateStatus(
         projectId: string,
-        status: ClientAdProject['status']
-    ): Promise<ClientAdProject> {
-        const project = projectsStore.get(projectId);
-        if (!project) {
-            throw new Error(`Project not found: ${projectId}`);
+        status: string
+    ): Promise<any> {
+        try {
+            return await prisma.adProject.update({
+                where: { id: projectId },
+                data: { status },
+                include: { runs: true },
+            });
+        } catch (error) {
+            console.error('Error updating status:', error);
+            throw error;
         }
-
-        project.status = status;
-        project.updatedAt = new Date();
-        projectsStore.set(projectId, project);
-
-        return project;
     }
 }
 
