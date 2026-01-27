@@ -84,7 +84,7 @@ const AdsPage: React.FC = () => {
                             playsInline
                             className="absolute inset-0 w-full h-full object-cover"
                         >
-                            <source src="/adpagevideo2.mp4" type="video/mp4" />
+                            <source src="/adpagevideo2.mov" />
                         </video>
                     </div>
                 </div>
