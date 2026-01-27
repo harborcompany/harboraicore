@@ -81,7 +81,11 @@ const Landing: React.FC = () => {
                      image: "/newscreenshot44.jpg"
                   },
                   { title: "Annotation & RLHF", desc: "Human-in-the-loop validation and labeling fabric." },
-                  { title: "Live & Streaming Data Pipelines", desc: "Real-time ingestion for continuous learning." },
+                  {
+                     title: "Live & Streaming Data Pipelines",
+                     desc: "Real-time ingestion for continuous learning.",
+                     image: "/realistic_raw_5.png"
+                  },
                   { title: "Data Infrastructure & APIs", desc: "Programmatic access to the Harbor engine." }
                ].map((block, i) => (
                   <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group overflow-hidden relative">
