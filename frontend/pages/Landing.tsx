@@ -88,7 +88,7 @@ const Landing: React.FC = () => {
                   {
                      title: "Live & Streaming Data Pipelines",
                      desc: "Real-time ingestion for continuous learning.",
-                     image: "/realistic_raw_5.png"
+                     image: "/realistic_raw_3.png"
                   },
                   {
                      title: "Data Infrastructure & APIs",
