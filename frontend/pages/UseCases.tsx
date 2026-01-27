@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import SeoHead from '../components/SeoHead';
 
 const UseCases: React.FC = () => {
@@ -10,32 +11,36 @@ const UseCases: React.FC = () => {
             />
 
             {/* SECTION 1: HERO */}
-            <section className="relative w-full px-6 pt-48 pb-24 md:pt-64 md:pb-32 max-w-[1400px] mx-auto text-center">
+            <section className="relative w-full px-6 pt-24 pb-12 md:pt-32 md:pb-16 max-w-[1400px] mx-auto text-center">
                 <h1 className="text-4xl md:text-6xl font-medium tracking-tight mb-6 text-black leading-[1.05]">
                     How Teams Use Harbor
                 </h1>
-                <p className="text-lg md:text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed mb-12">
+                <p className="text-lg md:text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed mb-10">
                     Real-world applications of Harbor’s data infrastructure across media, robotics, and enterprise AI.
                 </p>
-                <button className="bg-[#111] text-white px-8 py-3.5 rounded-full font-medium hover:bg-black transition-all">
+                <Link to="/contact" className="bg-[#111] text-white px-8 py-3.5 rounded-full font-medium hover:bg-black transition-all inline-block">
                     Request Dataset Access
-                </button>
+                </Link>
             </section>
 
             {/* SECTION 2: USE CASE 1 - ADS */}
-            <section className="w-full py-12 px-6">
+            <section className="w-full py-8 px-6">
                 <div className="relative w-full max-w-[1280px] mx-auto rounded-[2.5rem] overflow-hidden min-h-[600px] flex items-center">
                     {/* Background Image & Overlay */}
                     <div className="absolute inset-0 z-0">
-                        <img
-                            src="/real_ads_editor_1769477704902.png"
-                            alt="Studio Background"
+                        <video
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
                             className="w-full h-full object-cover"
-                        />
+                        >
+                            <source src="/mix_style_video_1080p_202601271137.mp4" type="video/mp4" />
+                        </video>
                         <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px]"></div>
                     </div>
 
-                    <div className="relative z-10 px-8 py-16 md:p-16 w-full">
+                    <div className="relative z-10 px-6 py-10 md:p-10 w-full">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24 items-start">
                             {/* LEFT COLUMN: Context */}
                             <div className="md:col-span-4 flex flex-col gap-12">
@@ -68,14 +73,7 @@ const UseCases: React.FC = () => {
                                     </p>
                                 </div>
 
-                                {/* Visual Insert - Integrated */}
-                                <div className="w-full overflow-hidden rounded-xl border border-white/10 shadow-2xl">
-                                    <img
-                                        src="/use_case_ads_pipeline_1769475996606.png"
-                                        alt="Advertising Pipeline"
-                                        className="w-full h-auto object-cover opacity-95"
-                                    />
-                                </div>
+
 
                                 {/* Outcome & Unique Factors */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 border-t border-white/10 pt-8">
@@ -100,62 +98,25 @@ const UseCases: React.FC = () => {
                 </div>
             </section>
 
-            {/* SECTION 1.5: TECHNOLOGY STACK (DIAGRAMS) - KEPT LIGHT FOR CONTRAST */}
-            <section className="py-24 px-6 max-w-[1280px] mx-auto bg-[#FAFAFA] rounded-3xl my-6">
-                <div className="text-center mb-16">
-                    <span className="text-xs font-mono text-gray-400 uppercase tracking-widest block mb-4">Under the hood</span>
-                    <h2 className="text-3xl font-medium tracking-tight text-black mb-6">Harbor Architecture & Alignment</h2>
-                    <p className="text-lg text-gray-500 font-light max-w-2xl mx-auto">
-                        Our infrastructure combines automated ingestion with precision human-in-the-loop annotation.
-                    </p>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Diagram 1: Architecture */}
-                    <div>
-                        <div className="bg-white p-8 rounded-xl border border-gray-100 mb-6 flex items-center justify-center h-[400px] shadow-sm">
-                            <img
-                                src="/diagram_architecture_stack_1769477312827.png"
-                                alt="Harbor Architecture Stack"
-                                className="max-w-full max-h-full object-contain mix-blend-multiply"
-                            />
-                        </div>
-                        <h3 className="text-xl font-medium text-black mb-2">Full-Stack Data Infrastructure</h3>
-                        <p className="text-gray-500 font-light text-sm leading-relaxed">
-                            From ingestion to delivery. We handle the entire pipeline from Layer-1 storage through to the RAG Retrieval Engine and final API Gateway.
-                        </p>
-                    </div>
-
-                    {/* Diagram 2: RLHF */}
-                    <div>
-                        <div className="bg-white p-8 rounded-xl border border-gray-100 mb-6 flex items-center justify-center h-[400px] shadow-sm">
-                            <img
-                                src="/diagram_rlhf_cycle_1769477296587.png"
-                                alt="Harbor RLHF Cycle"
-                                className="max-w-full max-h-full object-contain mix-blend-multiply"
-                            />
-                        </div>
-                        <h3 className="text-xl font-medium text-black mb-2">Continuous Alignment Cycle</h3>
-                        <p className="text-gray-500 font-light text-sm leading-relaxed">
-                            Our models improve through a rigorous cycle of Supervised Fine-Tuning (SFT), Red Teaming, and RLHF rooted in human preferences.
-                        </p>
-                    </div>
-                </div>
-            </section>
 
             {/* SECTION 3: USE CASE 2 - ROBOTICS */}
-            <section className="w-full py-12 px-6">
+            <section className="w-full py-8 px-6">
                 <div className="relative w-full max-w-[1280px] mx-auto rounded-[2.5rem] overflow-hidden min-h-[600px] flex items-center">
                     <div className="absolute inset-0 z-0">
-                        <img
-                            src="/real_robotics_factory_1769477720637.png"
-                            alt="Robotics Background"
+                        <video
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
                             className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px]"></div>
+                        >
+                            <source src="/industrialautomation.mp4" type="video/mp4" />
+                        </video>
+                        <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]"></div>
                     </div>
 
-                    <div className="relative z-10 px-8 py-16 md:p-16 w-full">
+                    <div className="relative z-10 px-6 py-10 md:p-10 w-full">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24 items-start">
                             {/* LEFT */}
                             <div className="md:col-span-4 flex flex-col gap-12">
@@ -186,14 +147,7 @@ const UseCases: React.FC = () => {
                                     </p>
                                 </div>
 
-                                {/* Visual */}
-                                <div className="w-full overflow-hidden rounded-xl border border-white/10 shadow-2xl">
-                                    <img
-                                        src="/use_case_robotics_task_1769476011769.png"
-                                        alt="Robotics Vision Training"
-                                        className="w-full h-auto object-cover opacity-95"
-                                    />
-                                </div>
+
 
                                 {/* Example Box */}
                                 <div className="p-8 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
@@ -229,7 +183,7 @@ const UseCases: React.FC = () => {
             </section>
 
             {/* SECTION 4: USE CASE 3 - ENTERPRISE AI */}
-            <section className="w-full py-12 px-6">
+            <section className="w-full py-8 px-6">
                 <div className="relative w-full max-w-[1280px] mx-auto rounded-[2.5rem] overflow-hidden min-h-[600px] flex items-center">
                     <div className="absolute inset-0 z-0">
                         <img
@@ -240,7 +194,7 @@ const UseCases: React.FC = () => {
                         <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px]"></div>
                     </div>
 
-                    <div className="relative z-10 px-8 py-16 md:p-16 w-full">
+                    <div className="relative z-10 px-6 py-10 md:p-10 w-full">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24 items-start">
                             {/* LEFT */}
                             <div className="md:col-span-4 flex flex-col gap-12">
@@ -271,14 +225,7 @@ const UseCases: React.FC = () => {
                                     </p>
                                 </div>
 
-                                {/* Visual */}
-                                <div className="w-full overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-white/5">
-                                    <img
-                                        src="/use_case_multimodal_schematic_1769476030926.png"
-                                        alt="Multimodal Data Schematic"
-                                        className="w-full h-auto object-contain p-8 md:p-12 mix-blend-screen"
-                                    />
-                                </div>
+
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 border-t border-white/10 pt-8">
                                     <div>
@@ -303,18 +250,22 @@ const UseCases: React.FC = () => {
             </section>
 
             {/* SECTION 5: USE CASE 4 - LIVE DATA */}
-            <section className="w-full py-12 px-6">
+            <section className="w-full py-8 px-6">
                 <div className="relative w-full max-w-[1280px] mx-auto rounded-[2.5rem] overflow-hidden min-h-[600px] flex items-center">
                     <div className="absolute inset-0 z-0">
-                        <img
-                            src="/bg_live_data_stream_1769477506479.png"
-                            alt="Live Data Background"
+                        <video
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
                             className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px]"></div>
+                        >
+                            <source src="/NewVid1.mp4" type="video/mp4" />
+                        </video>
+                        <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]"></div>
                     </div>
 
-                    <div className="relative z-10 px-8 py-16 md:p-16 w-full">
+                    <div className="relative z-10 px-6 py-10 md:p-10 w-full">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24 items-start">
                             {/* LEFT */}
                             <div className="md:col-span-4 flex flex-col gap-12">
@@ -345,14 +296,7 @@ const UseCases: React.FC = () => {
                                     </p>
                                 </div>
 
-                                {/* Visual */}
-                                <div className="w-full overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-white/5">
-                                    <img
-                                        src="/use_case_live_flow_1769476044195.png"
-                                        alt="Live Data Infrastructure"
-                                        className="w-full h-auto object-contain p-8 mix-blend-screen"
-                                    />
-                                </div>
+
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 border-t border-white/10 pt-8">
                                     <div>
@@ -377,7 +321,7 @@ const UseCases: React.FC = () => {
             </section>
 
             {/* CLOSING CTA */}
-            <section className="py-24 px-6 text-center bg-gray-50 border-t border-gray-200">
+            <section className="py-16 px-6 text-center bg-gray-50 border-t border-gray-200">
                 <div className="max-w-xl mx-auto">
                     <h2 className="text-3xl font-medium tracking-tight mb-8 text-black">
                         Harbor supports multiple data engagement models.
@@ -386,9 +330,9 @@ const UseCases: React.FC = () => {
                         From static datasets to continuous learning pipelines.
                     </p>
                     <div className="flex justify-center">
-                        <button className="bg-[#111] text-white px-8 py-3.5 rounded-full font-medium hover:bg-black transition-all">
+                        <Link to="/contact" className="bg-[#111] text-white px-8 py-3.5 rounded-full font-medium hover:bg-black transition-all inline-block">
                             Contact Sales
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </section>

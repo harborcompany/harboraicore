@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 
 const Layout: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
+  // Navigation Data Structure
   const navLinks = [
-    { name: 'Product', path: '/product' },
+    {
+      name: 'Product',
+      path: '/product', // Keep for compatibility, though we'll prevent default click
+      dropdown: [
+        { name: 'HARBOR token', path: '/token' },
+        { name: 'Use Cases', path: '/use-cases' },
+        { name: 'Multimodal Datasets', path: '/datasets' },
+        { name: 'Harbor ML Advertising', path: '/ads' },
+        { name: 'Data Infrastructure', path: '/contact' },
+      ]
+    },
     { name: 'Datasets', path: '/datasets' },
     { name: 'Ads', path: '/ads' },
     { name: 'Use Cases', path: '/use-cases' },
@@ -35,15 +46,42 @@ const Layout: React.FC = () => {
 
             {/* Nav Links - Desktop */}
             <div className="hidden lg:flex items-center gap-8">
-              {navLinks.map(link => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="text-sm font-medium text-gray-500 hover:text-black transition-colors"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                if (link.dropdown) {
+                  return (
+                    <div key={link.name} className="relative group">
+                      <button
+                        className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-black transition-colors focus:outline-none py-4"
+                      >
+                        {link.name}
+                        <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      <div className="absolute top-full left-0 w-64 bg-white border border-gray-100 shadow-xl rounded-lg p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
+                        {link.dropdown.map((item) => (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            className="block px-4 py-3 text-sm text-gray-600 hover:text-black hover:bg-gray-50 rounded-md transition-colors"
+                          >
+                            {item.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="text-sm font-medium text-gray-500 hover:text-black transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -64,16 +102,35 @@ const Layout: React.FC = () => {
 
         {/* Mobile Nav Overlay */}
         {isMenuOpen && (
-          <div className="lg:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-100 shadow-xl py-6 px-6 flex flex-col gap-4 animate-in slide-in-from-top-2">
-            {navLinks.map(link => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMenuOpen(false)}
-                className="text-base font-medium text-[#111] py-3 border-b border-gray-50"
-              >
-                {link.name}
-              </Link>
+          <div className="lg:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-100 shadow-xl py-6 px-6 flex flex-col gap-4 animate-in slide-in-from-top-2 overflow-y-auto max-h-[calc(100vh-4rem)]">
+            {navLinks.map((link) => (
+              <div key={link.name} className="border-b border-gray-50 pb-2">
+                {link.dropdown ? (
+                  <>
+                    <div className="text-base font-medium text-[#111] py-2">{link.name}</div>
+                    <div className="pl-4 flex flex-col gap-2 border-l-2 border-gray-100 ml-2">
+                      {link.dropdown.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="text-sm text-gray-600 py-2"
+                        >
+                          {item.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    to={link.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block text-base font-medium text-[#111] py-2"
+                  >
+                    {link.name}
+                  </Link>
+                )}
+              </div>
             ))}
             <div className="flex flex-col gap-4 mt-4">
               <Link to="/auth/login" className="text-base font-medium text-gray-600">Log in</Link>

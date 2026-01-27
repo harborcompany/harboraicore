@@ -23,28 +23,28 @@ export const DataOverview: React.FC = () => {
                         <Database size={14} className="text-gray-400" />
                         <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Datasets</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">12</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">0</p>
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Database size={14} className="text-gray-400" />
                         <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Total Records</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">8.4M</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">0</p>
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Video size={14} className="text-gray-400" />
                         <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Video Hours</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">142,380</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">0</p>
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Users size={14} className="text-gray-400" />
                         <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Annotation</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">87%</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">0%</p>
                 </div>
             </div>
         </div>

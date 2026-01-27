@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Database, Clock, ShoppingCart, Star } from 'lucide-react';
+import { Search, Filter, Database, Clock, ShoppingCart } from 'lucide-react';
 
 const marketplaceDatasets = [
     {
@@ -91,6 +91,12 @@ const marketplaceDatasets = [
 const MarketplacePage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
+    const [requestedIds, setRequestedIds] = useState<number[]>([]);
+
+    const handleLicenseClick = (e: React.MouseEvent, id: number) => {
+        e.stopPropagation();
+        setRequestedIds(prev => [...prev, id]);
+    };
 
     return (
         <div className="max-w-6xl">
@@ -146,11 +152,7 @@ const MarketplacePage: React.FC = () => {
                                 <h3 className="text-lg font-medium text-[#1A1A1A] mb-1">{dataset.name}</h3>
                                 <p className="text-sm text-stone-500">{dataset.provider}</p>
                             </div>
-                            <div className="flex items-center gap-1 text-amber-500">
-                                <Star size={14} fill="currentColor" />
-                                <span className="text-sm text-[#1A1A1A]">{dataset.rating}</span>
-                                <span className="text-stone-400 text-sm">({dataset.reviews})</span>
-                            </div>
+                            {/* Stars removed as per user request */}
                         </div>
 
                         <div className="flex items-center gap-4 mb-4">
@@ -176,9 +178,16 @@ const MarketplacePage: React.FC = () => {
 
                         <div className="flex items-center justify-between pt-4 border-t border-stone-100">
                             <span className="text-[#1A1A1A] font-medium">{dataset.price}</span>
-                            <button className="flex items-center gap-2 bg-[#1A1A1A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#333] transition-colors">
+                            <button
+                                onClick={(e) => handleLicenseClick(e, dataset.id)}
+                                disabled={requestedIds.includes(dataset.id)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${requestedIds.includes(dataset.id)
+                                    ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                                    : 'bg-[#1A1A1A] text-white hover:bg-[#333]'
+                                    }`}
+                            >
                                 <ShoppingCart size={16} />
-                                License
+                                {requestedIds.includes(dataset.id) ? 'Request Pending' : 'License'}
                             </button>
                         </div>
                     </div>

@@ -1,141 +1,96 @@
-import React from 'react';
-import { Plus, Play, Pause, BarChart2, DollarSign, TrendingUp, Calendar } from 'lucide-react';
-
-const campaigns = [
-    {
-        id: 1,
-        name: 'Global Enterprise Branding v2',
-        status: 'Active',
-        budget: '$450,000',
-        spent: '$284,340',
-        impressions: '14.2M',
-        ctr: '3.42%',
-        startDate: 'Jan 1, 2026',
-        endDate: 'Jun 30, 2026'
-    },
-    {
-        id: 2,
-        name: 'Automotive Vertical - Series X',
-        status: 'Active',
-        budget: '$2,400,000',
-        spent: '$678,890',
-        impressions: '42.1M',
-        ctr: '4.85%',
-        startDate: 'Feb 1, 2026',
-        endDate: 'Dec 31, 2026'
-    },
-    {
-        id: 3,
-        name: 'Egocentric Ad Lab - Alpha Test',
-        status: 'Paused',
-        budget: '$150,000',
-        spent: '$149,100',
-        impressions: '12.8M',
-        ctr: '2.95%',
-        startDate: 'Nov 1, 2025',
-        endDate: 'Jan 15, 2026'
-    }
-];
+import React, { useState } from 'react';
+import { Upload, Slack, Database, Mail, ArrowRight, CheckCircle2, Megaphone, Loader2 } from 'lucide-react';
 
 const AdsPage: React.FC = () => {
+    const [requestStatus, setRequestStatus] = useState<'idle' | 'requesting' | 'completed'>('idle');
+
+    const handleBuildRequest = () => {
+        setRequestStatus('requesting');
+        setTimeout(() => {
+            setRequestStatus('completed');
+        }, 1500);
+    };
+
     return (
-        <div className="max-w-6xl">
-            {/* Header */}
-            <div className="mb-8 flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-serif text-[#1A1A1A] mb-2">Harbor Ads</h1>
-                    <p className="text-stone-500">Create and manage data-driven video campaigns</p>
-                </div>
-                <button className="bg-[#1A1A1A] text-white px-4 py-2.5 rounded-lg font-medium hover:bg-[#333] transition-colors flex items-center gap-2">
-                    <Plus size={18} />
-                    New Campaign
-                </button>
+        <div className="max-w-5xl mx-auto">
+            <div className="mb-12 text-center">
+                <h1 className="text-4xl font-serif text-[#1A1A1A] mb-4">Ads Creative Studio</h1>
+                <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+                    Upload your assets or connect your workspace to generate high-performance ad creatives automatically.
+                </p>
             </div>
 
-            {/* Overhauled Ads Stats */}
-            <div className="grid grid-cols-4 gap-6 mb-12">
-                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                        <DollarSign size={24} className="text-emerald-500" />
-                        <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Total Managed Budget</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                {/* Option 1: Upload */}
+                <div className="bg-white p-8 rounded-2xl border border-stone-200 hover:border-stone-300 transition-all shadow-sm group">
+                    <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors">
+                        <Upload size={24} />
                     </div>
-                    <p className="text-4xl font-serif text-[#1A1A1A]">$3,000,000</p>
+                    <h2 className="text-2xl font-medium text-[#1A1A1A] mb-3">Upload Assets</h2>
+                    <p className="text-stone-500 mb-8 leading-relaxed">
+                        Directly upload raw videos, images, or dataset files. Our system will ingest and tag them for creative generation.
+                    </p>
+                    <button className="w-full py-3 border border-stone-200 rounded-lg font-medium text-[#1A1A1A] hover:bg-stone-50 transition-colors flex items-center justify-center gap-2">
+                        Upload Files <ArrowRight size={16} />
+                    </button>
+                    <div className="mt-4 flex gap-3 text-xs text-stone-400">
+                        <span className="flex items-center gap-1"><CheckCircle2 size={12} /> MP4/MOV</span>
+                        <span className="flex items-center gap-1"><CheckCircle2 size={12} /> PNG/JPG</span>
+                        <span className="flex items-center gap-1"><CheckCircle2 size={12} /> JSON/CSV</span>
+                    </div>
                 </div>
-                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                        <BarChart2 size={24} className="text-blue-500" />
-                        <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Total Impressions</span>
+
+                {/* Option 2: Integrate */}
+                <div className="bg-white p-8 rounded-2xl border border-stone-200 hover:border-stone-300 transition-all shadow-sm group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5">
+                        <Slack size={120} />
                     </div>
-                    <p className="text-4xl font-serif text-[#1A1A1A]">69.1M</p>
-                </div>
-                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                        <TrendingUp size={24} className="text-purple-500" />
-                        <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Average Conversion</span>
+                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-6">
+                        <Slack size={24} />
                     </div>
-                    <p className="text-4xl font-serif text-[#1A1A1A]">4.12%</p>
-                </div>
-                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
-                    <div className="flex items-center gap-3 mb-4">
-                        <Play size={24} className="text-stone-600" />
-                        <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Active Corridors</span>
-                    </div>
-                    <p className="text-4xl font-serif text-[#1A1A1A]">42</p>
+                    <h2 className="text-2xl font-medium text-[#1A1A1A] mb-3">Connect Workspace</h2>
+                    <p className="text-stone-500 mb-8 leading-relaxed">
+                        Integrate with Slack or Teams to automatically pull creative assets from your marketing channels.
+                    </p>
+
+                    {requestStatus === 'idle' && (
+                        <button
+                            onClick={handleBuildRequest}
+                            className="w-full py-3 bg-[#1A1A1A] text-white rounded-lg font-medium hover:bg-[#333] transition-colors flex items-center justify-center gap-2 shadow-lg shadow-gray-200"
+                        >
+                            <Megaphone size={18} />
+                            Build Ad Set for Me
+                        </button>
+                    )}
+
+                    {requestStatus === 'requesting' && (
+                        <button disabled className="w-full py-3 bg-stone-100 text-stone-400 rounded-lg font-medium cursor-not-allowed flex items-center justify-center gap-2">
+                            <Loader2 size={18} className="animate-spin" />
+                            Processing Request...
+                        </button>
+                    )}
+
+                    {requestStatus === 'completed' && (
+                        <button disabled className="w-full py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg font-medium cursor-default flex items-center justify-center gap-2">
+                            <CheckCircle2 size={18} />
+                            Request Made
+                        </button>
+                    )}
+
+                    <p className="mt-4 text-xs text-center text-stone-400">
+                        {requestStatus === 'completed'
+                            ? "We'll notify you when your creatives are ready."
+                            : "Includes automated formatting and copy generation."
+                        }
+                    </p>
                 </div>
             </div>
 
-            {/* Campaigns */}
-            <div className="mb-6">
-                <h2 className="text-lg font-medium text-[#1A1A1A] mb-4">Campaigns</h2>
-            </div>
-
-            <div className="space-y-4">
-                {campaigns.map((campaign) => (
-                    <div
-                        key={campaign.id}
-                        className="p-6 bg-white border border-stone-200 rounded-xl hover:border-stone-300 transition-all"
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div>
-                                <div className="flex items-center gap-3 mb-1">
-                                    <h3 className="text-lg font-medium text-[#1A1A1A]">{campaign.name}</h3>
-                                    <span className={`px-2 py-1 rounded text-xs ${campaign.status === 'Active'
-                                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                        : 'bg-amber-100 text-amber-700 border border-amber-200'
-                                        }`}>
-                                        {campaign.status}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-stone-500">
-                                    <Calendar size={14} />
-                                    {campaign.startDate} — {campaign.endDate}
-                                </div>
-                            </div>
-                            <button className="p-2 bg-stone-100 rounded-lg text-stone-400 hover:bg-stone-200 hover:text-[#1A1A1A] transition-colors">
-                                {campaign.status === 'Active' ? <Pause size={18} /> : <Play size={18} />}
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-6">
-                            <div>
-                                <p className="text-stone-500 text-sm mb-1">Budget</p>
-                                <p className="text-[#1A1A1A] font-mono">{campaign.budget}</p>
-                            </div>
-                            <div>
-                                <p className="text-stone-500 text-sm mb-1">Spent</p>
-                                <p className="text-[#1A1A1A] font-mono">{campaign.spent}</p>
-                            </div>
-                            <div>
-                                <p className="text-stone-500 text-sm mb-1">Impressions</p>
-                                <p className="text-[#1A1A1A] font-mono">{campaign.impressions}</p>
-                            </div>
-                            <div>
-                                <p className="text-stone-500 text-sm mb-1">CTR</p>
-                                <p className="text-[#1A1A1A] font-mono">{campaign.ctr}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+            {/* Bottom Note */}
+            <div className="text-center">
+                <p className="text-sm text-stone-400">
+                    Need enterprise data connection? <span className="text-[#1A1A1A] underline cursor-pointer">Contact Data Operations</span>
+                </p>
             </div>
         </div>
     );

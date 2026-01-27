@@ -116,6 +116,20 @@ export const authStore = {
         return { error: error ? new Error(error.message) : null };
     },
 
+    // Reset Password Email
+    resetPasswordForEmail: async (email: string): Promise<{ error: Error | null }> => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/reset`,
+        });
+        return { error: error ? new Error(error.message) : null };
+    },
+
+    // Update User Password
+    updatePassword: async (password: string): Promise<{ error: Error | null }> => {
+        const { error } = await supabase.auth.updateUser({ password });
+        return { error: error ? new Error(error.message) : null };
+    },
+
     // Sign Out
     signOut: async (): Promise<void> => {
         await supabase.auth.signOut();

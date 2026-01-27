@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import SeoHead from '../components/SeoHead';
 
+
 const Landing: React.FC = () => {
    return (
       <div className="w-full bg-[#FAFAFA] text-[#111]">
@@ -14,7 +15,7 @@ const Landing: React.FC = () => {
          {/* SECTION 1: HERO */}
          <section className="relative w-full pt-48 pb-32 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto min-h-[70vh] flex flex-col justify-center overflow-hidden rounded-[2rem] mt-4">
 
-            {/* Video Background - Robotics Content */}
+            {/* Video Background - Content */}
             <div className="absolute inset-0 z-0 select-none pointer-events-none">
                <video
                   autoPlay
@@ -23,11 +24,11 @@ const Landing: React.FC = () => {
                   playsInline
                   className="w-full h-full object-cover opacity-[0.85]"
                >
-                  <source src="/roboticscontent.mp4" type="video/mp4" />
+                  <source src="/Jan_27__1044_32s_202601271148_6xrem.mp4" type="video/mp4" />
                </video>
-               {/* Gradient Overlay for Text Readability */}
-               <div className="absolute inset-0 bg-gradient-to-r from-[#FAFAFA]/95 via-[#FAFAFA]/80 to-transparent"></div>
-               <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAFA] via-transparent to-transparent"></div>
+               {/* Gradient Overlay for Text Readability - Reduced Opacity */}
+               <div className="absolute inset-0 bg-gradient-to-r from-[#FAFAFA]/60 via-[#FAFAFA]/30 to-transparent"></div>
+               <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAFA] via-transparent to-transparent opacity-80"></div>
             </div>
 
             <div className="max-w-3xl relative z-10">
@@ -39,29 +40,17 @@ const Landing: React.FC = () => {
                </p>
 
                <div className="flex flex-wrap items-center gap-5">
-                  <button className="bg-[#111] text-white px-7 py-3 rounded hover:bg-black transition-all font-medium text-sm">
+                  <Link to="/auth/signup" className="bg-[#111] text-white px-7 py-3 rounded hover:bg-black transition-all font-medium text-sm">
                      Request Dataset Access
-                  </button>
-                  <button className="text-[#111] font-medium text-sm hover:text-gray-600 transition-colors border-b border-gray-300 pb-0.5 hover:border-black">
+                  </Link>
+                  <Link to="/contact" className="text-[#111] font-medium text-sm hover:text-gray-600 transition-colors border-b border-gray-300 pb-0.5 hover:border-black">
                      Contact Sales
-                  </button>
+                  </Link>
                </div>
             </div>
          </section>
 
-         {/* SECTION 2: PARTNER STRIP */}
-         <section className="w-full border-y border-gray-200 bg-[#FAFAFA]">
-            <div className="max-w-[1280px] mx-auto px-6 md:px-12 lg:px-16 py-8 flex flex-col md:flex-row items-center gap-8 md:gap-16">
-               <span className="text-xs font-medium text-gray-400 uppercase tracking-widest shrink-0">
-                  Trusted by teams building production AI systems
-               </span>
-               <div className="flex flex-wrap gap-12 opacity-40 grayscale items-center">
-                  {['Higgsfield', 'IBM', 'Adobe', 'Runway', 'Google DeepMind'].map((logo, i) => (
-                     <span key={i} className="text-lg font-semibold tracking-tight text-black">{logo}</span>
-                  ))}
-               </div>
-            </div>
-         </section>
+
 
          {/* SECTION 3: POSITIONING STATEMENT */}
          <section className="py-32 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto">
@@ -79,8 +68,8 @@ const Landing: React.FC = () => {
          </section>
 
          {/* SECTION 4: PRODUCT SURFACE (Architectural Blocks) */}
-         <section className="py-24 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto border-t border-gray-200">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16">
+         <section className="py-16 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto border-t border-gray-200">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-10">
                <h2 className="text-2xl font-medium text-black">Product Surface</h2>
             </div>
 
@@ -89,10 +78,9 @@ const Landing: React.FC = () => {
                   { title: "Video, Image & Audio Datasets", desc: "Curated, rights-cleared foundation data." },
                   { title: "Annotation & RLHF", desc: "Human-in-the-loop validation and labeling fabric." },
                   { title: "Live & Streaming Data Pipelines", desc: "Real-time ingestion for continuous learning." },
-                  { title: "Data Infrastructure & APIs", desc: "Programmatic access to the Harbor engine." },
-                  { title: "Compliance & Provenance", desc: "Audit trails and indemnification built-in." }
+                  { title: "Data Infrastructure & APIs", desc: "Programmatic access to the Harbor engine." }
                ].map((block, i) => (
-                  <div key={i} className="bg-white p-12 hover:bg-gray-50 transition-colors h-64 flex flex-col justify-between group">
+                  <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group">
                      <div>
                         <h3 className="text-xl font-medium text-black mb-3">{block.title}</h3>
                         <p className="text-gray-500 font-light">{block.desc}</p>
@@ -102,8 +90,6 @@ const Landing: React.FC = () => {
                      </div>
                   </div>
                ))}
-               {/* Filler block to complete grid if odd number */}
-               <div className="bg-white hidden md:block"></div>
             </div>
          </section>
 
@@ -138,17 +124,16 @@ const Landing: React.FC = () => {
                   Build with training data <br /> you can trust.
                </h2>
                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <button className="bg-[#111] text-white px-8 py-4 rounded hover:bg-black transition-all font-medium text-base w-full sm:w-auto">
+                  <Link to="/auth/signup" className="bg-[#111] text-white px-8 py-4 rounded hover:bg-black transition-all font-medium text-base w-full sm:w-auto">
                      Request Dataset Access
-                  </button>
-                  <button className="bg-transparent border border-gray-300 text-black px-8 py-4 rounded hover:bg-gray-50 transition-all font-medium text-base w-full sm:w-auto">
+                  </Link>
+                  <Link to="/contact" className="bg-transparent border border-gray-300 text-black px-8 py-4 rounded hover:bg-gray-50 transition-all font-medium text-base w-full sm:w-auto">
                      Contact Sales
-                  </button>
+                  </Link>
                </div>
             </div>
          </section>
       </div>
    );
 };
-
 export default Landing;

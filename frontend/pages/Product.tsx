@@ -159,7 +159,7 @@ const Product: React.FC = () => {
                 src={
                   activeTab === 'Transform Video' ? "https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=2940&auto=format&fit=crop" :
                     activeTab === 'Mood Boards' ? "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2940&auto=format&fit=crop" :
-                      activeTab === 'Virtual Staging' ? "https://images.unsplash.com/photo-1626305609423-4554eb71f287?q=80&w=3000&auto=format&fit=crop" :
+                      activeTab === 'Virtual Staging' ? "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=3000&auto=format&fit=crop" :
                         activeTab === 'Character Performance' ? "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2825&auto=format&fit=crop" :
                           activeTab === 'Virtual Try-On' ? "https://images.unsplash.com/photo-1542206395-9feb3edaa68d?q=80&w=2864&auto=format&fit=crop" :
                             "https://images.unsplash.com/photo-1614726365723-498aa46c0052?q=80&w=2787&auto=format&fit=crop"

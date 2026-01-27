@@ -1,92 +1,68 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Database, ShieldCheck, Zap, Coins } from 'lucide-react';
+import SeoHead from '../components/SeoHead';
 
 const HowItWorks: React.FC = () => {
     return (
-        <div className="w-full bg-[#faFaF9] pt-24 md:pt-32 pb-20 px-4 md:px-6">
-            <div className="max-w-5xl mx-auto">
-                {/* Header */}
-                <div className="text-center mb-16 md:mb-20">
-                    <h1 className="text-4xl md:text-7xl font-serif text-[#1A1A1A] mb-6 md:mb-8 leading-tight">The Law of Motion</h1>
-                    <p className="text-lg md:text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed px-2">
-                        Harbor isn't just a marketplace. It's a high-throughput data engine that turns raw media into verified, revenue-generating assets.
+        <div className="bg-white min-h-screen pt-20 pb-12 px-6">
+            <SeoHead
+                title="How It Works — Harbor Infrastructure"
+                description="Harbor infrastructure combines automated ingestion with precision human-in-the-loop annotation."
+            />
+
+            <div className="max-w-[700px] mx-auto">
+                <span className="text-xs font-mono text-gray-400 uppercase tracking-widest block mb-8">Process</span>
+
+                <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-[#111] mb-8 leading-[1.1]">
+                    Harbor Architecture & Alignment
+                </h1>
+
+                <div className="space-y-6 text-lg md:text-xl font-light text-gray-600 leading-relaxed font-sans mb-12">
+                    <p>
+                        Our infrastructure combines automated ingestion with precision human-in-the-loop annotation.
+                    </p>
+                    <p>
+                        Harbor operates across the full data stack. From ingestion to delivery, we handle the entire pipeline from Layer-1 storage through to the RAG Retrieval Engine and final API Gateway.
                     </p>
                 </div>
 
-                {/* Steps */}
-                <div className="space-y-16 md:space-y-24 relative">
-                    {/* Connecting Line */}
-                    <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-stone-300 hidden md:block"></div>
-
-                    {/* Mobile Connecting Line (Left aligned) */}
-                    <div className="absolute left-8 top-0 bottom-0 w-px bg-stone-200 md:hidden"></div>
-
-                    {/* Step 1: Ingestion */}
-                    <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-12 group pl-20 md:pl-0">
-                        <div className="flex-1 text-left md:text-right order-2 md:order-1 px-0 md:px-8">
-                            <h3 className="text-2xl md:text-3xl font-serif mb-2 md:mb-4 group-hover:text-amber-700 transition-colors">1. Verified Ingestion</h3>
-                            <p className="text-stone-500 leading-relaxed text-sm md:text-base">
-                                Upload raw video, audio, or images. We verify ownership and strip metadata immediately. No anonymous uploads allowed.
-                            </p>
+                {/* Diagrams from UseCases.tsx */}
+                <div className="space-y-8">
+                    {/* Diagram 1: Architecture */}
+                    <div>
+                        <div className="bg-white p-8 rounded-xl border border-gray-100 mb-6 flex items-center justify-center shadow-sm">
+                            <img
+                                src="/diagram_architecture_stack_1769477312827.png"
+                                alt="Harbor Architecture Stack"
+                                className="max-w-full h-auto object-contain mix-blend-multiply"
+                            />
                         </div>
-                        <div className="absolute left-0 md:relative md:left-auto w-16 h-16 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center z-10 shadow-xl border-4 border-[#faFaF9] order-1 md:order-2 shrink-0 group-hover:scale-110 transition-transform">
-                            <b className="text-xl">1</b>
-                        </div>
-                        <div className="flex-1 order-3 px-8 opacity-0 md:opacity-100 hidden md:block"></div>
+                        <h3 className="text-xl font-medium text-black mb-2">Full-Stack Data Infrastructure</h3>
+                        <p className="text-gray-500 font-light text-sm leading-relaxed">
+                            From ingestion to delivery. We handle the entire pipeline from Layer-1 storage through to the RAG Retrieval Engine and final API Gateway.
+                        </p>
                     </div>
 
-                    {/* Step 2: Audit */}
-                    <div className="relative flex flex-col md:flex-row items-center gap-12 group">
-                        <div className="flex-1 order-2 md:order-1 px-8 opacity-0 md:opacity-100"></div>
-                        <div className="w-16 h-16 rounded-full bg-white text-[#1A1A1A] flex items-center justify-center z-10 shadow-xl border-4 border-[#faFaF9] order-1 md:order-2 shrink-0 group-hover:scale-110 transition-transform">
-                            <ShieldCheck size={28} />
+                    {/* Diagram 2: RLHF */}
+                    <div>
+                        <div className="bg-white p-8 rounded-xl border border-gray-100 mb-6 flex items-center justify-center shadow-sm">
+                            <img
+                                src="/diagram_rlhf_cycle_1769477296587.png"
+                                alt="Harbor RLHF Cycle"
+                                className="max-w-full h-auto object-contain mix-blend-multiply"
+                            />
                         </div>
-                        <div className="flex-1 text-left order-3 md:order-3 px-8">
-                            <h3 className="text-3xl font-serif mb-4 group-hover:text-emerald-700 transition-colors">2. Multi-Layer Audit</h3>
-                            <p className="text-stone-500 leading-relaxed">
-                                Every asset passes through automated hash detection, web scraping for duplicates, and human review.
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Step 3: Dataset */}
-                    <div className="relative flex flex-col md:flex-row items-center gap-12 group">
-                        <div className="flex-1 text-right order-2 md:order-1 px-8">
-                            <h3 className="text-3xl font-serif mb-4 group-hover:text-blue-700 transition-colors">3. Dataset Creation</h3>
-                            <p className="text-stone-500 leading-relaxed">
-                                Assets are normalized, annotated, and grouped into high-value datasets for specific commercial verticals.
-                            </p>
-                        </div>
-                        <div className="w-16 h-16 rounded-full bg-white text-[#1A1A1A] flex items-center justify-center z-10 shadow-xl border-4 border-[#faFaF9] order-1 md:order-2 shrink-0 group-hover:scale-110 transition-transform">
-                            <Database size={28} />
-                        </div>
-                        <div className="flex-1 order-3 px-8 opacity-0 md:opacity-100"></div>
-                    </div>
-
-                    {/* Step 4: Revenue */}
-                    <div className="relative flex flex-col md:flex-row items-center gap-12 group">
-                        <div className="flex-1 order-2 md:order-1 px-8 opacity-0 md:opacity-100"></div>
-                        <div className="w-16 h-16 rounded-full bg-amber-400 text-[#1A1A1A] flex items-center justify-center z-10 shadow-xl border-4 border-[#faFaF9] order-1 md:order-2 shrink-0 group-hover:scale-110 transition-transform">
-                            <Coins size={28} />
-                        </div>
-                        <div className="flex-1 text-left order-3 md:order-3 px-8">
-                            <h3 className="text-3xl font-serif mb-4">4. Compounding Revenue</h3>
-                            <p className="text-stone-500 leading-relaxed">
-                                You earn every time your data is used for training or RAG. Value compounds as we add deeper annotations.
-                            </p>
-                        </div>
+                        <h3 className="text-xl font-medium text-black mb-2">Continuous Alignment Cycle</h3>
+                        <p className="text-gray-500 font-light text-sm leading-relaxed">
+                            Our models improve through a rigorous cycle of Supervised Fine-Tuning (SFT), Red Teaming, and RLHF rooted in human preferences.
+                        </p>
                     </div>
                 </div>
 
-                {/* CTA */}
-                <div className="mt-32 text-center">
-                    <Link
-                        to="/auth/signup"
-                        className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white px-10 py-5 rounded-full text-lg font-medium shadow-2xl hover:bg-black hover:scale-105 transition-all duration-300"
-                    >
-                        Join the Data Economy <ArrowRight size={20} />
-                    </Link>
+                <div className="mt-12 pt-8 border-t border-gray-100">
+                    <div className="mt-6">
+                        <Link to="/contact" className="text-sm font-medium text-[#1A1A1A] border-b border-black/20 pb-0.5 hover:border-black transition-colors">Contact Us</Link>
+                    </div>
                 </div>
             </div>
         </div>

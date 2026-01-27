@@ -11,12 +11,7 @@ interface Task {
     expiresIn: string;
 }
 
-const mockTasks: Task[] = [
-    { id: 'T-1024', type: 'Annotation', reward: '$0.50', priority: 'high', expiresIn: '2h' },
-    { id: 'T-1025', type: 'Review', reward: '$1.20', priority: 'normal', expiresIn: '4h' },
-    { id: 'T-1026', type: 'Audio Transcription', reward: '$3.00', priority: 'low', expiresIn: '24h' },
-    { id: 'T-1027', type: 'Annotation', reward: '$0.45', priority: 'normal', expiresIn: '5h' },
-];
+const mockTasks: Task[] = [];
 
 export const TaskQueue: React.FC = () => {
     return (
@@ -45,7 +40,7 @@ export const TaskQueue: React.FC = () => {
                         header: 'Priority',
                         accessor: (item) => (
                             <span className={`text-xs font-bold uppercase tracking-wide ${item.priority === 'high' ? 'text-red-500' :
-                                    item.priority === 'normal' ? 'text-blue-500' : 'text-stone-400'
+                                item.priority === 'normal' ? 'text-blue-500' : 'text-stone-400'
                                 }`}>
                                 {item.priority}
                             </span>

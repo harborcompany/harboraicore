@@ -35,20 +35,27 @@ const Signup: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+    const [loading, setLoading] = useState(false);
     const location = useLocation();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (validate()) {
-            authStore.setEmail(email);
+            setLoading(true);
+            const { error } = await authStore.signUp(email, password);
+            setLoading(false);
 
-            // Capture intent from navigation state if present
-            const state = location.state as { intent?: any };
-            if (state?.intent) {
-                authStore.setIntent(state.intent);
+            if (error) {
+                setErrors({ ...errors, form: error.message });
+            } else {
+                // Determine destination
+                const state = location.state as { intent?: any };
+                if (state?.intent) {
+                    authStore.setIntent(state.intent);
+                }
+                navigate('/auth/verify');
             }
-
-            navigate('/auth/verify');
         }
     };
 
@@ -60,6 +67,12 @@ const Signup: React.FC = () => {
                     Use a work email. Personal domains may require manual review.
                 </p>
             </div>
+
+            {errors.form && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                    {errors.form}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Email */}
@@ -122,9 +135,10 @@ const Signup: React.FC = () => {
                 {/* Submit */}
                 <button
                     type="submit"
-                    className="w-full bg-[#1A1A1A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#333] transition-colors mt-6"
+                    disabled={loading}
+                    className="w-full bg-[#1A1A1A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#333] transition-colors mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Continue
+                    {loading ? 'Creating Account...' : 'Continue'}
                 </button>
             </form>
 

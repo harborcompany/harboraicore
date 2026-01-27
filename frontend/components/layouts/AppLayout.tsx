@@ -10,7 +10,8 @@ import {
     Key,
     Settings,
     LogOut,
-    X
+    X,
+    Mail
 } from 'lucide-react';
 import { authStore, useAuth } from '../../lib/authStore';
 import { uiStore } from '../../lib/uiStore';
@@ -32,6 +33,7 @@ const AppLayout: React.FC = () => {
             { path: '/app/contributor', icon: Key, label: 'Earnings' },
         ] : [
             // Removed Command
+            { path: '/app/inbox', icon: Mail, label: 'Inbox' },
             { path: '/app/datasets', icon: Database, label: 'Builds' },
             { path: '/app/marketplace', icon: Store, label: 'Marketplace' },
             { path: '/app/ads', icon: Megaphone, label: 'Creative' },
@@ -155,7 +157,7 @@ const AppLayout: React.FC = () => {
                         <div className="flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                             <p className="text-xs text-gray-600 font-medium">
-                                Welcome to Harbor Command. System operating normally.
+                                Welcome to Harbor. System operating normally.
                             </p>
                         </div>
                         <button

@@ -37,6 +37,21 @@ const AuthGateway = () => {
                     Continue with Email
                 </button>
 
+                {/* Test Access */}
+                <button
+                    onClick={() => {
+                        authStore.devLogin().then(() => {
+                            // Dev/Test access granted
+                            // You might want to navigate or refresh here if store doesn't trigger it automatically
+                            // Assuming authStore handles state and AuthLayout/App redirects based on user state
+                            navigate('/');
+                        });
+                    }}
+                    className="w-full flex items-center justify-center gap-3 bg-stone-100 text-stone-600 py-3 px-4 rounded-lg font-medium hover:bg-stone-200 transition-colors"
+                >
+                    <span className="text-xs uppercase tracking-wider font-bold">Test Access (Dev)</span>
+                </button>
+
                 {/* Divider */}
                 <div className="flex items-center gap-4 my-6">
                     <div className="flex-1 h-px bg-stone-200"></div>

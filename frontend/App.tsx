@@ -8,6 +8,7 @@ import Layout from './components/Layout';
 // Public Pages
 import Landing from './pages/Landing';
 import Product from './pages/Product';
+import Token from './pages/Token';
 import Datasets from './pages/Datasets';
 import Ads from './pages/AdsPage';
 import Infrastructure from './pages/Infrastructure';
@@ -46,10 +47,12 @@ import ContributorDashboard from './pages/app/ContributorDashboard';
 import EnterpriseDashboard from './pages/app/EnterpriseDashboard';
 import DatasetEngine from './pages/app/DatasetEngine';
 import DatasetView from './pages/app/DatasetView';
+import Inbox from './pages/app/Inbox';
 import MarketplacePage from './pages/app/MarketplacePage';
 import AdsPage from './pages/app/AdsPage';
 import ContributePage from './pages/app/ContributePage';
 import ApiPage from './pages/app/ApiPage';
+import Settings from './pages/app/Settings';
 
 // ScrollToTop component
 const ScrollToTopWrapper: React.FC = () => {
@@ -113,6 +116,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<Landing />} />
           <Route path="product" element={<Product />} />
+          <Route path="token" element={<Token />} />
           <Route path="use-cases" element={<UseCases />} />
           <Route path="datasets" element={<Datasets />} />
           <Route path="ads" element={<Ads />} />
@@ -152,13 +156,14 @@ const App: React.FC = () => {
           {/* Demand Side (Enterprise) */}
           <Route path="enterprise" element={<EnterpriseDashboard />} />
 
+          <Route path="inbox" element={<Inbox />} />
           <Route path="datasets" element={<DatasetEngine />} />
           <Route path="datasets/:id" element={<DatasetView />} />
           <Route path="marketplace" element={<MarketplacePage />} />
           <Route path="ads" element={<AdsPage />} />
           <Route path="contribute" element={<ContributePage />} />
           <Route path="api" element={<ApiPage />} />
-          <Route path="settings" element={<div className="text-white">Settings</div>} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* Catch-all redirect */}

@@ -9,7 +9,7 @@ const DatasetEngine: React.FC = () => {
 
                 {/* Header - Engine Stats */}
                 <div className="mb-10">
-                    <h1 className="text-3xl font-serif text-[#1A1A1A] mb-2">Dataset Engine</h1>
+                    <h1 className="text-3xl font-medium tracking-tight text-[#1A1A1A] mb-2">Dataset Engine</h1>
                     <p className="text-stone-500">Manage, annotate, and index your multimodal assets.</p>
                 </div>
 
@@ -20,7 +20,7 @@ const DatasetEngine: React.FC = () => {
                             <Database size={20} />
                         </div>
                         <div>
-                            <div className="text-2xl font-serif text-[#1A1A1A]">2</div>
+                            <div className="text-2xl font-medium tracking-tight text-[#1A1A1A]">2</div>
                             <div className="text-xs font-mono text-stone-500 uppercase">Active Datasets</div>
                         </div>
                     </div>
@@ -29,7 +29,7 @@ const DatasetEngine: React.FC = () => {
                             <HardDrive size={20} />
                         </div>
                         <div>
-                            <div className="text-2xl font-serif text-[#1A1A1A]">57 GB</div>
+                            <div className="text-2xl font-medium tracking-tight text-[#1A1A1A]">57 GB</div>
                             <div className="text-xs font-mono text-stone-500 uppercase">Total Storage</div>
                         </div>
                     </div>
@@ -38,7 +38,7 @@ const DatasetEngine: React.FC = () => {
                             <Cpu size={20} />
                         </div>
                         <div>
-                            <div className="text-2xl font-serif text-[#1A1A1A]">1</div>
+                            <div className="text-2xl font-medium tracking-tight text-[#1A1A1A]">1</div>
                             <div className="text-xs font-mono text-stone-500 uppercase">Vector Index</div>
                         </div>
                     </div>
@@ -47,7 +47,7 @@ const DatasetEngine: React.FC = () => {
                             <Activity size={20} />
                         </div>
                         <div>
-                            <div className="text-2xl font-serif text-[#1A1A1A]">99.9%</div>
+                            <div className="text-2xl font-medium tracking-tight text-[#1A1A1A]">99.9%</div>
                             <div className="text-xs font-mono text-stone-500 uppercase">System Uptime</div>
                         </div>
                     </div>

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Play, ArrowRight, Check, Zap, Layers, Box, Cpu } from 'lucide-react';
 import SeoHead from '../components/SeoHead';
 
 const Datasets: React.FC = () => {
   return (
-    <div className="w-full bg-[#fcfcfc] text-[#111] selection:bg-black selection:text-white pb-32">
+    <div className="w-full bg-[#fcfcfc] text-[#111] selection:bg-black selection:text-white pb-20">
       <SeoHead
         title="Harbor Datasets — Generative Media Engine"
         description="High-fidelity video, audio, and image datasets for generative AI. Curated, licensed, and annotated for production models."
@@ -12,7 +13,7 @@ const Datasets: React.FC = () => {
 
       {/* HERO SECTION: Boxed Style (Matching Pricing) - Light Mode */}
       <section className="relative w-full px-4 md:px-6 py-4 max-w-[1600px] mx-auto">
-        <div className="relative w-full h-[75vh] rounded-2xl overflow-hidden bg-black group border border-black/5 shadow-2xl">
+        <div className="relative w-full h-[60vh] rounded-2xl overflow-hidden bg-black group border border-black/5 shadow-2xl">
           {/* Video Background */}
           <div className="absolute inset-0 z-0">
             <video
@@ -22,17 +23,14 @@ const Datasets: React.FC = () => {
               playsInline
               className="w-full h-full object-cover opacity-60"
             >
-              <source src="/roboticscontent.mp4" type="video/mp4" />
+              <source src="/Jan_27__1044_32s_202601271148_6xrem.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 pb-16 z-20">
+          <div className="absolute bottom-0 left-0 w-full p-6 md:p-10 pb-12 z-20">
             <div className="max-w-4xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-medium text-white mb-6 backdrop-blur-md">
-                <Zap size={12} className="fill-white" />
-                <span>Generative Media Engine</span>
-              </div>
+
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter mb-8 leading-[1.05] text-white">
                 Powering the next generation <br /> <span className="text-white/60">of Multimodal Models.</span>
               </h1>
@@ -41,13 +39,13 @@ const Datasets: React.FC = () => {
                 Ingest, curate, and annotate petabytes of unstructured data.
               </p>
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <button className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-gray-200 transition-all w-full sm:w-auto flex items-center justify-center gap-2">
+                <Link to="/how-it-works" className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-gray-200 transition-all w-full sm:w-auto flex items-center justify-center gap-2">
                   <Play size={16} fill="currentColor" />
                   Watch Demo
-                </button>
-                <button className="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-full font-medium hover:bg-white/20 transition-all w-full sm:w-auto backdrop-blur-sm">
+                </Link>
+                <Link to="/app/marketplace" className="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-full font-medium hover:bg-white/20 transition-all w-full sm:w-auto backdrop-blur-sm flex items-center justify-center">
                   Explore Data Gallery
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -55,28 +53,32 @@ const Datasets: React.FC = () => {
       </section>
 
       {/* MULTIMEDIA BENTO GRID (Light Mode) */}
-      <section className="py-24 px-6 md:px-12 lg:px-16 max-w-[1400px] mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 px-4">
+      <section className="py-8 px-6 md:px-12 lg:px-16 max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-8 px-4">
           <div>
             <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4 text-black">Foundation Datasets</h2>
             <p className="text-gray-500 font-light max-w-lg">
               Curated, rights-cleared collections designed for pre-training and fine-tuning.
             </p>
           </div>
-          <button className="text-sm font-medium border-b border-black/20 pb-1 hover:text-black hover:border-black transition-colors mt-6 md:mt-0 text-gray-500">
+          <Link to="/app/datasets" className="text-sm font-medium border-b border-black/20 pb-1 hover:text-black hover:border-black transition-colors mt-6 md:mt-0 text-gray-500">
             View Full Registry
-          </button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
           {/* LARGE VIDEO CARD (Spans 8 cols) */}
           <div className="md:col-span-8 h-[500px] rounded-3xl overflow-hidden relative group border border-gray-200 bg-gray-100 shadow-sm hover:shadow-md transition-all">
-            <img
-              src="https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=2940&auto=format&fit=crop"
-              alt="Physical Intelligence"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
-            />
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 scale-125"
+            >
+              <source src="/industrialautomation.mp4" type="video/mp4" />
+            </video>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-10">
               <div className="flex items-center gap-2 text-white/90 mb-2">
@@ -117,29 +119,37 @@ const Datasets: React.FC = () => {
 
           {/* WIDE CARD (Spans 6 cols) */}
           <div className="md:col-span-6 h-[400px] rounded-3xl overflow-hidden relative group border border-gray-200 bg-gray-100 shadow-sm hover:shadow-md transition-all">
-            <img
-              src="https://images.unsplash.com/photo-1614726365723-498aa46c0052?q=80&w=2787&auto=format&fit=crop"
-              alt="Cinematic Video"
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
-            />
+            >
+              <source src="/style_video_202601271427_5k4jh.mp4" type="video/mp4" />
+            </video>
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-10">
-              <h3 className="text-2xl font-medium mb-2 text-white">Cinematic Video</h3>
+              <h3 className="text-2xl font-medium mb-2 text-white">Micro Object Detection Data</h3>
               <div className="flex gap-2 mt-3">
-                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">4K</span>
-                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">RAW</span>
-                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">Rights-Cleared</span>
+                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">Counted</span>
+                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">Verified</span>
+                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">Labelled</span>
               </div>
             </div>
           </div>
 
           {/* WIDE CARD (Spans 6 cols) */}
           <div className="md:col-span-6 h-[400px] rounded-3xl overflow-hidden relative group border border-gray-200 bg-gray-100 shadow-sm hover:shadow-md transition-all">
-            <img
-              src="https://images.unsplash.com/photo-1478737270239-2f02b77ac6d5?q=80&w=2920&auto=format&fit=crop"
-              alt="Multimodal Audio"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
-            />
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 scale-125"
+            >
+              <source src="/mix_style_video_1080p_202601271137.mp4" type="video/mp4" />
+            </video>
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-10">
               <h3 className="text-2xl font-medium mb-2 text-white">Audio-Visual Reasoning</h3>
@@ -156,8 +166,8 @@ const Datasets: React.FC = () => {
       </section>
 
       {/* CAPABILITIES SECTION (Light Mode) */}
-      <section className="py-24 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto border-t border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+      <section className="py-8 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto border-t border-gray-200 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div>
             <h3 className="text-lg font-medium text-black mb-6 flex items-center gap-2">
               <Box size={18} className="text-black" />
@@ -192,17 +202,17 @@ const Datasets: React.FC = () => {
       </section>
 
       {/* CTA SECTION (Light Mode) */}
-      <section className="py-32 text-center bg-white border-t border-gray-100">
+      <section className="py-16 text-center bg-white border-t border-gray-100">
         <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-8 text-black">
           Ready to build?
         </h2>
         <div className="flex justify-center gap-6">
-          <button className="bg-black text-white px-9 py-4 rounded-full font-medium hover:bg-gray-800 transition-colors shadow-lg">
+          <Link to="/app" className="bg-black text-white px-9 py-4 rounded-full font-medium hover:bg-gray-800 transition-colors shadow-lg">
             Get Started
-          </button>
-          <button className="text-black border border-gray-200 px-9 py-4 rounded-full font-medium hover:bg-gray-50 transition-colors">
+          </Link>
+          <Link to="/contact" className="text-black border border-gray-200 px-9 py-4 rounded-full font-medium hover:bg-gray-50 transition-colors flex items-center justify-center">
             Contact Sales
-          </button>
+          </Link>
         </div>
       </section>
     </div>

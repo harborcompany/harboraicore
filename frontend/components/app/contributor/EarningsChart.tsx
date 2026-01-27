@@ -8,9 +8,9 @@ export const EarningsChart: React.FC = () => {
                 <div>
                     <h3 className="text-sm font-medium text-stone-500 uppercase tracking-widest mb-1">Total Earnings</h3>
                     <div className="flex items-baseline gap-2">
-                        <h2 className="text-3xl font-serif text-[#1A1A1A] font-bold">$1,240.50</h2>
-                        <span className="text-sm font-medium text-emerald-600 flex items-center gap-1">
-                            <TrendingUp size={14} /> +18%
+                        <h2 className="text-3xl font-serif text-[#1A1A1A] font-bold">$0.00</h2>
+                        <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
+                            <TrendingUp size={14} /> 0%
                         </span>
                     </div>
                 </div>
@@ -21,14 +21,14 @@ export const EarningsChart: React.FC = () => {
 
             {/* Mock Chart Visualization */}
             <div className="h-32 flex items-end gap-2 justify-between px-2">
-                {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 100].map((h, i) => (
+                {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((h, i) => (
                     <div
                         key={i}
-                        className="w-full bg-[#1A1A1A] rounded-t-sm opacity-10 hover:opacity-80 transition-opacity cursor-pointer relative group"
-                        style={{ height: `${h}%` }}
+                        className="w-full bg-[#1A1A1A] rounded-t-sm opacity-5 relative group"
+                        style={{ height: '5%' }}
                     >
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1A1A1A] text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                            ${(h * 1.5).toFixed(2)}
+                            $0.00
                         </div>
                     </div>
                 ))}

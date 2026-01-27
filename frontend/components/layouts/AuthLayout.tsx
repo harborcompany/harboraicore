@@ -11,12 +11,12 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             {/* Ambient gradients removed as per user request */}
 
             {/* Harbor Logo */}
-            <div className="mb-8 relative z-10 flex flex-col items-center justify-center w-full">
-                <Link to="/" className="inline-block transition-opacity hover:opacity-80">
+            <div className="mb-8 relative z-10 flex flex-col items-center justify-center w-full text-center">
+                <Link to="/" className="block mx-auto hover:opacity-80 transition-opacity">
                     <img
                         src="/harbor-logo.svg"
                         alt="Harbor"
-                        className="h-16 w-auto mx-auto"
+                        className="h-16 w-auto mx-auto block"
                     />
                 </Link>
             </div>

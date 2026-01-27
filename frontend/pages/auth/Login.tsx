@@ -83,7 +83,7 @@ const Login = () => {
                         <input type="checkbox" className="rounded border-stone-300" />
                         Remember me
                     </label>
-                    <Link to="/auth/forgot-password" className="text-[#1A1A1A] font-medium hover:underline">
+                    <Link to="/auth/reset" className="text-[#1A1A1A] font-medium hover:underline">
                         Forgot password?
                     </Link>
                 </div>
@@ -113,21 +113,7 @@ const Login = () => {
                 </p>
             </div>
 
-            {/* Dev Login for Testing */}
-            <div className="mt-6 pt-6 border-t border-gray-100">
-                <p className="text-center text-xs text-gray-400 mb-3 uppercase tracking-wide">Developer Access</p>
-                <button
-                    onClick={async () => {
-                        await authStore.devLogin();
-                        navigate('/app');
-                    }}
-                    className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
-                    type="button"
-                >
-                    <Loader2 size={14} className="opacity-0 group-hover:opacity-100" />
-                    Bypass Login (Test Mode)
-                </button>
-            </div>
+
         </AuthLayout>
     );
 };
