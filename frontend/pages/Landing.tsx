@@ -105,7 +105,7 @@ const Landing: React.FC = () => {
                      {block.image && (
                         <div className="absolute inset-x-0 bottom-0 top-[22%] overflow-hidden">
                            <img
-                              src={block.image}
+                              src={`${block.image}?v=final`}
                               alt={block.title}
                               className="w-full h-full object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-700"
                            />
