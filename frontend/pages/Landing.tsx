@@ -35,7 +35,7 @@ const Landing: React.FC = () => {
                <h1 className="text-4xl md:text-6xl font-medium tracking-tight mb-6 leading-[1.05] text-black">
                   Enterprise Data Infrastructure <br /> for Multimodal AI
                </h1>
-               <p className="text-lg md:text-xl text-gray-500 font-light leading-relaxed mb-10 max-w-xl">
+               <p className="text-lg md:text-xl text-black font-light leading-relaxed mb-10 max-w-xl">
                   Harbor provides training-ready image, audio, and video datasets, delivered through licensed sourcing, real-time infrastructure, and human-validated annotation.
                </p>
 
