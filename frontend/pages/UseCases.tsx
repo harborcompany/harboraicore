@@ -35,7 +35,7 @@ const UseCases: React.FC = () => {
                             playsInline
                             className="w-full h-full object-cover"
                         >
-                            <source src="/mix_style_video_1080p_202601271137.mp4" type="video/mp4" />
+                            <source src="/8second_fastcut_ad_1080p_202601271456.mp4" type="video/mp4" />
                         </video>
                         <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px]"></div>
                     </div>
