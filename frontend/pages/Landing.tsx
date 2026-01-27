@@ -93,7 +93,7 @@ const Landing: React.FC = () => {
                   {
                      title: "Data Infrastructure & APIs",
                      desc: "Programmatic access to the Harbor engine.",
-                     image: "/apinewimage.png"
+                     image: "/infra_preview.png"
                   }
                ].map((block, i) => (
                   <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group overflow-hidden relative">
