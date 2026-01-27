@@ -12,7 +12,7 @@ const Product: React.FC = () => {
   return (
     <div className="w-full bg-white text-black animate-in fade-in duration-700 min-h-screen font-sans">
       <SeoHead
-        title="Harbor Product — The Media Data Stack"
+        title="Harbor Product: The Media Data Stack"
         description="Harbor product: media-native ingestion, frame-accurate annotation fabric, RAG dataset engine, APIs, and ad creative execution."
       />
 

@@ -6,7 +6,7 @@ const HowItWorks: React.FC = () => {
     return (
         <div className="bg-white min-h-screen pt-20 pb-12 px-6">
             <SeoHead
-                title="How It Works — Harbor Infrastructure"
+                title="How It Works: Harbor Infrastructure"
                 description="Harbor infrastructure combines automated ingestion with precision human-in-the-loop annotation."
             />
 

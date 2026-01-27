@@ -6,7 +6,7 @@ const UseCases: React.FC = () => {
     return (
         <div className="w-full bg-[#FAFAFA] text-[#111] animate-in fade-in duration-700 min-h-screen font-sans selection:bg-black selection:text-white">
             <SeoHead
-                title="Use Cases — Harbor Infrastructure"
+                title="Use Cases: Harbor Infrastructure"
                 description="Real-world applications of Harbor’s data infrastructure across media, robotics, and enterprise AI."
             />
 
@@ -88,7 +88,7 @@ const UseCases: React.FC = () => {
                                     <div>
                                         <h4 className="text-white font-medium text-sm mb-4 uppercase tracking-wide">Why Harbor Is Unique</h4>
                                         <p className="text-gray-400 font-light leading-relaxed">
-                                            Only Harbor combines live video infrastructure, dataset licensing, continuous feedback loops, and ads delivery as a native product. This is not ad tech layered on AI — it is AI trained inside the media system.
+                                            Only Harbor combines live video infrastructure, dataset licensing, continuous feedback loops, and ads delivery as a native product. This is not ad tech layered on AI; it is AI trained inside the media system.
                                         </p>
                                     </div>
                                 </div>
@@ -143,7 +143,7 @@ const UseCases: React.FC = () => {
                                 <div>
                                     <h4 className="text-white font-medium text-xs mb-4 uppercase tracking-wide opacity-50">Harbor Solution</h4>
                                     <p className="text-xl md:text-2xl font-light text-gray-200 leading-relaxed">
-                                        Harbor sources, licenses, and annotates highly specific video datasets — such as sewing, assembly, or manipulation tasks — across multiple styles, materials, and environments.
+                                        Harbor sources, licenses, and annotates highly specific video datasets, such as sewing, assembly, or manipulation tasks, across multiple styles, materials, and environments.
                                     </p>
                                 </div>
 
@@ -172,7 +172,7 @@ const UseCases: React.FC = () => {
                                     <div>
                                         <h4 className="text-white font-medium text-sm mb-4 uppercase tracking-wide">Why Harbor Is Unique</h4>
                                         <p className="text-gray-400 font-light leading-relaxed">
-                                            Harbor can deliver task-specific, real-world video — not scraped clips or lab simulations.
+                                            Harbor can deliver task-specific, real-world video, not scraped clips or lab simulations.
                                         </p>
                                     </div>
                                 </div>
@@ -211,7 +211,7 @@ const UseCases: React.FC = () => {
                                     </div>
                                     <div>
                                         <h4 className="text-white font-medium text-sm mb-2">Problem</h4>
-                                        <p className="text-gray-400 font-light leading-relaxed">Enterprise models need aligned image, audio, and video data — but sourcing compliant multimodal datasets is slow and risky.</p>
+                                        <p className="text-gray-400 font-light leading-relaxed">Enterprise models need aligned image, audio, and video data, but sourcing compliant multimodal datasets is slow and risky.</p>
                                     </div>
                                 </div>
                             </div>

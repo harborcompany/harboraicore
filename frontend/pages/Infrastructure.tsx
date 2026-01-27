@@ -49,7 +49,7 @@ const Infrastructure: React.FC = () => {
           <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6 text-gray-900">Canonical System Flow</h2>
           <p className="text-lg text-gray-500 font-light max-w-2xl mx-auto">
             This diagram represents the <span className="font-medium text-gray-900">fixed execution order</span> of Harbor.
-            Data flows strictly top to bottom—no shortcuts, no abstractions, no skipping layers.
+            Data flows strictly top to bottom: no shortcuts, no abstractions, no skipping layers.
           </p>
         </div>
 

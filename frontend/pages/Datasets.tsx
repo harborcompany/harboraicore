@@ -7,7 +7,7 @@ const Datasets: React.FC = () => {
   return (
     <div className="w-full bg-[#fcfcfc] text-[#111] selection:bg-black selection:text-white pb-20">
       <SeoHead
-        title="Harbor Datasets — Generative Media Engine"
+        title="Harbor Datasets: Generative Media Engine"
         description="High-fidelity video, audio, and image datasets for generative AI. Curated, licensed, and annotated for production models."
       />
 

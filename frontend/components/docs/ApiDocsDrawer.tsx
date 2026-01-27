@@ -130,7 +130,7 @@ const ApiDocsDrawer: React.FC = () => {
                                     <div className="space-y-4">
                                         <h1 className="text-3xl md:text-4xl font-medium text-[#111] tracking-tight">Harbor APIs</h1>
                                         <p className="text-lg text-gray-500 font-light leading-relaxed">
-                                            Programmatic access to Harbor’s image, audio, and video datasets — built for training, evaluation, and continuous learning workflows.
+                                            Programmatic access to Harbor’s image, audio, and video datasets, built for training, evaluation, and continuous learning workflows.
                                         </p>
                                     </div>
 

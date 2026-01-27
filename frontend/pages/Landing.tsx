@@ -8,8 +8,8 @@ const Landing: React.FC = () => {
    return (
       <div className="w-full bg-[#FAFAFA] text-[#111]">
          <SeoHead
-            title="Harbor — Enterprise Data Infrastructure"
-            description="Harbor provides training-ready image, audio, and video datasets — delivered through licensed sourcing, real-time infrastructure, and human-validated annotation."
+            title="Harbor: Enterprise Data Infrastructure"
+            description="Harbor provides training-ready image, audio, and video datasets, delivered through licensed sourcing, real-time infrastructure, and human-validated annotation."
          />
 
          {/* SECTION 1: HERO */}
@@ -36,7 +36,7 @@ const Landing: React.FC = () => {
                   Enterprise Data Infrastructure <br /> for Multimodal AI
                </h1>
                <p className="text-lg md:text-xl text-gray-500 font-light leading-relaxed mb-10 max-w-xl">
-                  Harbor provides training-ready image, audio, and video datasets — delivered through licensed sourcing, real-time infrastructure, and human-validated annotation.
+                  Harbor provides training-ready image, audio, and video datasets, delivered through licensed sourcing, real-time infrastructure, and human-validated annotation.
                </p>
 
                <div className="flex flex-wrap items-center gap-5">
@@ -55,14 +55,14 @@ const Landing: React.FC = () => {
          {/* SECTION 3: POSITIONING STATEMENT */}
          <section className="py-32 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto">
             <h2 className="text-2xl md:text-3xl font-medium tracking-tight mb-12">
-               Built on Infrastructure — Not Abstractions
+               Built on Infrastructure: Not Abstractions
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                <p className="text-lg font-light text-gray-600 leading-relaxed">
                   Harbor operates across the full data stack. From live content ingestion to model-ready delivery.
                </p>
                <p className="text-lg font-light text-gray-600 leading-relaxed">
-                  Unlike providers that rely on scraped or third-party inputs, Harbor controls the underlying infrastructure — enabling flexible data products, real-time learning, and clear provenance.
+                  Unlike providers that rely on scraped or third-party inputs, Harbor controls the underlying infrastructure, enabling flexible data products, real-time learning, and clear provenance.
                </p>
             </div>
          </section>
@@ -101,7 +101,7 @@ const Landing: React.FC = () => {
                      Real-Time Data at <br /> Production Scale
                   </h2>
                   <p className="text-gray-400 text-lg font-light leading-relaxed mb-8">
-                     Our models learn from continuously flowing data — enabling dynamic dataset refreshes, temporal context, and real-world signal capture unavailable through static corpora.
+                     Our models learn from continuously flowing data, enabling dynamic dataset refreshes, temporal context, and real-world signal capture unavailable through static corpora.
                   </p>
                   <div className="inline-block border border-white/20 rounded-full px-4 py-1 text-sm text-gray-300">
                      Live Feedback Loops

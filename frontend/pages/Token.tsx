@@ -6,7 +6,7 @@ const Token: React.FC = () => {
     return (
         <div className="bg-white min-h-screen pt-32 pb-24 px-6 text-[#111]">
             <SeoHead
-                title="$HARBOR Token — The Media Data Stack"
+                title="$HARBOR Token: The Media Data Stack"
                 description="Harbor token: media-native ingestion, frame-accurate annotation fabric, RAG dataset engine, APIs, and ad creative execution."
             />
 
@@ -40,7 +40,7 @@ const Token: React.FC = () => {
                         <div>
                             <h3 className="text-2xl font-medium text-[#111] mb-2 tracking-tight">Team Collaboration</h3>
                             <p>
-                                Manage permissions, seat licensing, and shared assets across teams — without friction.
+                                Manage permissions, seat licensing, and shared assets across teams without friction.
                             </p>
                         </div>
 

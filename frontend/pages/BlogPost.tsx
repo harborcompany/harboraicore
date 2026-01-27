@@ -21,7 +21,7 @@ const BlogPost = () => {
                 content: [
                     {
                         type: 'hook',
-                        text: `The assumption that ${title.toLowerCase()} is merely a scaling problem is the most dangerous misconception in modern AI development. Most organizations treat audio and video data like "heavy images"—binary blobs to be stored, retrieved, and fed into models. They fail to understand the temporal dimension.`
+                        text: `The assumption that ${title.toLowerCase()} is merely a scaling problem is the most dangerous misconception in modern AI development. Most organizations treat audio and video data like "heavy images" - binary blobs to be stored, retrieved, and fed into models. They fail to understand the temporal dimension.`
                     },
                     {
                         type: 'hook',
@@ -45,7 +45,7 @@ const BlogPost = () => {
                     },
                     {
                         type: 'paragraph',
-                        text: `At Harbor, we do not treat media as files. We treat them as streams. Our ingestion engine decomposes video into temporal primitives—visual embeddings, audio waveforms, and speech transcripts—before they ever hit cold storage.`
+                        text: `At Harbor, we do not treat media as files. We treat them as streams. Our ingestion engine decomposes video into temporal primitives (visual embeddings, audio waveforms, and speech transcripts) before they ever hit cold storage.`
                     },
                     {
                         type: 'paragraph',

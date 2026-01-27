@@ -7,18 +7,18 @@ const AdsPage: React.FC = () => {
     return (
         <div className="w-full bg-white text-[#111] animate-in fade-in duration-700 font-sans selection:bg-[#111] selection:text-white">
             <SeoHead
-                title="Harbor Ads — Make Better Ads Faster"
-                description="Make Better Ads Faster — With Real Media, Real Data. Generate, test, and deploy high-performance video creatives at scale."
+                title="Harbor Ads: Make Better Ads Faster"
+                description="Make Better Ads Faster: With Real Media, Real Data. Generate, test, and deploy high-performance video creatives at scale."
             />
 
             {/* SECTION 1: HERO */}
             <section className="pt-32 pb-24 px-6 md:px-12 lg:px-16 max-w-[1400px] mx-auto min-h-[90vh] flex flex-col justify-center">
                 <div className="max-w-7xl mx-auto text-center mb-16">
                     <h1 className="text-5xl md:text-7xl font-medium tracking-tight mb-8 leading-[1.05] text-black">
-                        Make Better Ads Faster — <br /> With Real Media, Real Data
+                        Make Better Ads Faster: <br /> With Real Media, Real Data
                     </h1>
                     <p className="text-xl md:text-2xl text-gray-500 font-light leading-relaxed mb-10 max-w-4xl mx-auto">
-                        Harbor’s ad platform uses your data and real media insights to generate, test, and deploy high-performance video creatives at scale — continuously and automatically.
+                        Harbor’s ad platform uses your data and real media insights to generate, test, and deploy high-performance video creatives at scale, continuously and automatically.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
@@ -72,7 +72,7 @@ const AdsPage: React.FC = () => {
                             ))}
                         </ul>
                         <p className="text-gray-500 font-light leading-relaxed border-l-2 border-blue-600 pl-6">
-                            Harbor doesn’t just generate clips — we produce performance-oriented creatives informed by real viewing signals and live media behavior.
+                            Harbor doesn’t just generate clips; we produce performance-oriented creatives informed by real viewing signals and live media behavior.
                         </p>
                     </div>
                     {/* Visual: Algorithm -> Output Pipeline Placeholder (using code visual or abstract) */}
@@ -194,7 +194,7 @@ const AdsPage: React.FC = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start mb-16">
                     <h2 className="text-3xl md:text-4xl font-medium tracking-tight">What You Get</h2>
                     <p className="text-gray-500 font-light max-w-md mt-4 md:mt-0">
-                        This isn’t a tool you fiddle with — it’s a creative delivery engine that produces test-ready assets you can run immediately.
+                        This isn’t a tool you fiddle with, it’s a creative delivery engine that produces test-ready assets you can run immediately.
                     </p>
                 </div>
 

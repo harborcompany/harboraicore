@@ -6,7 +6,7 @@ const Pricing: React.FC = () => {
   return (
     <div className="w-full bg-[#050505] text-white animate-in fade-in duration-700 min-h-screen font-sans selection:bg-indigo-500 selection:text-white">
       <SeoHead
-        title="Harbor Pricing — Enterprise AI & Media"
+        title="Harbor Pricing: Enterprise AI & Media"
         description="Flexible pricing built for scope, usage, and integration. Advertising solutions, training data, and custom enterprise contracts."
       />
 
