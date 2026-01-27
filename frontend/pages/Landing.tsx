@@ -99,7 +99,7 @@ const Landing: React.FC = () => {
                      </div>
 
                      {block.image && (
-                        <div className="absolute inset-x-0 bottom-0 top-[40%] overflow-hidden">
+                        <div className="absolute inset-x-0 bottom-0 top-[22%] overflow-hidden">
                            <img
                               src={block.image}
                               alt={block.title}
