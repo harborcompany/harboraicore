@@ -56,12 +56,12 @@ models/*.pt
 models/*.pth
 
 # Media files (too large for git)
-*.mp4
-*.avi
-*.mov
-*.mkv
-*.wav
-*.mp3
+# *.mp4
+# *.avi
+# *.mov
+# *.mkv
+# *.wav
+# *.mp3
 
 # OS files
 Thumbs.db
