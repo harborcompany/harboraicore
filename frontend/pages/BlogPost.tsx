@@ -33,7 +33,7 @@ const BlogPost = () => {
                     },
                     {
                         type: 'paragraph',
-                        text: `In a real-time multimodal system, the "truth" of a dataset changes every millisecond. A frame at 00:00:01.05 might show a pedestrian on the curb; at 00:00:01.10, they are in the street. Static labeling pipelines—the industry standard—flatten this reality into a single bounding box that says "pedestrian."`
+                        text: `In a real-time multimodal system, the "truth" of a dataset changes every millisecond. A frame at 00:00:01.05 might show a pedestrian on the curb; at 00:00:01.10, they are in the street. Static labeling pipelines (the industry standard) flatten this reality into a single bounding box that says "pedestrian."`
                     },
                     {
                         type: 'paragraph',
