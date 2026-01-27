@@ -22,7 +22,7 @@ const Landing: React.FC = () => {
                   muted
                   loop
                   playsInline
-                  className="w-full h-full object-cover opacity-[0.85]"
+                  className="w-full h-full object-cover opacity-[0.85] scale-[1.04] origin-left"
                >
                   <source src="/Jan_27__1044_32s_202601271148_6xrem.mp4" type="video/mp4" />
                </video>
