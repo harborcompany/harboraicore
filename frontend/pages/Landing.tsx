@@ -78,22 +78,22 @@ const Landing: React.FC = () => {
                   {
                      title: "Video, Image & Audio Datasets",
                      desc: "Curated, rights-cleared foundation data.",
-                     image: "/legosetimage.png"
+                     image: "/assets/landing/dataset_lego.png"
                   },
                   {
                      title: "Annotation & RLHF",
                      desc: "Human-in-the-loop validation and labeling fabric.",
-                     image: "/annotation_rlhf_preview.png"
+                     image: "/assets/landing/annotation_preview.png"
                   },
                   {
                      title: "Live & Streaming Data Pipelines",
                      desc: "Real-time ingestion for continuous learning.",
-                     image: "/realistic_raw_3.png"
+                     image: "/assets/landing/pipeline_real.png"
                   },
                   {
                      title: "Data Infrastructure & APIs",
                      desc: "Programmatic access to the Harbor engine.",
-                     image: "/infra_preview.png"
+                     image: "/assets/landing/infrastructure.png"
                   }
                ].map((block, i) => (
                   <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group overflow-hidden relative">
@@ -105,7 +105,7 @@ const Landing: React.FC = () => {
                      {block.image && (
                         <div className="absolute inset-x-0 bottom-0 top-[22%] overflow-hidden">
                            <img
-                              src={`${block.image}?v=final`}
+                              src={block.image}
                               alt={block.title}
                               className="w-full h-full object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-700"
                            />
