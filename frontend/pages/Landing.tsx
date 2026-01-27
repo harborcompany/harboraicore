@@ -78,7 +78,7 @@ const Landing: React.FC = () => {
                   {
                      title: "Video, Image & Audio Datasets",
                      desc: "Curated, rights-cleared foundation data.",
-                     image: "/newscreenshot44.jpg"
+                     image: "/legosetimage.png"
                   },
                   {
                      title: "Annotation & RLHF",
