@@ -7,25 +7,23 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
-                serif: ['Playfair Display', 'serif'],
-                mono: ['JetBrains Mono', 'monospace'],
             },
             colors: {
-                stone: {
-                    50: '#fafaf9',
-                    100: '#f5f5f4',
-                    200: '#e7e5e4',
-                    300: '#d6d3d1',
-                    400: '#a8a29e',
-                    800: '#292524',
-                    900: '#1c1917',
-                },
-                cream: '#F9F8F6',
-                charcoal: '#1A1A1A',
+                primary: '#000000',
+                secondary: '#111827',
+                muted: '#6B7280',
+                border: '#E5E7EB',
+                accent: '#6366F1',
+                cream: '#FFFFFF', // Resetting 'cream' to white as per brief
+                charcoal: '#111827', // Mapping old var to new neutral
             },
             borderRadius: {
-                '4xl': '2rem',
-                '5xl': '3rem',
+                'xl': '12px',
+                '2xl': '18px',
+                'pill': '9999px',
+            },
+            boxShadow: {
+                'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
             }
         },
     },

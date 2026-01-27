@@ -43,10 +43,10 @@ const AdsPage: React.FC = () => {
             {/* Header */}
             <div className="mb-8 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-serif text-white mb-2">Harbor Ads</h1>
-                    <p className="text-stone-400">Create and manage data-driven video campaigns</p>
+                    <h1 className="text-3xl font-serif text-[#1A1A1A] mb-2">Harbor Ads</h1>
+                    <p className="text-stone-500">Create and manage data-driven video campaigns</p>
                 </div>
-                <button className="bg-white text-black px-4 py-2.5 rounded-lg font-medium hover:bg-stone-200 transition-colors flex items-center gap-2">
+                <button className="bg-[#1A1A1A] text-white px-4 py-2.5 rounded-lg font-medium hover:bg-[#333] transition-colors flex items-center gap-2">
                     <Plus size={18} />
                     New Campaign
                 </button>
@@ -54,54 +54,54 @@ const AdsPage: React.FC = () => {
 
             {/* Overhauled Ads Stats */}
             <div className="grid grid-cols-4 gap-6 mb-12">
-                <div className="p-8 bg-[#0A0A0A] border border-white/10 rounded-[1.5rem] shadow-sm hover:border-white/20 transition-colors">
+                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
                     <div className="flex items-center gap-3 mb-4">
                         <DollarSign size={24} className="text-emerald-500" />
                         <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Total Managed Budget</span>
                     </div>
-                    <p className="text-4xl font-serif text-white">$3,000,000</p>
+                    <p className="text-4xl font-serif text-[#1A1A1A]">$3,000,000</p>
                 </div>
-                <div className="p-8 bg-[#0A0A0A] border border-white/10 rounded-[1.5rem] shadow-sm hover:border-white/20 transition-colors">
+                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
                     <div className="flex items-center gap-3 mb-4">
                         <BarChart2 size={24} className="text-blue-500" />
                         <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Total Impressions</span>
                     </div>
-                    <p className="text-4xl font-serif text-white">69.1M</p>
+                    <p className="text-4xl font-serif text-[#1A1A1A]">69.1M</p>
                 </div>
-                <div className="p-8 bg-[#0A0A0A] border border-white/10 rounded-[1.5rem] shadow-sm hover:border-white/20 transition-colors">
+                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
                     <div className="flex items-center gap-3 mb-4">
                         <TrendingUp size={24} className="text-purple-500" />
                         <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Average Conversion</span>
                     </div>
-                    <p className="text-4xl font-serif text-white">4.12%</p>
+                    <p className="text-4xl font-serif text-[#1A1A1A]">4.12%</p>
                 </div>
-                <div className="p-8 bg-[#0A0A0A] border border-white/10 rounded-[1.5rem] shadow-sm hover:border-white/20 transition-colors">
+                <div className="p-8 bg-white border border-stone-200 rounded-[1.5rem] shadow-sm hover:border-stone-300 transition-colors">
                     <div className="flex items-center gap-3 mb-4">
                         <Play size={24} className="text-stone-600" />
                         <span className="text-stone-500 text-xs font-mono uppercase tracking-widest">Active Corridors</span>
                     </div>
-                    <p className="text-4xl font-serif text-white">42</p>
+                    <p className="text-4xl font-serif text-[#1A1A1A]">42</p>
                 </div>
             </div>
 
             {/* Campaigns */}
             <div className="mb-6">
-                <h2 className="text-lg font-medium text-white mb-4">Campaigns</h2>
+                <h2 className="text-lg font-medium text-[#1A1A1A] mb-4">Campaigns</h2>
             </div>
 
             <div className="space-y-4">
                 {campaigns.map((campaign) => (
                     <div
                         key={campaign.id}
-                        className="p-6 bg-[#0A0A0A] border border-white/10 rounded-xl hover:border-white/20 transition-all"
+                        className="p-6 bg-white border border-stone-200 rounded-xl hover:border-stone-300 transition-all"
                     >
                         <div className="flex items-start justify-between mb-4">
                             <div>
                                 <div className="flex items-center gap-3 mb-1">
-                                    <h3 className="text-lg font-medium text-white">{campaign.name}</h3>
+                                    <h3 className="text-lg font-medium text-[#1A1A1A]">{campaign.name}</h3>
                                     <span className={`px-2 py-1 rounded text-xs ${campaign.status === 'Active'
-                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                        : 'bg-amber-100 text-amber-700 border border-amber-200'
                                         }`}>
                                         {campaign.status}
                                     </span>
@@ -111,7 +111,7 @@ const AdsPage: React.FC = () => {
                                     {campaign.startDate} — {campaign.endDate}
                                 </div>
                             </div>
-                            <button className="p-2 bg-white/5 rounded-lg text-stone-400 hover:bg-white/10 hover:text-white transition-colors">
+                            <button className="p-2 bg-stone-100 rounded-lg text-stone-400 hover:bg-stone-200 hover:text-[#1A1A1A] transition-colors">
                                 {campaign.status === 'Active' ? <Pause size={18} /> : <Play size={18} />}
                             </button>
                         </div>
@@ -119,19 +119,19 @@ const AdsPage: React.FC = () => {
                         <div className="grid grid-cols-4 gap-6">
                             <div>
                                 <p className="text-stone-500 text-sm mb-1">Budget</p>
-                                <p className="text-white font-mono">{campaign.budget}</p>
+                                <p className="text-[#1A1A1A] font-mono">{campaign.budget}</p>
                             </div>
                             <div>
                                 <p className="text-stone-500 text-sm mb-1">Spent</p>
-                                <p className="text-white font-mono">{campaign.spent}</p>
+                                <p className="text-[#1A1A1A] font-mono">{campaign.spent}</p>
                             </div>
                             <div>
                                 <p className="text-stone-500 text-sm mb-1">Impressions</p>
-                                <p className="text-white font-mono">{campaign.impressions}</p>
+                                <p className="text-[#1A1A1A] font-mono">{campaign.impressions}</p>
                             </div>
                             <div>
                                 <p className="text-stone-500 text-sm mb-1">CTR</p>
-                                <p className="text-white font-mono">{campaign.ctr}</p>
+                                <p className="text-[#1A1A1A] font-mono">{campaign.ctr}</p>
                             </div>
                         </div>
                     </div>

@@ -112,8 +112,45 @@ const Login = () => {
                     </Link>
                 </p>
             </div>
+
+            {/* Dev Login for Testing */}
+            <div className="mt-6 pt-6 border-t border-gray-100">
+                <p className="text-center text-xs text-gray-400 mb-3 uppercase tracking-wide">Developer Access</p>
+                <button
+                    onClick={async () => {
+                        await authStore.devLogin();
+                        navigate('/app');
+                    }}
+                    className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                    type="button"
+                >
+                    <Loader2 size={14} className="opacity-0 group-hover:opacity-100" />
+                    Bypass Login (Test Mode)
+                </button>
+            </div>
         </AuthLayout>
     );
 };
+
+// Dev Login Button Component
+/*
+const DevLoginButton = () => {
+    const navigate = useNavigate();
+    const handleDevLogin = async () => {
+        await authStore.devLogin();
+        navigate('/app');
+    };
+
+    return (
+        <button 
+            onClick={handleDevLogin}
+            className="mt-4 w-full py-2 bg-stone-100 text-stone-600 rounded-lg text-xs hover:bg-stone-200 transition-colors"
+        >
+            [DEV] Login as Test User
+        </button>
+    );
+};
+*/
+
 
 export default Login;

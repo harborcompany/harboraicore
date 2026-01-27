@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Check } from 'lucide-react';
 import OnboardingLayout from '../../components/layouts/OnboardingLayout';
@@ -35,8 +36,8 @@ const Consent: React.FC = () => {
                     <button
                         onClick={() => setHasDataRights(!hasDataRights)}
                         className={`w-5 h-5 rounded flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${hasDataRights
-                                ? 'bg-[#1A1A1A] text-white'
-                                : 'border border-stone-300'
+                            ? 'bg-[#1A1A1A] text-white'
+                            : 'border border-stone-300'
                             }`}
                     >
                         {hasDataRights && <Check size={14} />}
@@ -51,17 +52,17 @@ const Consent: React.FC = () => {
                     <button
                         onClick={() => setAcceptedTerms(!acceptedTerms)}
                         className={`w-5 h-5 rounded flex-shrink-0 flex items-center justify-center mt-0.5 transition-colors ${acceptedTerms
-                                ? 'bg-[#1A1A1A] text-white'
-                                : 'border border-stone-300'
+                            ? 'bg-[#1A1A1A] text-white'
+                            : 'border border-stone-300'
                             }`}
                     >
                         {acceptedTerms && <Check size={14} />}
                     </button>
                     <span className="text-stone-700 text-sm">
                         I agree to Harbor's{' '}
-                        <a href="#" className="text-[#1A1A1A] underline">Terms of Service</a>
+                        <Link to="/terms" className="text-[#1A1A1A] underline">Terms of Service</Link>
                         {' '}and{' '}
-                        <a href="#" className="text-[#1A1A1A] underline">Data Policy</a>.
+                        <Link to="/privacy" className="text-[#1A1A1A] underline">Data Policy</Link>.
                     </span>
                 </label>
             </div>

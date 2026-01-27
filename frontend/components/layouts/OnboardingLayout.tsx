@@ -48,31 +48,33 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-[#F9F8F6] flex flex-col">
-            <header className="px-6 py-8 border-b border-stone-200 bg-white">
+        <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-white selection:text-black">
+            <header className="px-6 py-8 border-b border-white/5 bg-[#050505]">
                 <div className="max-w-6xl mx-auto relative flex items-center justify-between">
                     {/* Back Button */}
                     <button
                         onClick={handleBack}
-                        className="flex items-center gap-2 text-stone-500 hover:text-[#1A1A1A] transition-colors group"
+                        className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors group"
                     >
-                        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-medium hidden sm:inline">Back</span>
                     </button>
 
-                    {/* Logo */}
-                    <Link to="/" className="flex items-center absolute left-1/2 -translate-x-1/2">
-                        <img
-                            src="/harbor-logo.png"
-                            alt="Harbor"
-                            className="h-10 w-auto"
-                        />
+                    {/* Logo (Centered) */}
+                    <Link to="/" className="flex items-center absolute left-1/2 -translate-x-1/2 gap-2">
+                        <div className="flex items-center gap-1 text-white">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="6" cy="12" r="5" />
+                                <rect x="13" y="7" width="10" height="10" />
+                            </svg>
+                        </div>
+                        <span className="text-sm font-bold tracking-tight uppercase">HARBOR</span>
                     </Link>
 
                     {/* Close Button */}
                     <button
                         onClick={handleClose}
-                        className="p-2 text-stone-400 hover:text-[#1A1A1A] hover:bg-stone-100 rounded-full transition-all"
+                        className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-all"
                         title="Exit onboarding"
                     >
                         <X size={20} />
@@ -81,45 +83,51 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </header>
 
             {/* Progress Bar */}
-            <div className="w-full bg-stone-100">
+            <div className="w-full bg-white/5 h-1">
                 <div
-                    className="h-1 bg-[#1A1A1A] transition-all duration-500"
+                    className="h-full bg-white transition-all duration-500 ease-out"
                     style={{ width: `${(currentStep / totalSteps) * 100}%` }}
                 />
             </div>
 
             {/* Content */}
-            <main className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+            <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="w-full max-w-xl">
-                    {/* Step indicator */}
-                    <div className="flex items-center justify-center gap-3 mb-6">
-                        <span className="text-xs text-stone-400 font-mono uppercase tracking-widest">
-                            Step {currentStep} of {totalSteps}
-                        </span>
-                        <div className="flex gap-1.5">
-                            {Array.from({ length: totalSteps }).map((_, i) => (
-                                <div
-                                    key={i}
-                                    className={`w-2 h-2 rounded-full transition-colors ${i < currentStep ? 'bg-[#1A1A1A]' : 'bg-stone-200'
-                                        }`}
-                                />
-                            ))}
-                        </div>
+                    {/* Step Tabs */}
+                    <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-12">
+                        {['Intent', 'Organization', 'Data Types', 'Support'].map((label, i) => {
+                            const stepNum = i + 1;
+                            const isActive = stepNum === currentStep;
+                            const isCompleted = stepNum < currentStep;
+
+                            return (
+                                <div key={label} className={`flex items-center gap-2 ${isActive ? 'text-white' : isCompleted ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono border ${isActive ? 'bg-white text-black border-white' :
+                                            isCompleted ? 'bg-transparent text-gray-400 border-gray-400' :
+                                                'bg-transparent text-gray-600 border-gray-600'
+                                        }`}>
+                                        {stepNum}
+                                    </div>
+                                    <span className="text-sm font-medium hidden sm:block">{label}</span>
+                                </div>
+                            );
+                        })}
                     </div>
 
                     {title && (
-                        <h1 className="text-3xl md:text-4xl font-serif text-[#1A1A1A] mb-8 text-center">
+                        <h1 className="text-3xl md:text-5xl font-serif text-center mb-12 text-white leading-tight">
                             {title}
                         </h1>
                     )}
+
                     {children}
 
                     {/* Skip Option */}
                     {showSkip && (
-                        <div className="mt-6 text-center">
+                        <div className="mt-8 text-center">
                             <button
                                 onClick={handleSkip}
-                                className="text-sm text-stone-400 hover:text-stone-600 transition-colors underline underline-offset-4"
+                                className="text-xs text-gray-500 hover:text-white transition-colors font-medium border-b border-transparent hover:border-white/50 pb-0.5"
                             >
                                 Skip setup and go to dashboard
                             </button>
@@ -129,16 +137,15 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
             </main>
 
             {/* Footer with navigation links */}
-            <footer className="px-6 py-4 border-t border-stone-200 bg-white">
-                <div className="max-w-3xl mx-auto flex items-center justify-between">
-                    <nav className="flex items-center gap-4 text-xs text-stone-400">
-                        <Link to="/" className="hover:text-stone-600 transition-colors">Home</Link>
-                        <Link to="/product" className="hover:text-stone-600 transition-colors">Product</Link>
-                        <Link to="/datasets" className="hover:text-stone-600 transition-colors">Datasets</Link>
-                        <Link to="/pricing" className="hover:text-stone-600 transition-colors">Pricing</Link>
+            <footer className="px-6 py-6 border-t border-white/5 bg-[#050505]">
+                <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <nav className="flex items-center gap-6 text-[11px] text-gray-500 font-medium uppercase tracking-wide">
+                        <Link to="/" className="hover:text-white transition-colors">Home</Link>
+                        <Link to="/product" className="hover:text-white transition-colors">Product</Link>
+                        <Link to="/datasets" className="hover:text-white transition-colors">Datasets</Link>
                     </nav>
-                    <p className="text-xs text-stone-500">
-                        Need help? <a href="mailto:support@harbor.ai" className="text-stone-700 hover:text-[#1A1A1A]">Contact support</a>
+                    <p className="text-[11px] text-gray-600">
+                        Need help? <a href="mailto:support@harbor.ai" className="text-gray-400 underline underline-offset-2 hover:text-white">Contact support</a>
                     </p>
                 </div>
             </footer>
@@ -147,4 +154,3 @@ const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 };
 
 export default OnboardingLayout;
-

@@ -1,216 +1,163 @@
-import { useState } from 'react';
-import { Mail, MessageCircle, FileText, ArrowRight, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import SeoHead from '../components/SeoHead';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
-const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    company: '',
-    message: '',
-  });
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+const Contact: React.FC = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('loading');
-    setErrorMessage('');
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, type: 'demo' }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setStatus('success');
-        setFormData({ name: '', email: '', company: '', message: '' });
-      } else {
-        setStatus('error');
-        setErrorMessage(data.message || 'Something went wrong');
-      }
-    } catch {
-      setStatus('error');
-      setErrorMessage('Failed to send. Please try again.');
-    }
+    setLoading(true);
+    // Simulate network request
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 1000);
   };
 
   return (
-    <div className="w-full bg-[#F9F8F6]">
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 border-b border-stone-200 bg-white">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
+    <div className="bg-white min-h-screen pt-32 pb-24 px-6 text-[#111] font-sans selection:bg-black selection:text-white animate-in fade-in duration-700">
+      <SeoHead
+        title="Contact Harbor"
+        description="Get in touch with our team for enterprise access, partnerships, or support."
+      />
+
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-32">
+        {/* Left Column: Copy */}
+        <div className="flex flex-col justify-between h-full">
           <div>
-            <h1 className="text-5xl md:text-7xl font-serif text-[#1A1A1A] mb-8 leading-[1.1]">
-              Solutions for <br />global scale.
+            <span className="text-xs font-mono text-gray-500 uppercase tracking-wide mb-8 block">
+              New creative tools for every workflow and industry.
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight mb-8 leading-[1.1] text-black max-w-2xl">
+              Whether you're an advertising agency putting together pitch decks or an architecture firm iterating on new building concepts, Harbor's full-suite of creative and production AI tools allow you to efficiently and intuitively explore ideas and executions.
             </h1>
-            <p className="text-xl text-stone-600 leading-relaxed max-w-md mb-12">
-              Whether you're training a foundation model or deploying an automated ad engine, our engineering team is ready to architect your pipeline.
-            </p>
-
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-sm font-mono text-stone-500">SYSTEM STATUS: ALL SYSTEMS OPERATIONAL</span>
+            <div className="mt-12 max-w-lg">
+              <p className="text-lg text-gray-500 font-light leading-relaxed mb-6">
+                Fill out your information and a Harbor expert will reach out. Need help right away? Check out these resources:
+              </p>
+              <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm font-medium text-black">
+                <a href="/support" className="flex items-center gap-1 hover:opacity-70 transition-opacity">Contact customer support <ArrowRight size={14} /></a>
+                <a href="/docs" className="flex items-center gap-1 hover:opacity-70 transition-opacity">Explore our API docs <ArrowRight size={14} /></a>
+                <a href="/help" className="flex items-center gap-1 hover:opacity-70 transition-opacity">Visit our help center <ArrowRight size={14} /></a>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Request Demo Form */}
-          <div className="bg-[#F9F8F6] p-8 rounded-2xl border border-stone-200">
-            <h2 className="text-2xl font-serif mb-6">Request a Demo</h2>
-
-            {status === 'success' ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <CheckCircle2 size={48} className="text-emerald-500 mb-4" />
-                <h3 className="text-xl font-medium mb-2">Thank you!</h3>
-                <p className="text-stone-500">We'll be in touch within 24 hours.</p>
+        {/* Right Column: Form */}
+        <div>
+          {submitted ? (
+            <div className="h-full flex flex-col justify-center items-center text-center py-20 animate-in fade-in zoom-in duration-500 bg-gray-50 rounded-3xl">
+              <div className="w-16 h-16 bg-[#111] rounded-full flex items-center justify-center mb-6">
+                <ArrowRight size={32} className="text-white" />
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {status === 'error' && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
-                    <AlertCircle size={16} />
-                    {errorMessage}
+              <h3 className="text-2xl font-medium mb-2 text-black">Message Sent</h3>
+              <p className="text-gray-500">We'll be in touch shortly.</p>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="mt-8 text-sm text-gray-500 hover:text-black transition-colors"
+              >
+                Send another message
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-8 max-w-lg ml-auto">
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">First Name*</label>
+                  <input
+                    required
+                    className="w-full bg-transparent border-b border-gray-200 py-3 text-black focus:outline-none focus:border-black transition-colors placeholder:text-gray-300 font-light"
+                    placeholder="Type your first name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Last Name*</label>
+                  <input
+                    required
+                    className="w-full bg-transparent border-b border-gray-200 py-3 text-black focus:outline-none focus:border-black transition-colors placeholder:text-gray-300 font-light"
+                    placeholder="Type your last name"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Business Email*</label>
+                <input
+                  type="email"
+                  required
+                  className="w-full bg-transparent border-b border-gray-200 py-3 text-black focus:outline-none focus:border-black transition-colors placeholder:text-gray-300 font-light"
+                  placeholder="Type your business email"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Company*</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-transparent border-b border-gray-200 py-3 text-black focus:outline-none focus:border-black transition-colors placeholder:text-gray-300 font-light"
+                  placeholder="Type your company name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Company Size</label>
+                <div className="relative">
+                  <select className="w-full bg-gray-50 border-none rounded-lg px-4 py-3.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-200 appearance-none cursor-pointer">
+                    <option>Select an option</option>
+                    <option>1-10</option>
+                    <option>11-50</option>
+                    <option>51-200</option>
+                    <option>201-500</option>
+                    <option>500+</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1.5">Name *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Your name"
-                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent outline-none"
-                    required
-                  />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1.5">Work Email *</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="you@company.com"
-                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent outline-none"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1.5">Company</label>
-                  <input
-                    type="text"
-                    value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    placeholder="Company name"
-                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1.5">Message *</label>
-                  <textarea
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Tell us about your project..."
-                    rows={4}
-                    className="w-full px-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent outline-none resize-none"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={status === 'loading'}
-                  className="w-full flex items-center justify-center gap-2 bg-[#1A1A1A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#333] transition-colors disabled:opacity-50"
-                >
-                  {status === 'loading' ? (
-                    <>
-                      <Loader2 size={20} className="animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    'Request Demo'
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Contact Cards */}
-      <section className="py-16 px-6 bg-white border-b border-stone-200">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="mailto:sales@harbor.ai" className="group p-6 rounded-xl border border-stone-200 hover:border-[#1A1A1A] transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center"><Mail size={20} /></div>
-                <ArrowRight className="text-stone-300 group-hover:text-[#1A1A1A] transition-colors" />
               </div>
-              <h3 className="text-lg font-medium mb-1">Enterprise Sales</h3>
-              <p className="text-sm text-stone-500">Custom infrastructure & volume pricing</p>
-            </a>
 
-            <a href="mailto:support@harbor.ai" className="group p-6 rounded-xl border border-stone-200 hover:border-[#1A1A1A] transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center"><MessageCircle size={20} /></div>
-                <ArrowRight className="text-stone-300 group-hover:text-[#1A1A1A] transition-colors" />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Industry</label>
+                <div className="relative">
+                  <select className="w-full bg-gray-50 border-none rounded-lg px-4 py-3.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-200 appearance-none cursor-pointer">
+                    <option>Select an option</option>
+                    <option>Technology</option>
+                    <option>Media & Entertainment</option>
+                    <option>Manufacturing</option>
+                    <option>Retail</option>
+                    <option>Other</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-lg font-medium mb-1">Technical Support</h3>
-              <p className="text-sm text-stone-500">API integration & incident reporting</p>
-            </a>
 
-            <a href="mailto:legal@harbor.ai" className="group p-6 rounded-xl border border-stone-200 hover:border-[#1A1A1A] transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center"><FileText size={20} /></div>
-                <ArrowRight className="text-stone-300 group-hover:text-[#1A1A1A] transition-colors" />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Message*</label>
+                <textarea
+                  required
+                  rows={4}
+                  className="w-full bg-gray-50 border-none rounded-lg px-4 py-3 text-black focus:outline-none focus:ring-1 focus:ring-gray-200 transition-all placeholder:text-gray-400 resize-none"
+                  placeholder="How can we help?"
+                ></textarea>
               </div>
-              <h3 className="text-lg font-medium mb-1">Compliance & Legal</h3>
-              <p className="text-sm text-stone-500">SOC 2, DPA, insurance certs</p>
-            </a>
-          </div>
-        </div>
-      </section>
 
-      {/* Office Locations */}
-      <section className="py-24 px-6">
-        <div className="max-w-[1400px] mx-auto">
-          <h2 className="text-xl font-medium mb-12 border-b border-stone-200 pb-4">Global HQs</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div>
-              <h3 className="font-serif text-2xl mb-4">San Francisco</h3>
-              <p className="text-stone-500 text-sm leading-relaxed mb-4">
-                548 Market St<br />
-                San Francisco, CA 94104<br />
-                United States
-              </p>
-              <div className="text-xs font-mono text-stone-400">CORE ENGINEERING</div>
-            </div>
-            <div>
-              <h3 className="font-serif text-2xl mb-4">London</h3>
-              <p className="text-stone-500 text-sm leading-relaxed mb-4">
-                30 Stamford St<br />
-                London SE1 9LQ<br />
-                United Kingdom
-              </p>
-              <div className="text-xs font-mono text-stone-400">EMEA SALES</div>
-            </div>
-            <div>
-              <h3 className="font-serif text-2xl mb-4">Singapore</h3>
-              <p className="text-stone-500 text-sm leading-relaxed mb-4">
-                71 Ayer Rajah Crescent<br />
-                Singapore 139951
-              </p>
-              <div className="text-xs font-mono text-stone-400">APAC OPERATIONS</div>
-            </div>
-          </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#111] text-white font-medium py-3.5 rounded-full hover:bg-black transition-colors flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
+              >
+                {loading ? <Loader2 size={18} className="animate-spin" /> : 'Submit'}
+              </button>
+            </form>
+          )}
         </div>
-      </section>
+      </div>
     </div>
   );
 };

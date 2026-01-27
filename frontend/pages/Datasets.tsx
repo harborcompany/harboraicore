@@ -1,327 +1,208 @@
-import React from 'react';
-import { Database, Filter, Layers, ArrowRight, ArrowDown, Shield, Zap, Search, Brain, CheckCircle2, RefreshCw, Mic, Video, Box, FileCheck, Server } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Play, ArrowRight, Check, Zap, Layers, Box, Cpu } from 'lucide-react';
+import SeoHead from '../components/SeoHead';
 
 const Datasets: React.FC = () => {
   return (
-    <div className="w-full bg-[#FCFCFA]">
-      {/* HERO SECTION */}
-      <section className="pt-32 pb-20 px-6 border-b border-stone-200">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <div className="w-full bg-[#fcfcfc] text-[#111] selection:bg-black selection:text-white pb-32">
+      <SeoHead
+        title="Harbor Datasets — Generative Media Engine"
+        description="High-fidelity video, audio, and image datasets for generative AI. Curated, licensed, and annotated for production models."
+      />
+
+      {/* HERO SECTION: Boxed Style (Matching Pricing) - Light Mode */}
+      <section className="relative w-full px-4 md:px-6 py-4 max-w-[1600px] mx-auto">
+        <div className="relative w-full h-[75vh] rounded-2xl overflow-hidden bg-black group border border-black/5 shadow-2xl">
+          {/* Video Background */}
+          <div className="absolute inset-0 z-0">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover opacity-60"
+            >
+              <source src="/roboticscontent.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 pb-16 z-20">
+            <div className="max-w-4xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 text-xs font-medium text-white mb-6 backdrop-blur-md">
+                <Zap size={12} className="fill-white" />
+                <span>Generative Media Engine</span>
+              </div>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter mb-8 leading-[1.05] text-white">
+                Powering the next generation <br /> <span className="text-white/60">of Multimodal Models.</span>
+              </h1>
+              <p className="text-xl text-white/70 font-light max-w-2xl leading-relaxed mb-10">
+                The infrastructure for generative video, audio, and physical intelligence.
+                Ingest, curate, and annotate petabytes of unstructured data.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <button className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-gray-200 transition-all w-full sm:w-auto flex items-center justify-center gap-2">
+                  <Play size={16} fill="currentColor" />
+                  Watch Demo
+                </button>
+                <button className="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-full font-medium hover:bg-white/20 transition-all w-full sm:w-auto backdrop-blur-sm">
+                  Explore Data Gallery
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MULTIMEDIA BENTO GRID (Light Mode) */}
+      <section className="py-24 px-6 md:px-12 lg:px-16 max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 px-4">
           <div>
-            <h1 className="text-5xl md:text-7xl font-serif text-[#1A1A1A] mb-6 leading-[1.05] tracking-tight">
-              Production-Grade <br /><span className="text-stone-400">Audio & Video</span> Datasets
-            </h1>
-            <p className="text-xl md:text-2xl font-light text-stone-600 leading-relaxed mb-8 max-w-xl">
-              Curated, annotated, and continuously improved datasets for training and deploying multimodal AI systems.
+            <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4 text-black">Foundation Datasets</h2>
+            <p className="text-gray-500 font-light max-w-lg">
+              Curated, rights-cleared collections designed for pre-training and fine-tuning.
             </p>
+          </div>
+          <button className="text-sm font-medium border-b border-black/20 pb-1 hover:text-black hover:border-black transition-colors mt-6 md:mt-0 text-gray-500">
+            View Full Registry
+          </button>
+        </div>
 
-            <div className="text-stone-600 mb-10 space-y-4 text-lg leading-relaxed max-w-lg">
-              <p>Harbor provides licensed, media-native datasets built specifically for audio-visual AI.</p>
-              <p>Every dataset is engineered for real-world use — with clear provenance, structured annotations, and infrastructure designed to scale.</p>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-            <div className="flex gap-4">
-              <Link to="/app/datasets" className="bg-[#1A1A1A] text-white px-8 h-[44px] rounded-full font-medium flex items-center justify-center hover:bg-black transition-colors">
-                Explore Datasets
-              </Link>
-              <Link to="/contact" className="border border-stone-300 text-[#1A1A1A] px-8 h-[44px] rounded-full font-medium flex items-center justify-center hover:bg-stone-50 transition-colors">
-                Request Custom Dataset
-              </Link>
+          {/* LARGE VIDEO CARD (Spans 8 cols) */}
+          <div className="md:col-span-8 h-[500px] rounded-3xl overflow-hidden relative group border border-gray-200 bg-gray-100 shadow-sm hover:shadow-md transition-all">
+            <img
+              src="https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=2940&auto=format&fit=crop"
+              alt="Physical Intelligence"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-10">
+              <div className="flex items-center gap-2 text-white/90 mb-2">
+                <Cpu size={16} />
+                <span className="text-xs font-mono uppercase tracking-widest">Physical Intelligence</span>
+              </div>
+              <h3 className="text-3xl font-medium mb-3 text-white">Robotics & Manipulation</h3>
+              <p className="text-white/80 max-w-md font-light">
+                Ego-centric manipulation tasks, teleoperation data, and simulated physics interactions for embodied AI.
+              </p>
             </div>
           </div>
 
-          {/* Hero Visual - Monochrome Schematic */}
-          <div className="bg-white rounded-xl border border-stone-200 p-8 shadow-sm aspect-video flex flex-col justify-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-            {/* Abstract Pipeline */}
-            <div className="relative z-10 flex items-center justify-between gap-4 text-stone-800">
-              <div className="flex-1 border border-stone-100 bg-stone-50 rounded-lg p-4 h-32 flex flex-col justify-between">
-                <div className="flex gap-1">
-                  <div className="w-8 h-10 bg-stone-200 rounded-sm"></div>
-                  <div className="w-8 h-10 bg-stone-200 rounded-sm"></div>
-                  <div className="w-8 h-10 bg-stone-200 rounded-sm"></div>
+          {/* TALL CARD (Spans 4 cols) - Light Mode Override */}
+          <div className="md:col-span-4 h-[500px] rounded-3xl overflow-hidden relative group border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all">
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,#f3f4f6_25%,transparent_25%,transparent_75%,#f3f4f6_75%,#f3f4f6),linear-gradient(45deg,#f3f4f6_25%,transparent_25%,transparent_75%,#f3f4f6_75%,#f3f4f6)] bg-[size:20px_20px] opacity-40"></div>
+            <div className="p-10 h-full flex flex-col relative z-10">
+              <div className="mb-auto">
+                <div className="w-12 h-12 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center mb-6 text-black">
+                  <Layers size={24} />
                 </div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-stone-400">RAW</div>
+                <h3 className="text-2xl font-medium mb-4 text-black">RLHF Video & Audio</h3>
+                <p className="text-gray-500 text-sm font-light leading-relaxed">
+                  Human preference pairs for video generation.
+                  Ranked outputs for temporal consistency, motion fidelity, and prompt alignment.
+                </p>
               </div>
-              <div className="w-8 h-[1px] bg-stone-300"></div>
-              <div className="flex-1 border border-stone-100 bg-stone-50 rounded-lg p-4 h-32 flex flex-col justify-between relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full h-12 border-y border-stone-200 flex items-center">
-                    <div className="w-full h-4 bg-stone-100 mx-2 rounded-sm"></div>
+              <div className="space-y-3 mt-8">
+                {['Temporal Consistency', 'Motion Fidelity', 'Prompt Alignment'].map((item) => (
+                  <div key={item} className="flex items-center gap-3 text-sm text-gray-600">
+                    <Check size={14} className="text-black" />
+                    {item}
                   </div>
-                </div>
-                <div className="z-10 text-[10px] font-mono uppercase tracking-widest text-stone-400 mt-auto">WAVEFORM</div>
-              </div>
-              <div className="w-8 h-[1px] bg-stone-300"></div>
-              <div className="flex-1 border border-stone-100 bg-stone-50 rounded-lg p-4 h-32 flex flex-col justify-between">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="h-2 w-full bg-stone-200 rounded-full"></div>
-                  <div className="h-2 w-2/3 bg-stone-200 rounded-full"></div>
-                  <div className="h-2 w-3/4 bg-stone-200 rounded-full"></div>
-                </div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-stone-400">METADATA</div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* TRUST STRIP */}
-      <section className="border-b border-stone-200 py-6 bg-white">
-        <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <span className="text-stone-500 font-medium">Used by AI labs, media companies, and enterprise teams building multimodal systems.</span>
-          <div className="flex gap-8 opacity-40 grayscale">
-            {/* Abstract Placeholders */}
-            <div className="h-6 w-24 bg-stone-300 rounded"></div>
-            <div className="h-6 w-24 bg-stone-300 rounded"></div>
-            <div className="h-6 w-24 bg-stone-300 rounded"></div>
-            <div className="h-6 w-24 bg-stone-300 rounded"></div>
+          {/* WIDE CARD (Spans 6 cols) */}
+          <div className="md:col-span-6 h-[400px] rounded-3xl overflow-hidden relative group border border-gray-200 bg-gray-100 shadow-sm hover:shadow-md transition-all">
+            <img
+              src="https://images.unsplash.com/photo-1614726365723-498aa46c0052?q=80&w=2787&auto=format&fit=crop"
+              alt="Cinematic Video"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-10">
+              <h3 className="text-2xl font-medium mb-2 text-white">Cinematic Video</h3>
+              <div className="flex gap-2 mt-3">
+                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">4K</span>
+                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">RAW</span>
+                <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-xs text-white">Rights-Cleared</span>
+              </div>
+            </div>
           </div>
+
+          {/* WIDE CARD (Spans 6 cols) */}
+          <div className="md:col-span-6 h-[400px] rounded-3xl overflow-hidden relative group border border-gray-200 bg-gray-100 shadow-sm hover:shadow-md transition-all">
+            <img
+              src="https://images.unsplash.com/photo-1478737270239-2f02b77ac6d5?q=80&w=2920&auto=format&fit=crop"
+              alt="Multimodal Audio"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-10">
+              <h3 className="text-2xl font-medium mb-2 text-white">Audio-Visual Reasoning</h3>
+              <p className="text-white/80 text-sm font-light">Aligned audio-video pairs for multimodal understanding.</p>
+            </div>
+            <div className="absolute top-6 right-6">
+              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
+                <Play size={16} fill="white" className="ml-0.5 text-white" />
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      {/* WHAT MAKES HARBOR DIFFERENT */}
-      <section className="py-24 px-6 bg-white">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-16">
+      {/* CAPABILITIES SECTION (Light Mode) */}
+      <section className="py-24 px-6 md:px-12 lg:px-16 max-w-[1280px] mx-auto border-t border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
           <div>
-            <div className="inline-block px-3 py-1 bg-stone-100 rounded-full text-xs font-mono font-medium mb-6">BUILT FOR MEDIA-NATIVE AI</div>
-            <h2 className="text-3xl font-serif mb-6">Infrastructure, not just files.</h2>
-            <div className="space-y-6 text-lg text-stone-600 leading-relaxed">
-              <p>Most datasets were never designed for audio and video at scale. Harbor datasets are.</p>
-              <p>Each dataset is developed using Harbor's proprietary media infrastructure and refined continuously through annotation, retrieval, and performance feedback loops.</p>
-            </div>
-          </div>
-          {/* Visual: System Diagram */}
-          <div className="bg-stone-50 rounded-xl p-8 border border-stone-100 flex items-center justify-center">
-            <div className="flex items-center gap-4 text-xs font-mono text-stone-500">
-              <div className="bg-white px-4 py-2 border border-stone-200 rounded shadow-sm">INGEST</div>
-              <ArrowRight size={14} className="text-stone-300" />
-              <div className="bg-white px-4 py-2 border border-stone-200 rounded shadow-sm">ANNOTATE</div>
-              <ArrowRight size={14} className="text-stone-300" />
-              <div className="bg-white px-4 py-2 border border-stone-200 rounded shadow-sm">IMPROVE</div>
-              <ArrowRight size={14} className="text-stone-300" />
-              <div className="bg-[#1A1A1A] text-white px-4 py-2 rounded shadow-sm border border-black">DEPLOY</div>
-            </div>
-          </div>
-        </div>
-
-        {/* DIFFERENTIATION GRID */}
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Item 1 */}
-          <div className="p-8 border border-stone-100 rounded-xl bg-stone-50/50 hover:bg-stone-50 transition-colors">
-            <div className="w-10 h-10 bg-white border border-stone-200 rounded-lg flex items-center justify-center mb-6 shadow-sm"><Mic size={20} className="text-stone-700" /></div>
-            <h3 className="text-xl font-medium mb-3">Audio & Video First</h3>
-            <div className="text-stone-600 mb-4 text-sm leading-relaxed">
-              Harbor datasets are purpose-built for: <br />
-              <span className="text-stone-900">• Speech • Sound events • Scenes • Actions • Temporal context</span>
-            </div>
-            <p className="text-stone-500 text-sm">No generic image or text repurposing.</p>
-          </div>
-
-          {/* Item 2 */}
-          <div className="p-8 border border-stone-100 rounded-xl bg-stone-50/50 hover:bg-stone-50 transition-colors">
-            <div className="w-10 h-10 bg-white border border-stone-200 rounded-lg flex items-center justify-center mb-6 shadow-sm"><Layers size={20} className="text-stone-700" /></div>
-            <h3 className="text-xl font-medium mb-3">Native Annotation Infrastructure</h3>
-            <div className="text-stone-600 mb-4 text-sm leading-relaxed">
-              Annotations are: <br />
-              <span className="text-stone-900">• Frame-accurate • Time-aligned • Versioned • Confidence-scored</span>
-            </div>
-            <p className="text-stone-500 text-sm">This is infrastructure, not labor arbitrage.</p>
-          </div>
-
-          {/* Item 3 */}
-          <div className="p-8 border border-stone-100 rounded-xl bg-stone-50/50 hover:bg-stone-50 transition-colors">
-            <div className="w-10 h-10 bg-white border border-stone-200 rounded-lg flex items-center justify-center mb-6 shadow-sm"><RefreshCw size={20} className="text-stone-700" /></div>
-            <h3 className="text-xl font-medium mb-3">RAG-Enhanced Dataset Engineering</h3>
-            <div className="text-stone-600 mb-4 text-sm leading-relaxed">
-              Before datasets are released: <br />
-              <span className="text-stone-900">• Content is indexed and embedded • Context is enriched using retrieval pipelines</span>
-            </div>
-            <p className="text-stone-500 text-sm">Datasets improve over time.</p>
-          </div>
-
-          {/* Item 4 */}
-          <div className="p-8 border border-stone-100 rounded-xl bg-stone-50/50 hover:bg-stone-50 transition-colors">
-            <div className="w-10 h-10 bg-white border border-stone-200 rounded-lg flex items-center justify-center mb-6 shadow-sm"><FileCheck size={20} className="text-stone-700" /></div>
-            <h3 className="text-xl font-medium mb-3">Clear Licensing & Provenance</h3>
-            <div className="text-stone-600 mb-4 text-sm leading-relaxed">
-              Every dataset includes: <br />
-              <span className="text-stone-900">• Source transparency • Usage rights • Commercial readiness</span>
-            </div>
-            <p className="text-stone-500 text-sm">No ambiguity. No scraped data.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* DATASET CATEGORIES */}
-      <section className="py-24 px-6 border-t border-stone-200">
-        <div className="max-w-[1400px] mx-auto">
-          <h2 className="text-2xl font-serif mb-12">Available Dataset Verticals</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-
-            {/* Audio */}
-            <div>
-              <div className="h-32 bg-stone-100 rounded-lg mb-6 flex items-center justify-center border border-stone-200">
-                <Mic className="text-stone-400" size={32} />
-              </div>
-              <h3 className="text-xl font-medium mb-2">Audio Datasets</h3>
-              <p className="text-stone-500 text-sm mb-4 leading-relaxed">
-                Structured datasets for speech and sound understanding. Includes Transcription, Speaker ID, Emotion, and Environmental sounds.
-              </p>
-              <div className="text-xs font-mono text-stone-400">USE CASES: ASR, VOICE ASSISTANTS</div>
-            </div>
-
-            {/* Video */}
-            <div>
-              <div className="h-32 bg-stone-100 rounded-lg mb-6 flex items-center justify-center border border-stone-200">
-                <Video className="text-stone-400" size={32} />
-              </div>
-              <h3 className="text-xl font-medium mb-2">Video Datasets</h3>
-              <p className="text-stone-500 text-sm mb-4 leading-relaxed">
-                High-fidelity, time-aligned video datasets. Includes Scene segmentation, Action labeling, and Object interaction.
-              </p>
-              <div className="text-xs font-mono text-stone-400">USE CASES: VIDEO UNDERSTANDING, MODERATION</div>
-            </div>
-
-            {/* Multimodal */}
-            <div>
-              <div className="h-32 bg-stone-100 rounded-lg mb-6 flex items-center justify-center border border-stone-200">
-                <Layers className="text-stone-400" size={32} />
-              </div>
-              <h3 className="text-xl font-medium mb-2">Multimodal Datasets</h3>
-              <p className="text-stone-500 text-sm mb-4 leading-relaxed">
-                Audio, video, and metadata combined. Includes AV alignment, Contextual signals, and Cross-modal annotations.
-              </p>
-              <div className="text-xs font-mono text-stone-400">USE CASES: FOUNDATION MODELS, SPATIAL I</div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* DATASET GRID (BROWSING) */}
-      <section id="browse" className="py-24 px-6 bg-white border-t border-stone-200">
-        <div className="max-w-[1400px] mx-auto">
-          <h2 className="text-2xl font-serif mb-12">Browse Available Datasets</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="group border border-stone-200 rounded-xl p-6 hover:border-stone-400 transition-colors cursor-pointer">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="w-10 h-10 bg-stone-50 rounded flex items-center justify-center text-stone-400 group-hover:bg-stone-100 transition-colors">
-                    {i % 2 === 0 ? <Video size={18} /> : <Mic size={18} />}
-                  </div>
-                  <span className="text-xs font-mono bg-stone-100 px-2 py-1 rounded text-stone-500">COMMERCIAL</span>
-                </div>
-                <h4 className="font-medium text-lg mb-1 group-hover:underline">Harbor-Core-{i}00</h4>
-                <p className="text-sm text-stone-500 mb-6">High-fidelity action alignment dataset.</p>
-
-                <div className="grid grid-cols-2 gap-4 text-xs text-stone-400 font-mono border-t border-stone-100 pt-4">
-                  <div>
-                    <div className="mb-1">VOLUME</div>
-                    <div className="text-stone-600">45 TB</div>
-                  </div>
-                  <div>
-                    <div className="mb-1">ANNOTATION</div>
-                    <div className="text-stone-600">Frame-Level</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CUSTOM DATASET CTA */}
-      <section className="py-24 px-6 bg-[#FCFCFA] border-t border-stone-200">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="text-3xl font-serif mb-6">Custom Datasets for Specific Use Cases</h2>
-            <p className="text-lg text-stone-600 mb-8 leading-relaxed">
-              When off-the-shelf datasets aren't enough, Harbor builds datasets tailored to your requirements. Not a one-off delivery — datasets evolve as your needs change.
+            <h3 className="text-lg font-medium text-black mb-6 flex items-center gap-2">
+              <Box size={18} className="text-black" />
+              Data Curation
+            </h3>
+            <p className="text-gray-500 font-light leading-relaxed mb-6">
+              Filter petabytes of data using semantic search, CLIP embeddings, and custom metadata filters. Build training sets that target specific edge cases.
             </p>
-            <ul className="space-y-2 mb-10 text-stone-600">
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-stone-400" /> Proprietary data ingestion</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-stone-400" /> Annotation schema design</li>
-              <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-stone-400" /> RAG optimization</li>
-            </ul>
-            <Link to="/contact" className="bg-[#1A1A1A] text-white px-8 h-[44px] rounded-full font-medium inline-flex items-center justify-center hover:bg-black transition-colors">
-              Discuss Custom Dataset
-            </Link>
+            <a href="#" className="text-sm font-medium text-black border-b border-black/20 pb-0.5 hover:border-black transition-colors">Learn about Curation</a>
           </div>
-          {/* Visual */}
-          <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm">
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 border border-stone-100 rounded-lg bg-stone-50">
-                <div className="w-8 h-8 bg-white rounded flex items-center justify-center text-xs font-mono border border-stone-200">V1.0</div>
-                <div className="flex-1">
-                  <div className="h-2 w-3/4 bg-stone-200 rounded-full mb-2"></div>
-                  <div className="h-2 w-1/2 bg-stone-200 rounded-full"></div>
-                </div>
-              </div>
-              <div className="flex items-center justify-center text-stone-300"><ArrowDown size={16} /></div>
-              <div className="flex items-center gap-4 p-4 border border-stone-200 rounded-lg bg-white shadow-sm ring-1 ring-black/5">
-                <div className="w-8 h-8 bg-[#1A1A1A] text-white rounded flex items-center justify-center text-xs font-mono">V1.1</div>
-                <div className="flex-1">
-                  <div className="font-medium text-sm">Enhanced Metadata</div>
-                  <div className="text-xs text-stone-500">Updated 24h ago</div>
-                </div>
-              </div>
-              <div className="flex items-center justify-center text-stone-300"><ArrowDown size={16} /></div>
-              <div className="flex items-center gap-4 p-4 border border-stone-100 rounded-lg bg-stone-50 opacity-50">
-                <div className="w-8 h-8 bg-white rounded flex items-center justify-center text-xs font-mono border border-stone-200">V1.2</div>
-                <div className="flex-1">
-                  <div className="h-2 w-3/4 bg-stone-200 rounded-full mb-2"></div>
-                  <div className="h-2 w-1/2 bg-stone-200 rounded-full"></div>
-                </div>
-              </div>
-            </div>
+          <div>
+            <h3 className="text-lg font-medium text-black mb-6 flex items-center gap-2">
+              <Layers size={18} className="text-black" />
+              Annotation Fabric
+            </h3>
+            <p className="text-gray-500 font-light leading-relaxed mb-6">
+              Pixel-perfect segmentation, 3D cuboids, and temporal action localization. Powered by our expert-in-the-loop workforce.
+            </p>
+            <a href="#" className="text-sm font-medium text-black border-b border-black/20 pb-0.5 hover:border-black transition-colors">View Annotation Specs</a>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium text-black mb-6 flex items-center gap-2">
+              <Cpu size={18} className="text-black" />
+              Model Evaluation
+            </h3>
+            <p className="text-gray-500 font-light leading-relaxed mb-6">
+              Test your models against our hold-out sets. Verify performance on real-world distribution shifts and edge cases.
+            </p>
+            <a href="#" className="text-sm font-medium text-black border-b border-black/20 pb-0.5 hover:border-black transition-colors">Start Evaluation</a>
           </div>
         </div>
       </section>
 
-      {/* HOW IT'S BUILT */}
-      <section className="py-24 px-6 bg-white border-t border-stone-200">
-        <div className="max-w-[1000px] mx-auto text-center mb-16">
-          <h2 className="text-3xl font-serif mb-4">From Raw Media to Deployment-Ready Data</h2>
-        </div>
-        <div className="max-w-[1000px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6"><Database size={20} /></div>
-            <h4 className="font-medium mb-2">1. Ingest</h4>
-            <p className="text-sm text-stone-500">Secure ingestion from enterprise uploads & pipeline streams.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6"><Layers size={20} /></div>
-            <h4 className="font-medium mb-2">2. Annotate</h4>
-            <p className="text-sm text-stone-500">Machine-assisted labeling with human consensus review.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6"><RefreshCw size={20} /></div>
-            <h4 className="font-medium mb-2">3. Curate</h4>
-            <p className="text-sm text-stone-500">Data is indexed, embedded, and enriched via RAG.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6"><Box size={20} /></div>
-            <h4 className="font-medium mb-2">4. Deliver</h4>
-            <p className="text-sm text-stone-500">Released as license-ready collections or API assets.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* CLOSING CTA */}
-      <section className="py-32 px-6 bg-[#FCFCFA] border-t border-stone-200 text-center">
-        <h2 className="text-4xl font-serif mb-6 text-[#1A1A1A]">Data That Holds Up in Production</h2>
-        <p className="text-xl text-stone-500 max-w-2xl mx-auto mb-10 font-light">
-          Harbor datasets are engineered for teams that need reliability, scale, and clarity — not experimentation noise.
-        </p>
-        <div className="flex justify-center gap-4">
-          <Link to="/app/datasets" className="bg-[#1A1A1A] text-white px-8 h-[44px] rounded-full font-medium flex items-center justify-center hover:bg-black transition-colors shadow-lg">
-            Explore Datasets
-          </Link>
-          <Link to="/contact" className="px-8 h-[44px] rounded-full font-medium flex items-center justify-center text-stone-600 hover:text-[#1A1A1A] transition-colors">
-            Request Access
-          </Link>
+      {/* CTA SECTION (Light Mode) */}
+      <section className="py-32 text-center bg-white border-t border-gray-100">
+        <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-8 text-black">
+          Ready to build?
+        </h2>
+        <div className="flex justify-center gap-6">
+          <button className="bg-black text-white px-9 py-4 rounded-full font-medium hover:bg-gray-800 transition-colors shadow-lg">
+            Get Started
+          </button>
+          <button className="text-black border border-gray-200 px-9 py-4 rounded-full font-medium hover:bg-gray-50 transition-colors">
+            Contact Sales
+          </button>
         </div>
       </section>
     </div>

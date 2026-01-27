@@ -61,6 +61,19 @@ apiRouter.get('/', (req, res) => {
             // Public
             contact: '/api/contact',
         },
+        // Lab-Ready Data Platform
+        governance: '/api/governance',
+        marketplace: '/api/marketplace',
+        sandbox: '/api/sandbox',
+        contracts: '/api/contracts',
+        docs: '/api/docs',
+
+        // Integration
+        webhooks: '/api/webhooks',
+
+        // Public
+        contact: '/api/contact',
+    },
         status: 'operational',
     });
 });
@@ -68,6 +81,10 @@ apiRouter.get('/', (req, res) => {
 // ============================================
 // ASYMMETRIC API SURFACE (Build Doc Segments)
 // ============================================
+
+// Webhooks (M2M - n8n Integration)
+import { webhooksRouter } from './routes/webhooks.js';
+apiRouter.use('/webhooks', webhooksRouter);
 
 // Contributor Surface (Supply)
 apiRouter.use('/contributor', contributorRouter);

@@ -1,283 +1,183 @@
 import React from 'react';
-import { Check, Shield, Zap, Database, ArrowRight, Activity, Layers, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Check, Info } from 'lucide-react';
+import SeoHead from '../components/SeoHead';
 
 const Pricing: React.FC = () => {
   return (
-    <div className="w-full bg-[#F9F8F6]">
-      {/* Hero Section - Operational Focus */}
-      <section className="pt-32 pb-20 px-6 border-b border-stone-200">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-              <span className="text-sm font-mono uppercase tracking-widest text-stone-500">Strategic Infrastructure Investment</span>
+    <div className="w-full bg-[#050505] text-white animate-in fade-in duration-700 min-h-screen font-sans selection:bg-indigo-500 selection:text-white">
+      <SeoHead
+        title="Harbor Pricing — Enterprise AI & Media"
+        description="Flexible pricing built for scope, usage, and integration. Advertising solutions, training data, and custom enterprise contracts."
+      />
+
+      {/* Hero Section - Matching Landing.tsx */}
+      <section className="relative w-full px-4 md:px-6 py-4 max-w-[1600px] mx-auto">
+        <div className="relative w-full h-[65vh] md:h-[70vh] rounded-2xl overflow-hidden bg-[#0B0F19] group border border-white/5">
+          {/* Video/Image Background */}
+          <img src="https://images.unsplash.com/photo-1642427749670-f20e2e76ed8c?q=80&w=2960&auto=format&fit=crop" alt="Pricing Background" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[3s] ease-out saturate-0 group-hover:saturate-100" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/20 to-transparent"></div>
+
+          {/* Content */}
+          <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 pb-16">
+            <div className="max-w-4xl">
+              <h1 className="h1-hero mb-6 text-white text-5xl md:text-7xl font-medium tracking-tighter leading-[0.9]">
+                Flexible Pricing <br />
+                <span className="text-gray-400">Built for Scale.</span>
+              </h1>
+              <p className="text-lg md:text-xl text-gray-300 font-light max-w-xl leading-relaxed mb-10">
+                Harbor offers two standalone product lines: <span className="text-white font-medium">Advertising Solutions</span> and <span className="text-white font-medium">AI Training Data</span>.
+              </p>
+
+              <div className="mt-8"></div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-serif text-[#1A1A1A] mb-8 leading-[1.1]">
-              Predictable costs for <br /><span className="italic text-stone-400">scale-aware</span> pipelines.
-            </h1>
-            <p className="text-xl text-stone-600 leading-relaxed max-w-2xl">
-              Harbor aligns pricing with value creation—whether that's high-quality dataset acquisition, real-time inference throughput, or automated ad generation. We don't charge for seat counts; we charge for scale.
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Cards (3 Columns) */}
+      <section className="px-6 pb-32 max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+
+          {/* Card 1: Advertising Solutions */}
+          <div className="flex flex-col bg-[#0A0A0A] rounded-[2rem] p-8 border border-white/10 hover:border-white/20 transition-all hover:bg-[#0F0F0F] group">
+            <div className="mb-8">
+              <h3 className="text-2xl font-medium text-white mb-2">Advertising Solutions</h3>
+              <p className="text-gray-500 text-sm leading-relaxed min-h-[40px]">
+                Run high-performance video advertising across Harbor’s streaming infrastructure.
+              </p>
+            </div>
+            <div className="flex-grow space-y-4 mb-12">
+              <p className="text-xs font-mono uppercase tracking-widest text-gray-600 mb-4">Capabilities</p>
+              {[
+                'Contextual video ad placement',
+                'Audience segmentation & targeting',
+                'Performance analytics',
+                'Managed campaign optimization',
+                'Behavioral targeting (Add-on)'
+              ].map((feature, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Check size={16} className="text-white mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-400">{feature}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto">
+              <button className="w-full bg-white text-black py-4 rounded-full font-medium hover:bg-gray-200 transition-colors mb-3">
+                Book Demo
+              </button>
+              <p className="text-center text-[10px] text-gray-600">
+                Customized based on campaign goals
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2: AI Training Data (Foundation) */}
+          <div className="flex flex-col bg-[#0A0A0A] rounded-[2rem] p-8 border border-indigo-500/30 ring-1 ring-indigo-500/20 hover:border-indigo-500/50 transition-all hover:bg-[#0F0F0F] relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4">
+              <span className="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-indigo-500/20">
+                Most Popular
+              </span>
+            </div>
+            <div className="mb-8">
+              <h3 className="text-2xl font-medium text-white mb-2">Foundation Access</h3>
+              <p className="text-gray-500 text-sm leading-relaxed min-h-[40px]">
+                Access to curated, rights-cleared video datasets prepared for ML workflows.
+              </p>
+            </div>
+            <div className="flex-grow space-y-4 mb-12">
+              <p className="text-xs font-mono uppercase tracking-widest text-gray-600 mb-4">Includes</p>
+              {[
+                'Licensed & verified video',
+                'Structured metadata & manifests',
+                'Audio & text alignment',
+                'Standard dataset exports',
+                'Rights-cleared for training'
+              ].map((feature, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Check size={16} className="text-indigo-400 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-300">{feature}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto">
+              <button className="w-full bg-indigo-600 text-white py-4 rounded-full font-medium hover:bg-indigo-500 transition-colors mb-3 shadow-lg shadow-indigo-900/20">
+                Request Access
+              </button>
+              <p className="text-center text-[10px] text-gray-600">
+                Ideal for baseline training & research
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3: Enterprise / Custom */}
+          <div className="flex flex-col bg-[#0A0A0A] rounded-[2rem] p-8 border border-white/10 hover:border-white/20 transition-all hover:bg-[#0F0F0F]">
+            <div className="mb-8">
+              <h3 className="text-2xl font-medium text-white mb-2">Custom & Enterprise</h3>
+              <p className="text-gray-500 text-sm leading-relaxed min-h-[40px]">
+                Highly tailored datasets and annotation workflows built for specific objectives.
+              </p>
+            </div>
+            <div className="flex-grow space-y-4 mb-12">
+              <p className="text-xs font-mono uppercase tracking-widest text-gray-600 mb-4">Enterprise Features</p>
+              {[
+                'Custom data capture & sourcing',
+                'Expert annotation (RLHF)',
+                'Quality assurance & validation',
+                'Dedicated support & SLAs',
+                'Full audit documentation'
+              ].map((feature, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Check size={16} className="text-white mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-400">{feature}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto">
+              <button className="w-full bg-transparent border border-white/20 text-white py-4 rounded-full font-medium hover:bg-white/10 transition-colors mb-3">
+                Contact Sales
+              </button>
+              <p className="text-center text-[10px] text-gray-600">
+                For regulated industries & autonomous systems
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* How Pricing Works (Bottom Section - AIBC Text Layout) */}
+      <section className="py-24 px-6 border-t border-white/5 mx-auto max-w-[1600px]">
+        <div className="flex flex-col md:flex-row gap-16">
+          <div className="md:w-1/3">
+            <h2 className="text-3xl font-medium tracking-tight mb-4">How Pricing Works</h2>
+            <p className="text-gray-400 font-light leading-relaxed">
+              Harbor pricing reflects the value and complexity of each engagement. All plans are customized to align with enterprise workflows and long-term partnerships.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* Pricing Dimensions - "What you pay for" */}
-      <section className="py-20 px-6 bg-white border-b border-stone-200">
-        <div className="max-w-[1400px] mx-auto">
-          <h2 className="text-xl font-medium mb-12 flex items-center gap-3">
-            <Layers size={20} className="text-stone-400" />
-            Pricing Dimensions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-sm text-stone-600">
+          <div className="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-[#1A1A1A] font-medium mb-3 flex items-center gap-2">
-                <Database size={16} /> Data Depth & Exclusivity
-              </h3>
-              <p className="leading-relaxed">
-                Dataset pricing scales based on annotation granularity (e.g., frame-by-frame vs. clip-level) and licensing rights (exclusive vs. non-exclusive). You pay for the signal integrity, not just the gigabytes.
-              </p>
+              <h4 className="flex items-center gap-2 text-white font-medium mb-2">
+                <Info size={16} className="text-gray-500" /> Dataset Scope
+              </h4>
+              <p className="text-sm text-gray-500 font-light">Pricing based on dataset size, modality complexity, and unique capture requirements.</p>
             </div>
             <div>
-              <h3 className="text-[#1A1A1A] font-medium mb-3 flex items-center gap-2">
-                <Zap size={16} /> Throughput & Latency
-              </h3>
-              <p className="leading-relaxed">
-                API usage is billed on query volume and retrieval complexity. Higher tiers guarantee lower latency limits (sub-20ms) and dedicated RAG indexing resources for production-critical applications.
-              </p>
+              <h4 className="flex items-center gap-2 text-white font-medium mb-2">
+                <Info size={16} className="text-gray-500" /> Annotation Depth
+              </h4>
+              <p className="text-sm text-gray-500 font-light">Costs scale with the granularity of labeling and the level of expert review needed.</p>
             </div>
             <div>
-              <h3 className="text-[#1A1A1A] font-medium mb-3 flex items-center gap-2">
-                <Shield size={16} /> Indemnification & Governance
-              </h3>
-              <p className="leading-relaxed">
-                Enterprise tiers include comprehensive legal assurances, custom data retention policies, and audit logs. Essential for public companies and regulated industries deploying generative models.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Models */}
-      <section className="py-24 px-6">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Dataset Licensing */}
-          <div className="bg-white rounded-3xl p-8 border border-stone-200 shadow-sm hover:shadow-md transition-all flex flex-col">
-            <div className="mb-8">
-              <div className="inline-block px-3 py-1 rounded-full bg-stone-100 text-xs font-mono mb-4 text-stone-600">FOR TRAINING & RAG</div>
-              <h3 className="text-3xl font-serif mb-2 text-[#1A1A1A]">Dataset Licensing</h3>
-              <p className="text-stone-500 text-sm leading-relaxed">
-                Direct access to licensed, clean multimodal corpora for foundation model training or RAG knowledge bases.
-              </p>
-            </div>
-
-            <div className="space-y-4 mb-10 flex-grow font-mono text-sm text-stone-600">
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>One-off perpetual licenses</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>Quarterly update subscriptions</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>Commercial usage rights</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>Raw file + JSON metadata access</span>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-stone-100 mt-auto">
-              <div className="flex justify-between items-end">
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-stone-400 mb-1">Price Model</div>
-                  <div className="text-lg font-medium text-[#1A1A1A]">Variable / Asset</div>
-                </div>
-                <Link to="/datasets" className="text-sm font-medium hover:underline flex items-center gap-1">
-                  Browse Marketplace <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* API Usage */}
-          <div className="bg-[#1A1A1A] text-white rounded-3xl p-8 border border-stone-800 shadow-xl flex flex-col relative transform lg:-translate-y-4">
-            <div className="absolute top-4 right-4 flex gap-1">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-            </div>
-            <div className="mb-8">
-              <div className="inline-block px-3 py-1 rounded-full bg-white/10 text-xs font-mono mb-4 text-white/70">FOR INTEGRATION</div>
-              <h3 className="text-3xl font-serif mb-2 text-white">API Usage</h3>
-              <p className="text-white/60 text-sm leading-relaxed">
-                Programmatic access to Harbor's intelligence layer, including vector search, annotation streams, and content generation.
-              </p>
-            </div>
-
-            <div className="space-y-4 mb-10 flex-grow font-mono text-sm text-white/70">
-              <div className="flex gap-3">
-                <Check size={16} className="text-white mt-0.5" />
-                <span>Usage-based billing (per 1k reqs)</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-white mt-0.5" />
-                <span>Semantic Vector Search</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-white mt-0.5" />
-                <span>Real-time Annotation Stream</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-white mt-0.5" />
-                <span>99.99% Uptime SLA available</span>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-white/10 mt-auto">
-              <div className="flex justify-between items-end">
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-white/40 mb-1">Price Model</div>
-                  <div className="text-lg font-medium text-white">Metered</div>
-                </div>
-                <Link to="/infrastructure" className="text-sm font-medium hover:text-white text-white/80 hover:underline flex items-center gap-1">
-                  View Docs <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Harbor Ads */}
-          <div className="bg-white rounded-3xl p-8 border border-stone-200 shadow-sm hover:shadow-md transition-all flex flex-col">
-            <div className="mb-8">
-              <div className="inline-block px-3 py-1 rounded-full bg-rose-50 text-xs font-mono mb-4 text-rose-600">FOR GROWTH</div>
-              <h3 className="text-3xl font-serif mb-2 text-[#1A1A1A]">Harbor Ads</h3>
-              <p className="text-stone-500 text-sm leading-relaxed">
-                End-to-end management of AI-generated advertising campaigns. From dataset curation to creative generation and placement.
-              </p>
-            </div>
-
-            <div className="space-y-4 mb-10 flex-grow font-mono text-sm text-stone-600">
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>Flat monthly retainer</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>Guaranteed creative volume</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>Performance feedback loops</span>
-              </div>
-              <div className="flex gap-3">
-                <Check size={16} className="text-[#1A1A1A] mt-0.5" />
-                <span>Dedicated account manager</span>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-stone-100 mt-auto">
-              <div className="flex justify-between items-end">
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-stone-400 mb-1">Price Model</div>
-                  <div className="text-lg font-medium text-[#1A1A1A]">Subscription</div>
-                </div>
-                <Link to="/ads" className="text-sm font-medium hover:underline flex items-center gap-1">
-                  Start Campaign <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* Enterprise Context - "The Margin Logic" */}
-      <section className="py-24 px-6 bg-[#1A1A1A] text-white">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-serif mb-8 leading-tight">
-              Why high-quality data is <br /><span className="italic text-white/50">cheaper</span> than bad data.
-            </h2>
-            <div className="space-y-8 text-white/70 text-lg leading-relaxed">
-              <p>
-                The hidden cost of "cheap" web-scraped datasets is the engineering hours spent cleaning them, the model drift caused by low signal-to-noise ratios, and the legal risk of unverified IP.
-              </p>
-              <p>
-                Harbor reverses this equation. By front-loading the cost of rigorous ingestion and expert annotation, we reduce downstream training cycles and hallucination rates in RAG systems.
-              </p>
-            </div>
-            <div className="mt-12">
-              <Link to="/contact" className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-stone-200 transition-colors inline-flex items-center gap-2">
-                Talk to Enterprise Sales <ArrowRight size={18} />
-              </Link>
-            </div>
-          </div>
-
-          <div className="relative">
-            {/* Abstract Logic Diagram */}
-            <div className="aspect-square bg-gradient-to-br from-white/10 to-transparent rounded-[3rem] p-10 border border-white/10 flex flex-col justify-between">
-              {/* Top Logic */}
-              <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-mono text-rose-400">TRADITIONAL WORKFLOW</span>
-                  <Activity size={16} className="text-rose-400" />
-                </div>
-                <div className="h-2 w-full bg-white/10 rounded-full mb-2 overflow-hidden">
-                  <div className="h-full w-[80%] bg-rose-500/50"></div>
-                </div>
-                <div className="flex justify-between text-[10px] text-white/40">
-                  <span>Data Cleaning (80%)</span>
-                  <span>Training (20%)</span>
-                </div>
-              </div>
-
-              <div className="text-center font-mono text-white/30 text-xs py-4">VS</div>
-
-              {/* Bottom Logic */}
-              <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-mono text-emerald-400">HARBOR WORKFLOW</span>
-                  <Zap size={16} className="text-emerald-400" />
-                </div>
-                <div className="h-2 w-full bg-white/10 rounded-full mb-2 overflow-hidden">
-                  <div className="h-full w-[20%] bg-emerald-500/50"></div>
-                </div>
-                <div className="flex justify-between text-[10px] text-white/40">
-                  <span>Integration (20%)</span>
-                  <span>Training (80%)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ / Clarifications */}
-      <section className="py-24 px-6 border-b border-stone-200">
-        <div className="max-w-3xl mx-auto">
-          <h3 className="text-3xl font-serif text-[#1A1A1A] mb-12 text-center">Operational Explanations</h3>
-          <div className="space-y-8">
-            <div className="pb-8 border-b border-stone-200">
-              <h4 className="font-medium text-lg mb-2">What defines "Commercial Usage Rights"?</h4>
-              <p className="text-stone-600 leading-relaxed">
-                Datasets purchased with a commercial license include a perpetually irrevocable right to use the data for training internal or external models, including those generating revenue. It explicitly clears IP concerns regarding the raw assets.
-              </p>
-            </div>
-            <div className="pb-8 border-b border-stone-200">
-              <h4 className="font-medium text-lg mb-2">How is API volume measured?</h4>
-              <p className="text-stone-600 leading-relaxed">
-                Volume is an aggregate of query operations (Search), ingestion events (Upload), and generation requests (Ads). We verify metering on a 24-hour rolling basis. Detailed logs are available in the dashboard.
-              </p>
+              <h4 className="flex items-center gap-2 text-white font-medium mb-2">
+                <Info size={16} className="text-gray-500" /> Compliance
+              </h4>
+              <p className="text-sm text-gray-500 font-light">Enterprise plans include indemnification, extensive audit logs, and custom retention.</p>
             </div>
             <div>
-              <h4 className="font-medium text-lg mb-2">Can we migrate from Monthly to Enterprise?</h4>
-              <p className="text-stone-600 leading-relaxed">
-                Yes. Enterprise agreements often include retroactive volume discounts for prior API usage and can bundle multiple dataset licenses into a single MSA.
-              </p>
+              <h4 className="flex items-center gap-2 text-white font-medium mb-2">
+                <Info size={16} className="text-gray-500" /> API Usage
+              </h4>
+              <p className="text-sm text-gray-500 font-light">Metered billing for continuous pipeline ingestion and manifest retrieval.</p>
             </div>
           </div>
         </div>

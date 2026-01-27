@@ -69,10 +69,10 @@ const DatasetList: React.FC = () => {
 
                 {/* Filters */}
                 <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto">
-                    <div className="flex items-center gap-2 px-3 py-2 border border-stone-200 rounded-lg bg-stone-50">
-                        <Filter size={16} className="text-stone-500" />
+                    <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-white hover:border-gray-300 transition-colors">
+                        <Filter size={14} className="text-gray-500" />
                         <select
-                            className="bg-transparent border-none text-sm font-medium text-stone-700 focus:outline-none cursor-pointer"
+                            className="bg-transparent border-none text-sm font-medium text-[#111] focus:outline-none cursor-pointer"
                             value={selectedVertical}
                             onChange={(e) => setSelectedVertical(e.target.value)}
                         >
@@ -84,10 +84,10 @@ const DatasetList: React.FC = () => {
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-2 px-3 py-2 border border-stone-200 rounded-lg bg-stone-50">
-                        <Tag size={16} className="text-stone-500" />
+                    <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-white hover:border-gray-300 transition-colors">
+                        <Tag size={14} className="text-gray-500" />
                         <select
-                            className="bg-transparent border-none text-sm font-medium text-stone-700 focus:outline-none cursor-pointer"
+                            className="bg-transparent border-none text-sm font-medium text-[#111] focus:outline-none cursor-pointer"
                             value={selectedLicense}
                             onChange={(e) => setSelectedLicense(e.target.value)}
                         >
@@ -98,7 +98,7 @@ const DatasetList: React.FC = () => {
                         </select>
                     </div>
 
-                    <button className="bg-[#1A1A1A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors whitespace-nowrap flex items-center gap-2">
+                    <button className="bg-[#111] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors whitespace-nowrap flex items-center gap-2 border border-[#111]">
                         <Plus size={16} /> New Dataset
                     </button>
                 </div>
@@ -133,8 +133,8 @@ const DatasetList: React.FC = () => {
                                 )}
                                 <div className="flex items-start justify-between mb-2">
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl font-serif border ${ds.media_type === 'video' ? 'bg-purple-50 text-purple-600 border-purple-100' :
-                                            ds.media_type === 'audio' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                'bg-blue-50 text-blue-600 border-blue-100'
+                                        ds.media_type === 'audio' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                            'bg-blue-50 text-blue-600 border-blue-100'
                                         }`}>
                                         {ds.media_type === 'video' ? 'V' : ds.media_type === 'audio' ? 'A' : 'M'}
                                     </div>
@@ -168,7 +168,7 @@ const DatasetList: React.FC = () => {
                                     <div>
                                         <div className="text-[10px] text-stone-400 uppercase font-medium mb-1">RAG Index</div>
                                         <div className={`text-xs font-medium ${ds.embedding_status === 'completed' ? 'text-emerald-600' :
-                                                ds.embedding_status === 'embedding' ? 'text-blue-600' : 'text-stone-400'
+                                            ds.embedding_status === 'embedding' ? 'text-blue-600' : 'text-stone-400'
                                             }`}>
                                             {ds.embedding_status === 'completed' ? 'Active' :
                                                 ds.embedding_status === 'embedding' ? 'Indexing...' : 'Not Indexed'}

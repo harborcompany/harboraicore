@@ -9,7 +9,7 @@ import Layout from './components/Layout';
 import Landing from './pages/Landing';
 import Product from './pages/Product';
 import Datasets from './pages/Datasets';
-import Ads from './pages/AdsNewPage';
+import Ads from './pages/AdsPage';
 import Infrastructure from './pages/Infrastructure';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
@@ -19,6 +19,11 @@ import SeoLanding from './pages/SeoLanding';
 import About from './pages/About';
 import Docs from './pages/Docs';
 import HowItWorks from './pages/HowItWorks';
+import UseCases from './pages/UseCases';
+import Ambassadors from './pages/Ambassadors';
+// import Trust from './pages/Trust';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 
 // Auth Pages
 import AuthGateway from './pages/auth/AuthGateway';
@@ -72,24 +77,14 @@ const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 // Onboarding Guard - Redirects to onboarding if incomplete
 const RequireOnboarding: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAuth();
+  const location = useLocation();
 
   if (!user.authenticated) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check onboarding state and redirect to appropriate step
-  if (!user.intent) {
-    return <Navigate to="/onboarding/intent" replace />;
-  }
-  if (!user.organization) {
-    return <Navigate to="/onboarding/organization" replace />;
-  }
-  if (!user.dataTypes.audio && !user.dataTypes.video && !user.dataTypes.multimodal) {
-    return <Navigate to="/onboarding/data-types" replace />;
-  }
-  if (!user.acceptedTerms || !user.hasDataRights) {
-    return <Navigate to="/onboarding/consent" replace />;
-  }
+  // We now handle onboarding via the SmartOnboardingModal in AppLayout
+  // So we don't redirect to separate pages anymore.
 
   return <>{children}</>;
 };
@@ -118,6 +113,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<Landing />} />
           <Route path="product" element={<Product />} />
+          <Route path="use-cases" element={<UseCases />} />
           <Route path="datasets" element={<Datasets />} />
           <Route path="ads" element={<Ads />} />
           <Route path="infrastructure" element={<Infrastructure />} />
@@ -127,9 +123,13 @@ const App: React.FC = () => {
           <Route path="blog/:slug" element={<BlogPost />} />
           <Route path="explore/:slug" element={<SeoLanding />} />
           <Route path="about" element={<About />} />
-          <Route path="about" element={<About />} />
+          <Route path="use-cases" element={<UseCases />} />
+          <Route path="ambassadors" element={<Ambassadors />} />
           <Route path="docs" element={<Docs />} />
           <Route path="how-it-works" element={<HowItWorks />} />
+          {/* <Route path="trust" element={<Trust />} /> - Deleted */}
+          <Route path="terms" element={<Terms />} />
+          <Route path="privacy" element={<Privacy />} />
         </Route>
 
         {/* Auth Routes */}
@@ -139,12 +139,8 @@ const App: React.FC = () => {
         <Route path="/auth/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
         <Route path="/auth/reset" element={<Reset />} />
 
-        {/* Onboarding Routes */}
-        <Route path="/onboarding/intent" element={<RequireAuth><Intent /></RequireAuth>} />
-        <Route path="/onboarding/organization" element={<RequireAuth><Organization /></RequireAuth>} />
-        <Route path="/onboarding/data-types" element={<RequireAuth><DataTypes /></RequireAuth>} />
-        <Route path="/onboarding/consent" element={<RequireAuth><Consent /></RequireAuth>} />
-        <Route path="/onboarding/complete" element={<RequireAuth><Complete /></RequireAuth>} />
+        {/* Onboarding Routes - Deprecated, redirect to App */}
+        <Route path="/onboarding/*" element={<Navigate to="/app" replace />} />
 
         {/* Protected App Routes - Role Based */}
         <Route path="/app" element={<RequireOnboarding><AppLayout /></RequireOnboarding>}>

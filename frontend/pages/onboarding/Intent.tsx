@@ -15,32 +15,32 @@ const intentOptions: IntentOption[] = [
     {
         id: 'ai_ml',
         icon: Brain,
-        title: 'Model Training & Fine-Tuning',
-        description: 'Access high-fidelity datasets for scale-aware model optimization'
+        title: 'Training AI or ML models',
+        description: 'Access datasets for model training and fine-tuning'
     },
     {
         id: 'dataset_licensing',
         icon: Database,
-        title: 'Multimodal Dataset Licensing',
-        description: 'Browse and license production-grade, commercially-ready datasets'
+        title: 'Licensing audio or video datasets',
+        description: 'Browse and license production-ready datasets'
     },
     {
         id: 'ads',
         icon: Megaphone,
-        title: 'Managed Creative Services',
-        description: 'Generate vertical-optimized creative leveraging Harbor data assets'
+        title: 'Running ads or content campaigns',
+        description: 'Create high-performance video advertising'
     },
     {
         id: 'contributor',
         icon: Upload,
-        title: 'Data Ingestion & Monetization',
-        description: 'Ingest proprietary assets into the Harbor data fabric for monetization'
+        title: 'Contributing or monetizing data',
+        description: 'Upload and earn from your audio/video content'
     },
     {
         id: 'explore',
         icon: Search,
-        title: 'Infrastructure Research',
-        description: 'Evaluate Harbor’s L1 network and architectural capabilities'
+        title: 'Exploring the platform',
+        description: 'Learn what Harbor can do for your team'
     }
 ];
 
@@ -48,6 +48,7 @@ const Intent: React.FC = () => {
     const navigate = useNavigate();
     const [selected, setSelected] = React.useState<IntentOption['id'] | null>(null);
 
+    // Initial state check
     React.useEffect(() => {
         const user = authStore.getUser();
         if (user.intent) {
@@ -64,25 +65,24 @@ const Intent: React.FC = () => {
 
     return (
         <OnboardingLayout currentStep={1} totalSteps={4} title="How will you use Harbor?">
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 gap-3">
                 {intentOptions.map((option) => (
                     <button
                         key={option.id}
                         onClick={() => setSelected(option.id)}
-                        className={`w-full flex items-start gap-4 p-4 rounded-xl border transition-all text-left ${selected === option.id
-                            ? 'bg-[#1A1A1A] border-[#1A1A1A]'
-                            : 'bg-white border-stone-200 hover:border-stone-300'
+                        className={`w-full flex items-center gap-5 p-5 rounded-xl border transition-all text-left group ${selected === option.id
+                            ? 'bg-[#1A1A1A] border-white/20'
+                            : 'bg-[#0F0F0F] border-white/5 hover:border-white/10'
                             }`}
                     >
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${selected === option.id ? 'bg-white text-[#1A1A1A]' : 'bg-stone-100 text-stone-500'
-                            }`}>
-                            <option.icon size={20} />
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors bg-[#1A1A1A] border border-white/5 text-gray-400 group-hover:text-white ${selected === option.id ? 'text-white border-white/10' : ''}`}>
+                            <option.icon size={20} strokeWidth={1.5} />
                         </div>
                         <div>
-                            <h3 className={`font-medium ${selected === option.id ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                            <h3 className="font-serif text-lg mb-1 text-white">
                                 {option.title}
                             </h3>
-                            <p className={`text-sm mt-0.5 ${selected === option.id ? 'text-white/70' : 'text-stone-500'}`}>
+                            <p className="text-sm text-gray-500 font-light">
                                 {option.description}
                             </p>
                         </div>
@@ -93,7 +93,7 @@ const Intent: React.FC = () => {
             <button
                 onClick={handleContinue}
                 disabled={!selected}
-                className="w-full bg-[#1A1A1A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#333] transition-colors mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#888] text-black py-4 px-6 rounded-md font-medium text-base hover:bg-white transition-all mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Continue
             </button>

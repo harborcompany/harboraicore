@@ -45,12 +45,12 @@ const Overview: React.FC = () => {
 
     return (
         <div className="max-w-4xl animate-in fade-in duration-500">
-            <div className="mb-8">
-                <h1 className="text-3xl font-serif text-[#1A1A1A] mb-2">
+            <div className="mb-8 border-b border-gray-200 pb-6">
+                <h1 className="text-2xl font-medium text-[#111] tracking-tight mb-2">
                     Command Center
                 </h1>
-                <p className="text-stone-500 italic">
-                    Initializing your secure session...
+                <p className="text-stone-500 font-light text-sm">
+                    System operational. All services valid.
                 </p>
             </div>
 

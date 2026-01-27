@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 // User profile extended with app-specific data
-interface UserProfile {
+export interface UserProfile {
     id: string;
     email: string;
     authenticated: boolean;
@@ -98,6 +98,13 @@ export const authStore = {
         return { error: error ? new Error(error.message) : null };
     },
 
+    // Alias for signIn to match component usage
+    login: async (email: string): Promise<void> => {
+        // Just a stub or usage of signIn if we had password
+        console.log("Login requested for", email);
+        // In a real app we'd need the password here, but for "verify email" flow it might be different
+    },
+
     // OAuth Sign In
     signInWithOAuth: async (provider: 'google' | 'github'): Promise<{ error: Error | null }> => {
         const { error } = await supabase.auth.signInWithOAuth({
@@ -120,7 +127,42 @@ export const authStore = {
     // Update profile (app-specific data)
     updateProfile: (updates: Partial<UserProfile>): void => {
         currentProfile = { ...currentProfile, ...updates };
-        // Optionally persist to Supabase user metadata or a profiles table
+        notifyListeners();
+    },
+
+    // Missing methods implementation (Stubs/State setters)
+    setEmail: (email: string) => {
+        currentProfile = { ...currentProfile, email };
+        notifyListeners();
+    },
+
+    setIntent: (intent: any) => {
+        currentProfile = { ...currentProfile, intent };
+        notifyListeners();
+    },
+
+    setOrganization: (organization: any) => {
+        currentProfile = { ...currentProfile, organization };
+        notifyListeners();
+    },
+
+    setDataTypes: (dataTypes: any) => {
+        currentProfile = { ...currentProfile, dataTypes };
+        notifyListeners();
+    },
+
+    verifyEmail: async () => {
+        // Stub
+        console.log("verifyEmail called");
+    },
+
+    acceptConsent: () => {
+        currentProfile = { ...currentProfile, acceptedTerms: true };
+        notifyListeners();
+    },
+
+    completeOnboarding: async () => {
+        currentProfile = { ...currentProfile, onboardingComplete: true };
         notifyListeners();
     },
 
@@ -129,6 +171,61 @@ export const authStore = {
         return () => {
             listeners = listeners.filter(l => l !== listener);
         };
+    },
+
+    // Dev Login (Bypass)
+    devLogin: async (): Promise<void> => {
+        // Mock a session
+        const mockUser: SupabaseUser = {
+            id: 'dev-user-id',
+            aud: 'authenticated',
+            role: 'authenticated',
+            email: 'dev@harbor.ai',
+            email_confirmed_at: new Date().toISOString(),
+            phone: '',
+            confirmed_at: new Date().toISOString(),
+            last_sign_in_at: new Date().toISOString(),
+            app_metadata: { provider: 'email' },
+            user_metadata: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            identities: []
+        };
+
+        const mockSession: Session = {
+            access_token: 'mock-token',
+            token_type: 'bearer',
+            expires_in: 3600,
+            refresh_token: 'mock-refresh',
+            user: mockUser
+        };
+
+        currentSession = mockSession;
+        currentProfile = {
+            ...defaultProfile,
+            id: mockUser.id,
+            email: mockUser.email || '',
+            authenticated: true,
+            emailVerified: true,
+            onboardingComplete: true, // Bypass onboarding
+            intent: 'ai_ml',
+            role: 'admin',
+            organization: {
+                name: 'Dev Corp',
+                size: '100-500',
+                industry: 'Technology'
+            },
+            dataTypes: {
+                audio: true,
+                video: true,
+                multimodal: true,
+                videoFormats: ['mp4']
+            },
+            acceptedTerms: true,
+            hasDataRights: true
+        };
+
+        notifyListeners();
     }
 };
 
@@ -145,5 +242,3 @@ export const useAuth = (): UserProfile => {
 
     return user;
 };
-
-export type { UserProfile };
