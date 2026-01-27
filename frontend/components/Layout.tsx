@@ -11,8 +11,8 @@ const Layout: React.FC = () => {
     { name: 'Datasets', path: '/datasets' },
     { name: 'Ads', path: '/ads' },
     { name: 'Use Cases', path: '/use-cases' },
-    { name: 'Contact', path: '/contact' },
     { name: 'Pricing', path: '/pricing' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   return (

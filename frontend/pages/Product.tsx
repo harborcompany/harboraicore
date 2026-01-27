@@ -53,19 +53,7 @@ const Product: React.FC = () => {
 
       {/* 2. Logo Strip (Light) */}
       {/* Matching Screenshot 2: White background, grayscale logos */}
-      <section className="py-16 md:py-20 bg-white border-b border-gray-100">
-        <div className="max-w-[1400px] mx-auto px-6 text-center">
-          <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-40 grayscale hover:opacity-60 transition-opacity items-center">
-            {/* Using text for logos to avoid external dependency issues, styled to look like logos */}
-            <span className="text-xl font-bold tracking-tight font-serif text-gray-800">Adobe</span>
-            <span className="text-xl font-bold tracking-tight text-gray-800">Allstate</span>
-            <span className="text-2xl font-black tracking-tighter text-gray-800 italic">gut</span>
-            <span className="text-lg font-bold tracking-widest text-gray-800 uppercase">LEGENDARY</span>
-            <span className="text-lg font-bold tracking-wider text-gray-800 uppercase">LIONSGATE</span>
-            <span className="text-xl font-bold tracking-tight text-gray-800 flex items-center gap-1"><div className="w-5 h-5 rounded-full border-2 border-gray-800"></div> Microsoft</span>
-          </div>
-        </div>
-      </section>
+
 
       {/* 3. "Creative Toolkit" Statement (Light) */}
       {/* Matching Screenshot 2 middle: Large centered text on white */}
