@@ -75,17 +75,33 @@ const Landing: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 border border-gray-200">
                {[
-                  { title: "Video, Image & Audio Datasets", desc: "Curated, rights-cleared foundation data." },
+                  {
+                     title: "Video, Image & Audio Datasets",
+                     desc: "Curated, rights-cleared foundation data.",
+                     image: "/newscreenshot44.jpg"
+                  },
                   { title: "Annotation & RLHF", desc: "Human-in-the-loop validation and labeling fabric." },
                   { title: "Live & Streaming Data Pipelines", desc: "Real-time ingestion for continuous learning." },
                   { title: "Data Infrastructure & APIs", desc: "Programmatic access to the Harbor engine." }
                ].map((block, i) => (
-                  <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group">
-                     <div>
+                  <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group overflow-hidden relative">
+                     <div className="relative z-10">
                         <h3 className="text-xl font-medium text-black mb-3">{block.title}</h3>
                         <p className="text-gray-500 font-light">{block.desc}</p>
                      </div>
-                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+
+                     {block.image && (
+                        <div className="absolute inset-x-0 bottom-0 top-[40%] overflow-hidden">
+                           <img
+                              src={block.image}
+                              alt={block.title}
+                              className="w-full h-full object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-700"
+                           />
+                           <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-white/90"></div>
+                        </div>
+                     )}
+
+                     <div className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity self-end">
                         <ArrowRight size={20} className="text-gray-400" />
                      </div>
                   </div>
