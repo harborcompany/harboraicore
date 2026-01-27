@@ -86,7 +86,11 @@ const Landing: React.FC = () => {
                      desc: "Real-time ingestion for continuous learning.",
                      image: "/realistic_raw_5.png"
                   },
-                  { title: "Data Infrastructure & APIs", desc: "Programmatic access to the Harbor engine." }
+                  {
+                     title: "Data Infrastructure & APIs",
+                     desc: "Programmatic access to the Harbor engine.",
+                     image: "/api_infrastructure_preview.png"
+                  }
                ].map((block, i) => (
                   <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group overflow-hidden relative">
                      <div className="relative z-10">
