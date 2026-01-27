@@ -78,22 +78,22 @@ const Landing: React.FC = () => {
                   {
                      title: "Video, Image & Audio Datasets",
                      desc: "Curated, rights-cleared foundation data.",
-                     image: "/assets/landing/dataset_lego.png"
+                     image: "/assets/landing/dataset_lego_v3.png"
                   },
                   {
                      title: "Annotation & RLHF",
                      desc: "Human-in-the-loop validation and labeling fabric.",
-                     image: "/assets/landing/annotation_preview.png"
+                     image: "/assets/landing/annotation_preview_v3.png"
                   },
                   {
                      title: "Live & Streaming Data Pipelines",
                      desc: "Real-time ingestion for continuous learning.",
-                     image: "/assets/landing/pipeline_real.png"
+                     image: "/assets/landing/pipeline_real_v3.png"
                   },
                   {
                      title: "Data Infrastructure & APIs",
                      desc: "Programmatic access to the Harbor engine.",
-                     image: "/assets/landing/infrastructure.png"
+                     image: "/assets/landing/infrastructure_v3.png"
                   }
                ].map((block, i) => (
                   <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group overflow-hidden relative">
