@@ -80,7 +80,11 @@ const Landing: React.FC = () => {
                      desc: "Curated, rights-cleared foundation data.",
                      image: "/newscreenshot44.jpg"
                   },
-                  { title: "Annotation & RLHF", desc: "Human-in-the-loop validation and labeling fabric." },
+                  {
+                     title: "Annotation & RLHF",
+                     desc: "Human-in-the-loop validation and labeling fabric.",
+                     image: "/annotation_rlhf_preview.png"
+                  },
                   {
                      title: "Live & Streaming Data Pipelines",
                      desc: "Real-time ingestion for continuous learning.",
