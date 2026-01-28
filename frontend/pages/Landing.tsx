@@ -121,14 +121,14 @@ const Landing: React.FC = () => {
                      image: "/assets/landing/infrastructure_v3.png"
                   }
                ].map((block, i) => (
-                  <div key={i} className="bg-white p-10 hover:bg-gray-50 transition-colors aspect-square flex flex-col justify-between group overflow-hidden relative">
+                  <div key={i} className="bg-white p-6 md:p-10 hover:bg-gray-50 transition-colors min-h-[400px] md:aspect-square md:min-h-0 flex flex-col justify-between group overflow-hidden relative">
                      <div className="relative z-10">
                         <h3 className="text-xl font-medium text-black mb-3">{block.title}</h3>
                         <p className="text-gray-500 font-light">{block.desc}</p>
                      </div>
 
                      {block.video && (
-                        <div className="absolute inset-x-0 bottom-0 top-[22%] overflow-hidden">
+                        <div className="absolute inset-x-0 bottom-0 top-[45%] md:top-[22%] overflow-hidden">
                            <video
                               autoPlay
                               muted
@@ -144,7 +144,7 @@ const Landing: React.FC = () => {
                      )}
 
                      {block.image && (
-                        <div className="absolute inset-x-0 bottom-0 top-[22%] overflow-hidden">
+                        <div className="absolute inset-x-0 bottom-0 top-[45%] md:top-[22%] overflow-hidden">
                            <img
                               src={block.image}
                               alt={block.title}
@@ -192,7 +192,7 @@ const Landing: React.FC = () => {
                </div>
 
                {/* End Visual: Abstract Multimodal Schematic */}
-               <div className="relative h-[400px] w-full rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+               <div className="relative w-full aspect-video md:h-[400px] md:aspect-auto rounded-2xl overflow-hidden border border-white/10 bg-white/5">
                   <img
                      src="/Make_the_background_202601271704.jpeg"
                      alt="Multimodal Data Infrastructure"

@@ -269,7 +269,7 @@ const AdsPage: React.FC = () => {
                     </div>
 
                     {/* End Visual: Abstract Multimodal Schematic */}
-                    <div className="relative h-[400px] w-full rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+                    <div className="relative w-full aspect-video md:h-[400px] md:aspect-auto rounded-2xl overflow-hidden border border-white/10 bg-white/5">
                         <img
                             src="/Make_the_background_202601271704.jpeg"
                             alt="Multimodal Data Infrastructure"
