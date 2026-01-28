@@ -2,8 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import SeoHead from '../components/SeoHead';
-
-
 const Landing: React.FC = () => {
    return (
       <div className="w-full bg-[#FAFAFA] text-[#111]">
@@ -108,7 +106,7 @@ const Landing: React.FC = () => {
                   {
                      title: "Annotation & RLHF",
                      desc: "Human-in-the-loop validation and labeling fabric.",
-                     image: "/assets/landing/dataset_lego_v3.png"
+                     image: "/assets/landing/s-l1200.jpg"
                   },
                   {
                      title: "Live & Streaming Data Pipelines",
@@ -118,7 +116,7 @@ const Landing: React.FC = () => {
                   {
                      title: "Data Infrastructure & APIs",
                      desc: "Programmatic access to the Harbor engine.",
-                     image: "/assets/landing/infrastructure_v3.png"
+                     image: "/assets/landing/Replace_with_2k_202601281750.jpeg"
                   }
                ].map((block, i) => (
                   <div key={i} className="bg-white p-6 md:p-10 hover:bg-gray-50 transition-colors min-h-[400px] md:aspect-square md:min-h-0 flex flex-col justify-between group overflow-hidden relative">
