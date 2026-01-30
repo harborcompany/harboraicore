@@ -109,6 +109,22 @@ export const INDUSTRIES: KeywordEntity[] = [
     { value: 'Building Toys', slug: 'building-toys' },
     { value: 'DIY & Crafts', slug: 'diy-crafts' },
     { value: 'Toy Industry', slug: 'toy-industry' },
+    // High-volume LEGO keywords (60K+ monthly searches)
+    { value: 'LEGO Ideas', slug: 'lego-ideas' },
+    { value: 'LEGO Ideas Sets', slug: 'lego-ideas-sets' },
+    { value: 'LEGO Storage Ideas', slug: 'lego-storage-ideas' },
+    { value: 'LEGO Build', slug: 'lego-build' },
+    { value: 'LEGO Building', slug: 'lego-building' },
+    { value: 'LEGO MOC', slug: 'lego-moc' },
+    { value: 'LEGO Projects', slug: 'lego-projects' },
+    { value: 'LEGO Techniques', slug: 'lego-techniques' },
+    { value: 'LEGO Sets', slug: 'lego-sets' },
+    { value: 'LEGO Instructions', slug: 'lego-instructions' },
+    { value: 'LEGO Videos', slug: 'lego-videos' },
+    { value: 'LEGO Tutorial', slug: 'lego-tutorial' },
+    { value: 'LEGO Creations', slug: 'lego-creations' },
+    { value: 'LEGO Stop Motion', slug: 'lego-stop-motion' },
+    { value: 'LEGO Timelapse', slug: 'lego-timelapse' },
 ];
 
 // ==============================================

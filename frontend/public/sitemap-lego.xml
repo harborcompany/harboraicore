@@ -1,6 +1,195 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- LEGO Building Video Dataset Pages -->
+  <!-- HIGH-VOLUME LEGO KEYWORD PAGES -->
+  
+  <!-- LEGO Ideas (60.5K monthly searches) -->
+  <url>
+    <loc>https://harborml.com/tools/lego-ideas</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-ideas/best-video-training-dataset</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-ideas/curated-video-annotation</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Ideas Sets (5.4K monthly searches) -->
+  <url>
+    <loc>https://harborml.com/tools/lego-ideas-sets</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-ideas-sets/best-video-object-detection</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Storage Ideas (3.6K monthly searches) -->
+  <url>
+    <loc>https://harborml.com/tools/lego-storage-ideas</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Build / Building (high volume) -->
+  <url>
+    <loc>https://harborml.com/tools/lego-build</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-building</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-build/best-video-assembly-instructions</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-build/premium-video-step-detection</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO MOC (My Own Creation) -->
+  <url>
+    <loc>https://harborml.com/tools/lego-moc</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-moc/best-video-building-recognition</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Videos -->
+  <url>
+    <loc>https://harborml.com/tools/lego-videos</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-videos/curated-video-training-dataset</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Tutorial -->
+  <url>
+    <loc>https://harborml.com/tools/lego-tutorial</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-tutorial/best-video-tutorial-generation</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Instructions -->
+  <url>
+    <loc>https://harborml.com/tools/lego-instructions</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Stop Motion -->
+  <url>
+    <loc>https://harborml.com/tools/lego-stop-motion</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-stop-motion/best-video-action-recognition</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Timelapse -->
+  <url>
+    <loc>https://harborml.com/tools/lego-timelapse</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/tools/lego-timelapse/curated-video-scene-understanding</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Creations -->
+  <url>
+    <loc>https://harborml.com/tools/lego-creations</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- LEGO Sets -->
+  <url>
+    <loc>https://harborml.com/tools/lego-sets</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- CONTRIBUTOR LANDING PAGES -->
+  <url>
+    <loc>https://harborml.com/guides/contribute-lego-videos</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/guides/lego-video-dataset-earn-money</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/guides/how-to-film-lego-builds</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://harborml.com/guides/lego-building-video-annotation</loc>
+    <lastmod>2026-01-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
   
   <!-- LEGO Builders Hub -->
   <url>
