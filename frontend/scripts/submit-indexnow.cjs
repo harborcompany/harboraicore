@@ -11,7 +11,7 @@ const path = require('path');
 
 const INDEXNOW_KEY = 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6';
 const HOST = 'harborml.com';
-const BATCH_SIZE = 10000; // IndexNow allows up to 10,000 URLs per request
+const BATCH_SIZE = 2000; // Reduced from 10k to prevent 429 rate limits
 
 // Load URLs from sitemaps
 function extractUrlsFromSitemap(sitemapPath) {
@@ -102,8 +102,8 @@ async function main() {
             console.log(`  ❌ Batch ${i + 1}/${batches}: Error - ${err.message}`);
         }
 
-        // Small delay between batches to be nice
-        await new Promise(r => setTimeout(r, 500));
+        // Longer delay to be gentle with rate limits
+        await new Promise(r => setTimeout(r, 5000));
     }
 
     console.log('\n========================================');
