@@ -73,7 +73,6 @@ apiRouter.get('/', (req, res) => {
 
         // Public
         contact: '/api/contact',
-    },
         status: 'operational',
     });
 });

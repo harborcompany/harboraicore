@@ -25,6 +25,8 @@ import Ambassadors from './pages/Ambassadors';
 // import Trust from './pages/Trust';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import StatusPage from './pages/Status';
+import PSEORouter from './pages/PSEORouter';
 
 // Auth Pages
 import AuthGateway from './pages/auth/AuthGateway';
@@ -134,6 +136,12 @@ const App: React.FC = () => {
           {/* <Route path="trust" element={<Trust />} /> - Deleted */}
           <Route path="terms" element={<Terms />} />
           <Route path="privacy" element={<Privacy />} />
+          <Route path="status" element={<StatusPage />} />
+
+          {/* Programmatic SEO Routes (168,420+ pages) */}
+          <Route path="tools/:category/:slug" element={<PSEORouter />} />
+          <Route path="guides/:slug" element={<PSEORouter />} />
+          <Route path="compare/:slug" element={<PSEORouter />} />
         </Route>
 
         {/* Auth Routes */}

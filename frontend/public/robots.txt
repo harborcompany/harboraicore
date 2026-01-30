@@ -1,0 +1,58 @@
+# Harbor AI - robots.txt
+# Programmatic SEO Configuration
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://harborml.com/sitemap-index.xml
+
+# Allow all pSEO pages
+Allow: /tools/
+Allow: /guides/
+Allow: /compare/
+Allow: /explore/
+
+# Block authenticated/app routes
+Disallow: /app/
+Disallow: /auth/
+Disallow: /onboarding/
+Disallow: /settings/
+Disallow: /api/
+
+# Block utility pages
+Disallow: /404
+Disallow: /500
+
+# Allow static assets
+Allow: /assets/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.svg
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.webp
+
+# Crawl delay (optional, be nice to servers)
+Crawl-delay: 1
+
+# Google-specific
+User-agent: Googlebot
+Allow: /
+
+# Bing-specific
+User-agent: Bingbot
+Allow: /
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

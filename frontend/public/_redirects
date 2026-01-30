@@ -1,5 +1,9 @@
 # Force all traffic to the new primary domain (optional but recommended for SEO)
 # https://aibcmedia.com/* https://harboragi.com/:splat 301!
 
+# Serve static files directly (XML sitemaps, robots.txt)
+/sitemap*.xml  /sitemap*.xml  200
+/robots.txt    /robots.txt    200
+
 # Handle Single Page App (SPA) Routing for React Router
 /*  /index.html  200
