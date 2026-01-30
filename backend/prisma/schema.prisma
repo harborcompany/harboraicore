@@ -27,7 +27,10 @@ model User {
   email            String           @unique
   name             String?
   role             UserRole         @default(VIEWER)
+  accountType      String           @default("individual") // individual, enterprise
   kycStatus        String           @default("pending") // pending, verified, failed
+  verified         Boolean          @default(false)
+  riskScore        Float            @default(0.0) // 0-1 risk scoring
   walletId         String?          @unique
   profile          Profile?
   
@@ -43,6 +46,9 @@ model User {
   
   // Sandbox/Trial access
   sandboxAccount   SandboxAccount?
+  
+  // Admin relations
+  assetAuditLogs   AssetAuditLog[]  @relation("AuditReviewer")
   
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -102,11 +108,72 @@ model MediaAsset {
   storagePointer String?          // s3 bucket/key
   status         MediaStatus      @default(PROCESSING)
   
+  // Admin audit trail
+  auditLogs      AssetAuditLog[]
+  
   consent        ConsentRecord[]
   annotations    UserAnnotation[]
   earnings       EarningsLedger[]
   
   createdAt      DateTime         @default(now())
+}
+
+// ==========================================
+// ADMIN PANEL: Asset Audit Trail
+// ==========================================
+
+model AssetAuditLog {
+  id           String     @id @default(uuid())
+  assetId      String
+  asset        MediaAsset @relation(fields: [assetId], references: [id])
+  
+  stage        String     // "fingerprint", "similarity", "web_scrape", "human_review"
+  result       String     // "passed", "failed", "flagged"
+  confidence   Float?
+  reviewerId   String?    // Human reviewer if applicable
+  reviewer     User?      @relation("AuditReviewer", fields: [reviewerId], references: [id])
+  metadata     Json?      // Fingerprint hash, similarity scores, etc.
+  
+  createdAt    DateTime   @default(now())
+}
+
+// ==========================================
+// ADMIN PANEL: Enterprise Clients
+// ==========================================
+
+model Client {
+  id           String          @id @default(uuid())
+  name         String
+  industry     String?
+  tier         String          @default("standard") // standard, premium, enterprise
+  
+  // Billing
+  billingEmail String?
+  billingPlan  String          @default("usage") // usage, subscription, exclusive
+  
+  // Deals
+  deals        Deal[]
+  
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model Deal {
+  id            String   @id @default(uuid())
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
+  
+  datasetIds    String[] // Datasets included in deal
+  pricingModel  String   // usage, flat_fee, revenue_share
+  termMonths    Int      @default(12)
+  usageLimits   Json?    // { "queries": 10000, "downloads": 100 }
+  slaTier       String   @default("standard") // standard, premium, enterprise
+  
+  status        String   @default("active") // active, expired, cancelled
+  totalValue    Decimal  @db.Decimal(18, 2)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model ConsentRecord {

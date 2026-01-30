@@ -56,6 +56,22 @@ import ContributePage from './pages/app/ContributePage';
 import ApiPage from './pages/app/ApiPage';
 import Settings from './pages/app/Settings';
 
+// Admin Panel Pages
+import {
+  AdminLayout,
+  AdminOverview,
+  AdminUsers,
+  AdminIngestion,
+  AdminAnnotation,
+  AdminDatasets,
+  AdminMarketplace,
+  AdminAds,
+  AdminRevenue,
+  AdminInfrastructure,
+  AdminCompliance,
+  AdminSettings,
+} from './pages/admin';
+
 // ScrollToTop component
 const ScrollToTopWrapper: React.FC = () => {
   const { pathname } = useLocation();
@@ -172,6 +188,21 @@ const App: React.FC = () => {
           <Route path="contribute" element={<ContributePage />} />
           <Route path="api" element={<ApiPage />} />
           <Route path="settings" element={<Settings />} />
+        </Route>
+
+        {/* Admin Panel Routes - Internal Only */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminOverview />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="ingestion" element={<AdminIngestion />} />
+          <Route path="annotation" element={<AdminAnnotation />} />
+          <Route path="datasets" element={<AdminDatasets />} />
+          <Route path="marketplace" element={<AdminMarketplace />} />
+          <Route path="ads" element={<AdminAds />} />
+          <Route path="revenue" element={<AdminRevenue />} />
+          <Route path="infrastructure" element={<AdminInfrastructure />} />
+          <Route path="compliance" element={<AdminCompliance />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
 
         {/* Catch-all redirect */}
