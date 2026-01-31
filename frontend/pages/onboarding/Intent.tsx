@@ -1,17 +1,23 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Database, Megaphone, Upload, Search } from 'lucide-react';
+import { Brain, Database, Megaphone, Upload, Search, Blocks } from 'lucide-react';
 import OnboardingLayout from '../../components/layouts/OnboardingLayout';
 import { authStore } from '../../lib/authStore';
 
 interface IntentOption {
-    id: 'ai_ml' | 'dataset_licensing' | 'ads' | 'contributor' | 'explore';
+    id: 'lego_builder' | 'ai_ml' | 'dataset_licensing' | 'ads' | 'contributor' | 'explore';
     icon: React.ElementType;
     title: string;
     description: string;
 }
 
 const intentOptions: IntentOption[] = [
+    {
+        id: 'lego_builder',
+        icon: Blocks,
+        title: 'Lego Data Contributor',
+        description: 'Join the Lego AI Data Program'
+    },
     {
         id: 'ai_ml',
         icon: Brain,
@@ -59,7 +65,11 @@ const Intent: React.FC = () => {
     const handleContinue = () => {
         if (selected) {
             authStore.setIntent(selected);
-            navigate('/onboarding/organization');
+            if (selected === 'lego_builder') {
+                navigate('/onboarding/lego-experience');
+            } else {
+                navigate('/onboarding/organization');
+            }
         }
     };
 

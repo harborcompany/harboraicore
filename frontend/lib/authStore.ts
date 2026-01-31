@@ -22,6 +22,11 @@ export interface UserProfile {
         multimodal: boolean;
         videoFormats: string[];
     };
+    legoProfile?: {
+        level: string;
+        themes: string[];
+        filmsBuilds: boolean | null;
+    };
     acceptedTerms: boolean;
     hasDataRights: boolean;
 }
@@ -41,6 +46,7 @@ const defaultProfile: UserProfile = {
         multimodal: false,
         videoFormats: []
     },
+    legoProfile: undefined,
     acceptedTerms: false,
     hasDataRights: false
 };
@@ -162,6 +168,11 @@ export const authStore = {
 
     setDataTypes: (dataTypes: any) => {
         currentProfile = { ...currentProfile, dataTypes };
+        notifyListeners();
+    },
+
+    setLegoProfile: (legoProfile: any) => {
+        currentProfile = { ...currentProfile, legoProfile };
         notifyListeners();
     },
 

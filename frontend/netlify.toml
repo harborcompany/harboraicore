@@ -3,6 +3,19 @@
   command = "npm run build"
   publish = "dist"
 
+# SEO Sitemap Proxies (Point to your Backend URL)
+[[redirects]]
+  from = "/sitemap-index.xml"
+  to = "https://api.yourdomain.com/api/seo/sitemap-index.xml" 
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/sitemap-*.xml"
+  to = "https://api.yourdomain.com/api/seo/sitemap-:splat.xml"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

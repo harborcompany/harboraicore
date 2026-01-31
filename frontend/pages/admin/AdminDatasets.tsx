@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader, DataTable, Tabs, StatusBadge, Button, KPICard } from '../../components/admin/AdminComponents';
 
 interface Dataset {
@@ -13,24 +13,72 @@ interface Dataset {
     revenue: number;
     clients: number;
     createdAt: string;
+    videos?: any[]; // Raw backend videos
 }
 
-const mockDatasets: Dataset[] = [
-    { id: 'ds_001', name: 'Urban Driving Scenes v3', vertical: 'AUTOMOTIVE', modality: ['video'], hours: 12500, assetCount: 45000, license: 'COMMERCIAL', status: 'PUBLISHED', revenue: 245000, clients: 8, createdAt: '2024-06-15' },
-    { id: 'ds_002', name: 'Podcast Conversations', vertical: 'BROADCAST', modality: ['audio'], hours: 8400, assetCount: 12000, license: 'COMMERCIAL', status: 'PUBLISHED', revenue: 127000, clients: 5, createdAt: '2024-08-22' },
-    { id: 'ds_003', name: 'Retail Interactions', vertical: 'RETAIL', modality: ['video', 'audio'], hours: 3200, assetCount: 8500, license: 'HYBRID', status: 'DRAFT', revenue: 0, clients: 0, createdAt: '2024-11-10' },
-    { id: 'ds_004', name: 'Gaming Voice Commands', vertical: 'GAMING', modality: ['audio'], hours: 1800, assetCount: 25000, license: 'COMMERCIAL', status: 'PUBLISHED', revenue: 89000, clients: 12, createdAt: '2024-09-05' },
-    { id: 'ds_005', name: 'Therapy Sessions (Anonymized)', vertical: 'THERAPY', modality: ['audio'], hours: 950, assetCount: 2400, license: 'RESEARCH', status: 'PUBLISHED', revenue: 156000, clients: 3, createdAt: '2024-07-18' },
-];
-
 export function AdminDatasets() {
+    const [datasets, setDatasets] = useState<Dataset[]>([]);
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
-    const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
+    const [selectedDataset, setSelectedDataset] = useState<any | null>(null);
+
+    // Fetch Datasets from API
+    useEffect(() => {
+        fetchDatasets();
+    }, []);
+
+    const fetchDatasets = async () => {
+        try {
+            const res = await fetch('/api/lab/datasets');
+            const json = await res.json();
+            // Map Prisma model to UI model
+            const mapped = json.data.map((d: any) => ({
+                id: d.id,
+                name: d.title,
+                vertical: d.category.toUpperCase(),
+                modality: ['video', 'annotation'],
+                hours: d.videos.reduce((acc: number, v: any) => acc + (v.duration || 0), 0),
+                assetCount: d.videos.length,
+                license: 'COMMERCIAL',
+                status: d.isPublic ? 'PUBLISHED' : 'DRAFT',
+                revenue: d.price * 10, // Mock revenue logic
+                clients: Math.floor(Math.random() * 20),
+                createdAt: new Date(d.createdAt).toISOString().split('T')[0],
+                videos: d.videos // Keep raw videos for details
+            }));
+            setDatasets(mapped);
+        } catch (e) {
+            console.error("Failed to fetch datasets", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleProcessVideo = async () => {
+        if (!selectedDataset) return;
+
+        try {
+            await fetch('/api/lab/process-video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    datasetId: selectedDataset.id,
+                    filename: `upload_${Date.now()}.mp4`,
+                    duration: 300 // 5 minutes
+                })
+            });
+            alert("Started Processing 5-minute video! Check back in a few seconds.");
+            fetchDatasets(); // Refresh
+            setSelectedDataset(null);
+        } catch (e) {
+            alert("Failed to start processing");
+        }
+    };
 
     const tabs = [
-        { id: 'all', label: 'All', count: mockDatasets.length },
-        { id: 'published', label: 'Published', count: mockDatasets.filter(d => d.status === 'PUBLISHED').length },
-        { id: 'draft', label: 'Draft', count: mockDatasets.filter(d => d.status === 'DRAFT').length },
+        { id: 'all', label: 'All', count: datasets.length },
+        { id: 'published', label: 'Published', count: datasets.filter(d => d.status === 'PUBLISHED').length },
+        { id: 'draft', label: 'Draft', count: datasets.filter(d => d.status === 'DRAFT').length },
     ];
 
     const columns = [
@@ -40,7 +88,7 @@ export function AdminDatasets() {
             render: (ds: Dataset) => (
                 <div>
                     <span style={{ color: '#fafafa' }}>{ds.name}</span>
-                    <span style={{ display: 'block', fontSize: 11, color: '#525252', fontFamily: 'monospace' }}>{ds.id}</span>
+                    <span style={{ display: 'block', fontSize: 11, color: '#525252', fontFamily: 'monospace' }}>{ds.id.substring(0, 8)}</span>
                 </div>
             )
         },
@@ -50,59 +98,51 @@ export function AdminDatasets() {
             render: (ds: Dataset) => <StatusBadge label={ds.vertical} variant="info" />
         },
         {
-            key: 'modality',
-            label: 'Modality',
-            render: (ds: Dataset) => ds.modality.join(', ')
+            key: 'assetCount',
+            label: 'Labeled Videos',
+            render: (ds: any) => (
+                <div className="flex gap-2 items-center">
+                    <span>{ds.assetCount}</span>
+                    {ds.videos?.some((v: any) => v.status === 'PROCESSING') && (
+                        <span className="text-xs text-blue-400 animate-pulse">Processing...</span>
+                    )}
+                </div>
+            )
         },
-        {
-            key: 'hours',
-            label: 'Hours',
-            sortable: true,
-            render: (ds: Dataset) => `${(ds.hours / 1000).toFixed(1)}K`
-        },
-        { key: 'assetCount', label: 'Assets', sortable: true, render: (ds: Dataset) => ds.assetCount.toLocaleString() },
-        { key: 'license', label: 'License' },
         {
             key: 'status',
             label: 'Status',
             render: (ds: Dataset) => (
                 <StatusBadge
                     label={ds.status}
-                    variant={ds.status === 'PUBLISHED' ? 'success' : ds.status === 'DRAFT' ? 'warning' : 'neutral'}
+                    variant={ds.status === 'PUBLISHED' ? 'success' : 'neutral'}
                 />
             )
-        },
-        {
-            key: 'revenue',
-            label: 'Revenue',
-            sortable: true,
-            render: (ds: Dataset) => `$${(ds.revenue / 1000).toFixed(0)}K`
-        },
-        { key: 'clients', label: 'Clients', sortable: true },
+        }
     ];
 
-    const filteredDatasets = mockDatasets.filter(ds => {
+    const filteredDatasets = datasets.filter(ds => {
         if (activeTab === 'published') return ds.status === 'PUBLISHED';
         if (activeTab === 'draft') return ds.status === 'DRAFT';
         return true;
     });
 
-    const totalRevenue = mockDatasets.reduce((sum, d) => sum + d.revenue, 0);
-    const totalHours = mockDatasets.reduce((sum, d) => sum + d.hours, 0);
-    const totalAssets = mockDatasets.reduce((sum, d) => sum + d.assetCount, 0);
+    const totalRevenue = datasets.reduce((sum, d) => sum + d.revenue, 0);
+    const totalHours = datasets.reduce((sum, d) => sum + d.hours, 0);
+    const totalAssets = datasets.reduce((sum, d) => sum + d.assetCount, 0);
 
     return (
         <div className="admin-datasets">
             <PageHeader
-                title="Datasets"
-                subtitle="Dataset registry and management"
-                actions={<Button variant="primary">Create Dataset</Button>}
+                title="Lab Datasets"
+                subtitle="Data Labeling Pipeline & Registry"
+                actions={<Button variant="primary" onClick={() => fetchDatasets()}>Refresh</Button>}
             />
 
             <div className="kpi-row">
-                <KPICard label="Total Datasets" value={mockDatasets.length} />
-                <KPICard label="Published" value={mockDatasets.filter(d => d.status === 'PUBLISHED').length} />
-                <KPICard label="Total Hours" value={`${(totalHours / 1000).toFixed(1)}K`} />
+                <KPICard label="Total Datasets" value={datasets.length} />
+                <KPICard label="Published" value={datasets.filter(d => d.status === 'PUBLISHED').length} />
+                <KPICard label="Total Seconds" value={totalHours.toLocaleString()} />
                 <KPICard label="Total Assets" value={totalAssets.toLocaleString()} />
                 <KPICard label="Total Revenue" value={`$${(totalRevenue / 1000).toFixed(0)}K`} />
             </div>
@@ -130,16 +170,22 @@ export function AdminDatasets() {
                                 <h3>Overview</h3>
                                 <DetailRow label="Dataset ID" value={selectedDataset.id} mono />
                                 <DetailRow label="Vertical" value={selectedDataset.vertical} />
-                                <DetailRow label="Modalities" value={selectedDataset.modality.join(', ')} />
-                                <DetailRow label="License" value={selectedDataset.license} />
                                 <DetailRow label="Status" value={selectedDataset.status} />
                             </div>
                             <div className="detail-section">
+                                <h3>Pipeline Controls</h3>
+                                <div className="p-4 bg-gray-900 rounded border border-gray-800 mb-4">
+                                    <h4 className="text-sm font-semibold text-gray-300 mb-2">Simulate Data Ingestion</h4>
+                                    <p className="text-xs text-gray-500 mb-3">Upload a 5-minute video for mock VLM analysis.</p>
+                                    <Button variant="primary" onClick={handleProcessVideo}>
+                                        Upload & Label Video (5m)
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="detail-section">
                                 <h3>Metrics</h3>
-                                <DetailRow label="Total Hours" value={`${selectedDataset.hours.toLocaleString()} hrs`} />
-                                <DetailRow label="Asset Count" value={selectedDataset.assetCount.toLocaleString()} />
-                                <DetailRow label="Revenue" value={`$${selectedDataset.revenue.toLocaleString()}`} />
-                                <DetailRow label="Active Clients" value={selectedDataset.clients.toString()} />
+                                <DetailRow label="Total Seconds" value={`${selectedDataset.hours}`} />
+                                <DetailRow label="Labeled Videos" value={selectedDataset.assetCount.toString()} />
                             </div>
                             <div className="detail-section">
                                 <h3>Actions</h3>

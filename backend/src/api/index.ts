@@ -159,6 +159,10 @@ apiRouter.use('/client', clientRouter);
 // Governance & Compliance API
 apiRouter.use('/governance', governanceRouter);
 
+// Lab Data Pipeline API
+import { labRouter } from './routes/lab.js';
+apiRouter.use('/lab', labRouter);
+
 // Marketplace & Revenue API
 apiRouter.use('/marketplace', marketplaceRouter);
 

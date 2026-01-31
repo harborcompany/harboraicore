@@ -702,3 +702,51 @@ model MemoryEvent {
   @@index([entityType])
   @@index([createdAt])
 }
+
+// ============================================
+// LAB-READY DATA MODELS
+// ============================================
+
+model LabDataset {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  category    String   // e.g. "Lego Assembly", "Cooking", "Retail"
+  price       Float    // Price for the dataset
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  videos      LabeledVideo[]
+}
+
+model LabeledVideo {
+  id          String   @id @default(uuid())
+  datasetId   String
+  dataset     LabDataset @relation(fields: [datasetId], references: [id])
+  
+  filename    String
+  url         String   // Storage URL
+  duration    Int      // Duration in seconds
+  status      String   // "PROCESSING", "COMPLETED", "FAILED"
+  
+  annotations VideoAnnotation[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model VideoAnnotation {
+  id          String   @id @default(uuid())
+  videoId     String
+  video       LabeledVideo @relation(fields: [videoId], references: [id])
+  
+  timestamp   Float    // Time in seconds from start
+  label       String   // e.g. "Red Brick 2x4", "Person"
+  action      String?  // e.g. "Pickup", "Install", "Inspect"
+  confidence  Float    // 0.0 to 1.0
+  boundingBox Json?    // {x, y, w, h}
+  
+  createdAt   DateTime @default(now())
+}
+

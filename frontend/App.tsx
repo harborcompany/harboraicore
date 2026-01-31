@@ -27,6 +27,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import StatusPage from './pages/Status';
 import PSEORouter from './pages/PSEORouter';
+import ModelDataRequests from './pages/ModelDataRequests';
 
 // Auth Pages
 import AuthGateway from './pages/auth/AuthGateway';
@@ -40,6 +41,7 @@ import Intent from './pages/onboarding/Intent';
 import Organization from './pages/onboarding/Organization';
 import DataTypes from './pages/onboarding/DataTypes';
 import Consent from './pages/onboarding/Consent';
+import LegoExperience from './pages/onboarding/LegoExperience';
 import Complete from './pages/onboarding/Complete';
 
 // App Layout & Pages (Asymmetric)
@@ -171,6 +173,8 @@ const App: React.FC = () => {
         <Route path="/auth/reset" element={<Reset />} />
 
         {/* Onboarding Routes - Deprecated, redirect to App */}
+        <Route path="/onboarding/intent" element={<Intent />} />
+        <Route path="/onboarding/lego-experience" element={<LegoExperience />} />
         <Route path="/onboarding/*" element={<Navigate to="/app" replace />} />
 
         {/* Protected App Routes - Role Based */}

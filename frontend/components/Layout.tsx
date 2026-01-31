@@ -16,6 +16,7 @@ const Layout: React.FC = () => {
         { name: 'Use Cases', path: '/use-cases' },
         { name: 'Multimodal Datasets', path: '/datasets' },
         { name: 'Harbor ML Advertising', path: '/ads' },
+        { name: 'Model Data Requests', path: '/model-data-requests' },
         { name: 'Data Infrastructure', path: '/contact' },
       ]
     },
@@ -155,6 +156,7 @@ const Layout: React.FC = () => {
             <Link to="/use-cases" className="text-sm text-gray-500 hover:text-black transition-colors">Use Cases</Link>
             <Link to="/product" className="text-sm text-gray-500 hover:text-black transition-colors">Annotation Fabric</Link>
             <Link to="/datasets" className="text-sm text-gray-500 hover:text-black transition-colors">Multimodal Datasets</Link>
+            <Link to="/model-data-requests" className="text-sm text-gray-500 hover:text-black transition-colors">Model Data Requests</Link>
             <Link to="/infrastructure" className="text-sm text-gray-500 hover:text-black transition-colors">Data Infrastructure</Link>
             <Link to="/ads" className="text-sm text-gray-500 hover:text-black transition-colors">Advertising</Link>
           </div>
