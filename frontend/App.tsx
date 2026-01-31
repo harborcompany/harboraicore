@@ -163,6 +163,7 @@ const App: React.FC = () => {
           <Route path="tools/:category/:slug" element={<PSEORouter />} />
           <Route path="guides/:slug" element={<PSEORouter />} />
           <Route path="compare/:slug" element={<PSEORouter />} />
+          <Route path="model-data-requests" element={<ModelDataRequests />} />
         </Route>
 
         {/* Auth Routes */}
