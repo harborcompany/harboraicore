@@ -55,6 +55,7 @@ import AdsPage from './pages/app/AdsPage';
 import ContributePage from './pages/app/ContributePage';
 import ApiPage from './pages/app/ApiPage';
 import Settings from './pages/app/Settings';
+import MeetingPage from './pages/app/MeetingPage';
 
 // Admin Panel Pages
 import {
@@ -69,6 +70,8 @@ import {
   AdminRevenue,
   AdminInfrastructure,
   AdminCompliance,
+  AdminMemory,
+  AdminRealtime,
   AdminSettings,
 } from './pages/admin';
 
@@ -188,6 +191,7 @@ const App: React.FC = () => {
           <Route path="contribute" element={<ContributePage />} />
           <Route path="api" element={<ApiPage />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="meet/:room" element={<MeetingPage />} />
         </Route>
 
         {/* Admin Panel Routes - Internal Only */}
@@ -197,6 +201,8 @@ const App: React.FC = () => {
           <Route path="ingestion" element={<AdminIngestion />} />
           <Route path="annotation" element={<AdminAnnotation />} />
           <Route path="datasets" element={<AdminDatasets />} />
+          <Route path="memory" element={<AdminMemory />} />
+          <Route path="realtime" element={<AdminRealtime />} />
           <Route path="marketplace" element={<AdminMarketplace />} />
           <Route path="ads" element={<AdminAds />} />
           <Route path="revenue" element={<AdminRevenue />} />

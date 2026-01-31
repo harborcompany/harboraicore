@@ -4,6 +4,8 @@
 
 export { cogneeAdapter, CogneeAdapter } from './cognee-adapter.js';
 export { datasetVersioner, DatasetVersioner } from './dataset-versioner.js';
+export { userMemoryService, UserMemoryService } from './user-memory.js';
+export { temporalMemory, TemporalMemory } from './temporal-memory.js';
 
 export type {
     CogneeConfig,

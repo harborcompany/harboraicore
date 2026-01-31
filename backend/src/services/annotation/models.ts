@@ -38,10 +38,12 @@ export class AIModelService {
      */
     async processKnowledgeGraph(text: string): Promise<any> {
         console.log(`[AI-Cognee] Processing graph for text length: ${text.length}`);
-        return cogneeAdapter.add({
-            data: { text },
-            id: 'doc_' + Date.now()
-        });
+        const mediaId = 'doc_' + Date.now();
+        return cogneeAdapter.addToGraph(mediaId, [{
+            type: 'transcript',
+            content: text,
+            metadata: { source: 'ai-service' }
+        }]);
     }
 }
 

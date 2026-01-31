@@ -59,7 +59,7 @@ sandboxRouter.post('/create', requireScope('sandbox:write'), async (req: Authent
             update: {
                 apiKeyScope,
                 rateLimit,
-                datasetsPreloaded: anchorDatasets.map(d => d.id),
+                datasetsPreloaded: anchorDatasets.map((d: any) => d.id),
                 expiresAt,
                 isActive: true,
             },
@@ -67,7 +67,7 @@ sandboxRouter.post('/create', requireScope('sandbox:write'), async (req: Authent
                 userId,
                 apiKeyScope,
                 rateLimit,
-                datasetsPreloaded: anchorDatasets.map(d => d.id),
+                datasetsPreloaded: anchorDatasets.map((d: any) => d.id),
                 expiresAt,
                 isActive: true,
             },

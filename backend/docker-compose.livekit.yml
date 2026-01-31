@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --dev --config /livekit.yaml
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    volumes:
+      - ./livekit.yaml:/livekit.yaml
+    environment:
+      - "LIVEKIT_KEYS=${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+    networks:
+      - harbor-network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server
+    ports:
+      - "6379:6379"
+    networks:
+      - harbor-network
+
+networks:
+  harbor-network:
+    driver: bridge

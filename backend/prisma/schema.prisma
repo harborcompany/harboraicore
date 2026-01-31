@@ -644,3 +644,61 @@ model GeneratedContract {
   updatedAt      DateTime         @updatedAt
 }
 
+// ==========================================
+// 10. ELITE MEMORY SYSTEM
+// ==========================================
+
+// User Memory Profile - Learned preferences and context
+model UserMemory {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  
+  // Static context (always-relevant info)
+  staticContext   Json     @default("{}") // role, org, preferences
+  
+  // Dynamic context (recent activity, episodic)
+  dynamicContext  Json     @default("{}") // recent queries, sessions
+  
+  // Learned patterns
+  searchPatterns  String[] // Common query patterns
+  preferredTypes  String[] // Favorite content types: scene, object, etc.
+  topDatasets     String[] // Most accessed dataset IDs
+  
+  // Memory stats
+  totalQueries    Int      @default(0)
+  avgQueryDepth   Float    @default(2.0)
+  lastQueryAt     DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Memory Event - Temporal memories with decay
+model MemoryEvent {
+  id          String    @id @default(uuid())
+  userId      String?
+  entityId    String    // Media entity, dataset, or query reference
+  entityType  String    // query, view, purchase, annotate, search
+  
+  // Content and context
+  content     String    @db.Text // The actual memory content
+  embedding   Float[]   // Vector embedding for similarity (optional)
+  
+  // Temporal weighting
+  weight      Float     @default(1.0) // Decays over time
+  reinforced  Int       @default(0)   // Times this memory was accessed
+  
+  // Metadata
+  metadata    Json?
+  source      String?   // Where this memory came from
+  
+  // TTL support
+  expiresAt   DateTime?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([entityType])
+  @@index([createdAt])
+}

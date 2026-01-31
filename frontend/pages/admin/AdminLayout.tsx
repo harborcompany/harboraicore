@@ -2,73 +2,75 @@ import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 
 interface NavItem {
-    label: string;
-    path: string;
-    icon: React.ReactNode;
+  label: string;
+  path: string;
+  icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
-    { label: 'Overview', path: '/admin', icon: <OverviewIcon /> },
-    { label: 'Users', path: '/admin/users', icon: <UsersIcon /> },
-    { label: 'Content Ingestion', path: '/admin/ingestion', icon: <UploadIcon /> },
-    { label: 'Annotation & QA', path: '/admin/annotation', icon: <AnnotationIcon /> },
-    { label: 'Datasets', path: '/admin/datasets', icon: <DatasetIcon /> },
-    { label: 'Marketplace & Sales', path: '/admin/marketplace', icon: <MarketIcon /> },
-    { label: 'Ads & Creative', path: '/admin/ads', icon: <AdsIcon /> },
-    { label: 'Revenue & Payouts', path: '/admin/revenue', icon: <RevenueIcon /> },
-    { label: 'Infrastructure', path: '/admin/infrastructure', icon: <InfraIcon /> },
-    { label: 'Compliance & Audit', path: '/admin/compliance', icon: <AuditIcon /> },
-    { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon /> },
+  { label: 'Overview', path: '/admin', icon: <OverviewIcon /> },
+  { label: 'Users', path: '/admin/users', icon: <UsersIcon /> },
+  { label: 'Content Ingestion', path: '/admin/ingestion', icon: <UploadIcon /> },
+  { label: 'Annotation & QA', path: '/admin/annotation', icon: <AnnotationIcon /> },
+  { label: 'Datasets', path: '/admin/datasets', icon: <DatasetIcon /> },
+  { label: 'Marketplace & Sales', path: '/admin/marketplace', icon: <MarketIcon /> },
+  { label: 'Ads & Creative', path: '/admin/ads', icon: <AdsIcon /> },
+  { label: 'Revenue & Payouts', path: '/admin/revenue', icon: <RevenueIcon /> },
+  { label: 'Infrastructure', path: '/admin/infrastructure', icon: <InfraIcon /> },
+  { label: 'Compliance & Audit', path: '/admin/compliance', icon: <AuditIcon /> },
+  { label: 'Memory System', path: '/admin/memory', icon: <MemoryIcon /> },
+  { label: 'Real-time & Voice', path: '/admin/realtime', icon: <RealtimeIcon /> },
+  { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon /> },
 ];
 
 export function AdminLayout() {
-    const location = useLocation();
-    const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
-    return (
-        <div className="admin-layout">
-            <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
-                <div className="admin-sidebar-header">
-                    <Link to="/admin" className="admin-logo">
-                        {!collapsed && <span className="admin-logo-text">HARBOR</span>}
-                        <span className="admin-logo-badge">Admin</span>
-                    </Link>
-                    <button
-                        className="admin-collapse-btn"
-                        onClick={() => setCollapsed(!collapsed)}
-                    >
-                        {collapsed ? '→' : '←'}
-                    </button>
-                </div>
+  return (
+    <div className="admin-layout">
+      <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
+        <div className="admin-sidebar-header">
+          <Link to="/admin" className="admin-logo">
+            {!collapsed && <span className="admin-logo-text">HARBOR</span>}
+            <span className="admin-logo-badge">Admin</span>
+          </Link>
+          <button
+            className="admin-collapse-btn"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? '→' : '←'}
+          </button>
+        </div>
 
-                <nav className="admin-nav">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
-                        >
-                            <span className="admin-nav-icon">{item.icon}</span>
-                            {!collapsed && <span className="admin-nav-label">{item.label}</span>}
-                        </Link>
-                    ))}
-                </nav>
+        <nav className="admin-nav">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+            >
+              <span className="admin-nav-icon">{item.icon}</span>
+              {!collapsed && <span className="admin-nav-label">{item.label}</span>}
+            </Link>
+          ))}
+        </nav>
 
-                <div className="admin-sidebar-footer">
-                    {!collapsed && (
-                        <div className="admin-system-status">
-                            <span className="status-dot online"></span>
-                            <span>System Online</span>
-                        </div>
-                    )}
-                </div>
-            </aside>
+        <div className="admin-sidebar-footer">
+          {!collapsed && (
+            <div className="admin-system-status">
+              <span className="status-dot online"></span>
+              <span>System Online</span>
+            </div>
+          )}
+        </div>
+      </aside>
 
-            <main className="admin-content">
-                <Outlet />
-            </main>
+      <main className="admin-content">
+        <Outlet />
+      </main>
 
-            <style>{`
+      <style>{`
         .admin-layout {
           display: flex;
           min-height: 100vh;
@@ -211,8 +213,8 @@ export function AdminLayout() {
           overflow-y: auto;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
 
 // Icon components
@@ -226,6 +228,8 @@ function AdsIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill
 function RevenueIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>; }
 function InfraIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2" /><rect x="2" y="14" width="20" height="8" rx="2" ry="2" /><line x1="6" y1="6" x2="6.01" y2="6" /><line x1="6" y1="18" x2="6.01" y2="18" /></svg>; }
 function AuditIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>; }
+function MemoryIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z" /><path d="M12 14a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0v-2a5 5 0 0 0-5-5z" /><line x1="12" y1="9" x2="12" y2="14" /></svg>; }
+function RealtimeIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3v18" /><path d="M16 8v8" /><path d="M20 11v2" /><path d="M8 8v8" /><path d="M4 11v2" /></svg>; }
 function SettingsIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>; }
 
 export default AdminLayout;

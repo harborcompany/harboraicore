@@ -10,3 +10,5 @@ export { AdminRevenue } from './AdminRevenue';
 export { AdminInfrastructure } from './AdminInfrastructure';
 export { AdminCompliance } from './AdminCompliance';
 export { AdminSettings } from './AdminSettings';
+export { AdminMemory } from './AdminMemory';
+export { AdminRealtime } from './AdminRealtime';

@@ -24,6 +24,7 @@ import { marketplaceRouter } from './routes/marketplace.js';
 import { sandboxRouter } from './routes/sandbox.js';
 import { contractsRouter } from './routes/contracts.js';
 import { docsRouter } from './routes/docs.js';
+import adminRouter from './routes/admin.js';
 
 export const apiRouter = Router();
 
@@ -133,8 +134,17 @@ apiRouter.use('/annotation', annotationRouter);
 // RAG Query API
 apiRouter.use('/rag', ragRouter);
 
+// Realtime/LiveKit API
+import { realtimeRouter } from './routes/realtime.js';
+apiRouter.use('/realtime', realtimeRouter);
+
+
 // Agent APIs
 apiRouter.use('/agents', agentsRouter);
+
+// Admin API (Role Protected)
+import { requireRole } from './middleware/auth.js';
+apiRouter.use('/admin', requireRole('admin'), adminRouter);
 
 // Harbor Ads Production API
 apiRouter.use('/ads', adsRouter);

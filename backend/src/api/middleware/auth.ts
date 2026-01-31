@@ -68,12 +68,17 @@ export function authMiddleware(
     }
 
     // Demo mode for development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
         req.apiKey = {
             id: 'key_development',
             ownerId: 'user_development',
             scopes: ['*'],
             rateLimit: 10000,
+        };
+        req.user = {
+            id: 'user_admin_demo',
+            email: 'admin@harbor.ai',
+            role: 'admin',
         };
         next();
         return;
@@ -102,6 +107,26 @@ export function requireScope(scope: string) {
             error: 'Forbidden',
             message: `Required scope: ${scope}`,
             currentScopes: scopes,
+        });
+    };
+}
+
+/**
+ * Require specific role
+ */
+export function requireRole(role: string) {
+    return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+        const userRole = req.user?.role;
+
+        if (userRole === 'admin' || userRole === role) {
+            next();
+            return;
+        }
+
+        res.status(403).json({
+            error: 'Forbidden',
+            message: `Required role: ${role}`,
+            currentRole: userRole,
         });
     };
 }

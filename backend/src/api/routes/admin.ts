@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient() as any;
 
 // ==========================================
 // ADMIN OVERVIEW ENDPOINTS
@@ -77,7 +77,7 @@ router.get('/overview/charts', async (req, res) => {
 
         res.json({
             uploadTrend: uploads,
-            contentByType: contentByType.map(c => ({ type: c.type, count: c._count }))
+            contentByType: contentByType.map((c: any) => ({ type: c.type, count: c._count }))
         });
     } catch (error) {
         console.error('Admin charts error:', error);
@@ -135,7 +135,7 @@ router.get('/users', async (req, res) => {
         ]);
 
         // Enrich with aggregated stats
-        const enrichedUsers = await Promise.all(users.map(async (user) => {
+        const enrichedUsers = await Promise.all(users.map(async (user: any) => {
             const [totalEarnings, approvedAssets] = await Promise.all([
                 prisma.earningsLedger.aggregate({
                     where: { userId: user.id },
@@ -219,7 +219,7 @@ router.get('/users/:id', async (req, res) => {
             stats: {
                 totalEarnings: totalEarnings._sum.amount || 0,
                 totalPayouts: totalPayouts._sum.amount || 0,
-                pendingBalance: (totalEarnings._sum.amount || 0) - (totalPayouts._sum.amount || 0)
+                pendingBalance: (Number(totalEarnings._sum.amount) || 0) - (Number(totalPayouts._sum.amount) || 0)
             }
         });
     } catch (error) {
@@ -430,7 +430,7 @@ router.get('/datasets', async (req, res) => {
         ]);
 
         // Enrich with revenue data
-        const enrichedDatasets = await Promise.all(datasets.map(async (dataset) => {
+        const enrichedDatasets = await Promise.all(datasets.map(async (dataset: any) => {
             const revenue = await prisma.datasetRevenueLedger.aggregate({
                 where: { datasetId: dataset.id },
                 _sum: { priceUsd: true }
@@ -610,7 +610,7 @@ router.get('/metrics/api', async (req, res) => {
         });
 
         res.json({
-            services: usageByService.map(s => ({
+            services: usageByService.map((s: any) => ({
                 service: s.service,
                 totalRequests: s._count,
                 totalUnits: s._sum.units
@@ -639,7 +639,7 @@ router.get('/metrics/storage', async (req, res) => {
         res.json({
             totalBytes: totalStorage._sum.sizeBytes || 0,
             totalAssets: totalStorage._count,
-            byType: storageByType.map(s => ({
+            byType: storageByType.map((s: any) => ({
                 type: s.type,
                 bytes: s._sum.sizeBytes,
                 count: s._count

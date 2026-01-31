@@ -117,11 +117,11 @@ marketplaceRouter.get('/datasets/:datasetId/revenue', requireScope('marketplace:
             where: { datasetId },
         });
 
-        const totalRevenue = transactions.reduce((sum, t) => sum + Number(t.priceUsd), 0);
-        const totalUnits = transactions.reduce((sum, t) => sum + t.usageUnits, 0);
+        const totalRevenue = transactions.reduce((sum: number, t: any) => sum + Number(t.priceUsd), 0);
+        const totalUnits = transactions.reduce((sum: number, t: any) => sum + t.usageUnits, 0);
         const buyerBreakdown: Record<string, number> = {};
 
-        transactions.forEach((t) => {
+        transactions.forEach((t: any) => {
             buyerBreakdown[t.buyerType] = (buyerBreakdown[t.buyerType] || 0) + Number(t.priceUsd);
         });
 
@@ -151,8 +151,8 @@ marketplaceRouter.get('/stats', requireScope('marketplace:read'), async (req: Re
         const transactions = await prisma.datasetRevenueLedger.findMany();
         const datasets = await prisma.dataset.count({ where: { datasetStatus: 'PUBLISHED' } });
 
-        const totalRevenue = transactions.reduce((sum, t) => sum + Number(t.priceUsd), 0);
-        const totalUnits = transactions.reduce((sum, t) => sum + t.usageUnits, 0);
+        const totalRevenue = transactions.reduce((sum: number, t: any) => sum + Number(t.priceUsd), 0);
+        const totalUnits = transactions.reduce((sum: number, t: any) => sum + t.usageUnits, 0);
 
         res.json({
             data: {

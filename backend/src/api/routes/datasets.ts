@@ -97,8 +97,8 @@ datasetsRouter.get('/:datasetId/stats', requireScope('datasets:read'), async (re
             return;
         }
 
-        const totalSize = dataset.mediaAssets.reduce((sum, m) => sum + Number(m.sizeBytes), 0);
-        const totalDuration = dataset.mediaAssets.reduce((sum, m) => sum + (m.duration || 0), 0);
+        const totalSize = dataset.mediaAssets.reduce((sum: number, m: any) => sum + Number(m.sizeBytes), 0);
+        const totalDuration = dataset.mediaAssets.reduce((sum: number, m: any) => sum + (m.duration || 0), 0);
 
         res.json({
             data: {
