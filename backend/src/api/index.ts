@@ -175,3 +175,23 @@ apiRouter.use('/contracts', contractsRouter);
 import { storageRouter } from './routes/storage.js';
 apiRouter.use('/storage', storageRouter);
 
+// ============================================
+// HARBOR ML PIPELINE APIs
+// ============================================
+import { pipelineRouter } from './routes/pipeline.js';
+import { presentationRouter } from './routes/presentation.js';
+
+apiRouter.use('/pipeline', pipelineRouter);
+apiRouter.use('/presentation', presentationRouter);
+
+// ============================================
+// HITL QUALITY PIPELINE APIs
+// ============================================
+import { stagingRouter } from './routes/staging.js';
+import { reviewRouter } from './routes/review.js';
+
+// Staging Bin (QA Review)
+apiRouter.use('/staging', stagingRouter);
+
+// Human Review & Completion
+apiRouter.use('/review', reviewRouter);

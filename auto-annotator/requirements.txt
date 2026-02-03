@@ -1,0 +1,43 @@
+# Harbor ML Auto-Annotator Dependencies
+
+# FastAPI Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+gunicorn>=21.0.0
+python-multipart>=0.0.6
+
+# ML Frameworks
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+
+# Computer Vision
+opencv-python-headless>=4.8.0
+mediapipe>=0.10.7
+ultralytics>=8.0.200  # YOLOv8
+
+# Audio Processing
+librosa>=0.10.1
+soundfile>=0.12.1
+pyannote.audio>=3.0.0  # Diarization + VAD
+openai-whisper>=20230918  # ASR
+
+# Scene Detection
+scenedetect>=0.6.2
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+pydantic>=2.5.0
+
+# HTTP Client
+httpx>=0.25.0
+aiofiles>=23.2.1
+
+# Redis (for job queue)
+redis>=5.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.66.0
+Pillow>=10.0.0

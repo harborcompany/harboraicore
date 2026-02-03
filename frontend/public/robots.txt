@@ -1,17 +1,20 @@
 # Harbor AI - robots.txt
-# Programmatic SEO Configuration
+# Emergency Recovery Configuration - 2026-02-02
 
 User-agent: *
 Allow: /
 
-# Sitemap location
+# Sitemap location - Points to clean index only
 Sitemap: https://harborml.com/sitemap-index.xml
 
-# Allow all pSEO pages
+# Allow core content paths
 Allow: /tools/
 Allow: /guides/
 Allow: /compare/
 Allow: /explore/
+
+# Block excessive programmatic crawling until trust is established
+# Disallow: /tools/*/* (Commented out to allow specific sitemap-lego URLs, but careful)
 
 # Block authenticated/app routes
 Disallow: /app/

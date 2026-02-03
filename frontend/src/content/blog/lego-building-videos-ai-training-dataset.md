@@ -1,7 +1,7 @@
 ---
 title: "Why LEGO Building Videos Are the Next Big AI Training Dataset"
 slug: "lego-building-videos-ai-training-dataset"
-date: "2026-01-30"
+date: "2026-02-03"
 category: "AI Training Data"
 excerpt: "How millions of LEGO build videos can train the next generation of assembly AI and robotics systems."
 author: "Harbor Team"

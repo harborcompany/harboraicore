@@ -89,8 +89,13 @@ model CaptureSession {
   startTime  DateTime     @default(now())
   endTime    DateTime?
   assets     MediaAsset[]
+  
+  // Skill profiling
+  skillProfile ContributorSkillProfile?
+  
   createdAt  DateTime     @default(now())
 }
+
 
 model MediaAsset {
   id             String           @id @default(uuid())
@@ -115,8 +120,34 @@ model MediaAsset {
   annotations    UserAnnotation[]
   earnings       EarningsLedger[]
   
+  // Harbor ML Pipeline relations
+  uploadMetadata         UploadMetadata?
+  preprocessingJobs      PreprocessingJob[]
+  handPoseDetections     HandPoseDetection[]
+  objectDetections       ObjectDetection[]
+  temporalActions        TemporalAction[]
+  failureRecoveryEvents  FailureRecoveryEvent[]
+  sceneSegments          SceneSegment[]
+  speechSegments         SpeechSegment[]
+  transcriptSegments     TranscriptSegment[]
+  audioQualityMetrics    AudioQualityMetrics?
+  compositeQualityScore  CompositeQualityScore?
+  provenanceRecords      ProvenanceRecord[]
+  pipelineJobs           AnnotationPipelineJob[]
+  
+  // Commercial/Lab-facing relations
+  taskComplexity         TaskComplexityMetrics?
+  extendedFailures       ExtendedFailureEvent[]
+  linguisticFeatures     LinguisticFeatures?
+  scriptAlignment        ScriptAlignment?
+  
+  // HITL Quality Pipeline
+  stagingBinEntry        StagingBinEntry?
+  
   createdAt      DateTime         @default(now())
 }
+
+
 
 // ==========================================
 // ADMIN PANEL: Asset Audit Trail
@@ -305,10 +336,16 @@ model Dataset {
   access           DatasetAccess[]
   annotationEvents AnnotationEvent[]
   outreachAssets   OutreachAsset[]
+  manifests        DatasetManifest[]  // Versioned manifests for delivery
+  
+  // Commercial/Lab-facing relations
+  commercialMetadata DatasetCommercialMetadata?
+  autoSummary        DatasetAutoSummary?
   
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 }
+
 
 model DatasetAccess {
   id         String       @id @default(uuid())
@@ -750,3 +787,727 @@ model VideoAnnotation {
   createdAt   DateTime @default(now())
 }
 
+// ============================================
+// HARBOR ML AUTO-ANNOTATION PIPELINE
+// ============================================
+
+// Upload metadata required from all contributors
+model UploadMetadata {
+  id                    String       @id @default(uuid())
+  mediaAssetId          String       @unique
+  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  uploaderId            String
+  datasetType           DatasetType
+  deviceModel           String
+  recordingEnvironment  RecordingEnvironment
+  consentSigned         Boolean      @default(true)
+  rightsGranted         Boolean      @default(true)
+  country               String       @db.Char(2) // ISO-3166-1 alpha-2
+  uploadTimestamp       DateTime     @default(now())
+  
+  // Provenance
+  originalFilename      String
+  originalSizeBytes     BigInt
+  originalHash          String       // SHA-256
+  ipRegion              String?      // Derived from request
+  
+  createdAt             DateTime     @default(now())
+  
+  @@index([uploaderId])
+  @@index([datasetType])
+}
+
+enum DatasetType {
+  LEGO_VIDEO
+  AUDIO_SPEECH
+  MULTIMODAL
+  OTHER
+}
+
+enum RecordingEnvironment {
+  QUIET
+  MODERATE
+  NOISY
+}
+
+// Preprocessing job tracking
+model PreprocessingJob {
+  id            String              @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset          @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  jobType       PreprocessingType
+  status        JobStatus           @default(QUEUED)
+  progress      Int                 @default(0) // 0-100
+  
+  // Input/Output
+  inputPath     String
+  outputPath    String?
+  
+  // Metrics extracted during preprocessing
+  metrics       Json?               // { duration, resolution, fps, etc. }
+  
+  // Timing
+  startedAt     DateTime?
+  completedAt   DateTime?
+  errorMessage  String?
+  
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  
+  @@index([status])
+  @@index([mediaAssetId])
+}
+
+enum PreprocessingType {
+  VIDEO_TRANSCODE
+  VIDEO_FRAME_EXTRACT
+  AUDIO_EXTRACT
+  AUDIO_NORMALIZE
+  METADATA_EXTRACT
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ============================================
+// VIDEO AUTO-ANNOTATION MODELS
+// ============================================
+
+// Hand & Pose Detection (MediaPipe)
+model HandPoseDetection {
+  id            String       @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  frameId       Int
+  timestampMs   Float
+  handId        HandType
+  keypoints     Json         // [{ x, y, z?, name }]
+  confidence    Float
+  
+  // Model provenance
+  modelName     String       @default("mediapipe_hands")
+  modelVersion  String       @default("0.10.0")
+  
+  createdAt     DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+  @@index([frameId])
+}
+
+enum HandType {
+  LEFT
+  RIGHT
+}
+
+// Object Detection (YOLO)
+model ObjectDetection {
+  id            String       @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  frameId       Int
+  timestampMs   Float
+  objectType    String       // brick, piece, hand, tool, etc.
+  bbox          Json         // { x, y, w, h }
+  confidence    Float
+  
+  // Extended attributes (Phase 2)
+  category      String?      // Brick category
+  orientation   Json?        // Orientation vector
+  pieceId       String?      // Unique piece identifier
+  
+  // Model provenance
+  modelName     String       @default("yolov8")
+  modelVersion  String       @default("8.0.0")
+  
+  createdAt     DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+  @@index([frameId])
+  @@index([objectType])
+}
+
+// Temporal Action Recognition
+model TemporalAction {
+  id            String       @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  startMs       Float
+  endMs         Float
+  action        ActionLabel
+  confidence    Float
+  
+  // Extended metadata
+  metadata      Json?        // Additional action-specific data
+  
+  // Model provenance
+  modelName     String       @default("timesformer")
+  modelVersion  String       @default("1.0.0")
+  
+  // HITL override
+  humanReviewed Boolean      @default(false)
+  humanLabel    ActionLabel?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  
+  createdAt     DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+  @@index([action])
+}
+
+enum ActionLabel {
+  SEARCH
+  ALIGN
+  ATTACH
+  DETACH
+  ROTATE
+  ADJUST
+  PAUSE
+  INSPECT
+  OTHER
+}
+
+// Failure & Recovery Detection
+model FailureRecoveryEvent {
+  id              String       @id @default(uuid())
+  mediaAssetId    String
+  mediaAsset      MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  timestampMs     Float
+  failureType     FailureType
+  recoveryAction  String?      // rotate_and_retry, reposition, etc.
+  confidence      Float
+  
+  // Detection method
+  detectionMethod String       @default("hybrid") // rule_based, ml, hybrid
+  
+  // Model provenance
+  modelName       String?
+  modelVersion    String?
+  
+  // HITL override
+  humanVerified   Boolean      @default(false)
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  
+  createdAt       DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+  @@index([failureType])
+}
+
+enum FailureType {
+  MISALIGNMENT
+  WRONG_PIECE
+  DROP
+  COLLISION
+  STUCK
+  OTHER
+}
+
+// Scene & Session Segmentation
+model SceneSegment {
+  id            String       @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  stepId        String       @default(uuid())
+  startMs       Float
+  endMs         Float
+  description   String?
+  
+  // Scene metadata
+  sceneType     String?      // setup, assembly, completion, etc.
+  
+  // Model provenance
+  modelName     String       @default("pyscenedetect")
+  modelVersion  String       @default("0.6.0")
+  
+  createdAt     DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+}
+
+// ============================================
+// AUDIO AUTO-ANNOTATION MODELS
+// ============================================
+
+// Voice Activity Detection Segment
+model SpeechSegment {
+  id            String       @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  startMs       Float
+  endMs         Float
+  isSpeech      Boolean      @default(true)
+  
+  // Speaker diarization
+  speakerId     String?      // spk_01, spk_02, etc.
+  
+  // Model provenance
+  modelName     String       @default("pyannote_vad")
+  modelVersion  String       @default("3.0.0")
+  
+  createdAt     DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+  @@index([speakerId])
+}
+
+// ASR Transcription Segment
+model TranscriptSegment {
+  id            String       @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  text          String       @db.Text
+  startMs       Float
+  endMs         Float
+  confidence    Float
+  
+  // Word-level alignment
+  wordTimings   Json?        // [{ word, start_ms, end_ms }]
+  
+  // Language/Dialect
+  language      String       @default("en")
+  accent        String?      // British_Northern, American_Southern, etc.
+  accentConfidence Float?
+  
+  // Model provenance
+  modelName     String       @default("whisper")
+  modelVersion  String       @default("large-v3")
+  
+  // HITL override
+  humanCorrected Boolean     @default(false)
+  correctedText  String?     @db.Text
+  correctedBy    String?
+  correctedAt    DateTime?
+  
+  createdAt     DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+  @@index([language])
+}
+
+// Audio Quality Metrics
+model AudioQualityMetrics {
+  id            String       @id @default(uuid())
+  mediaAssetId  String       @unique
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  snrDb         Float        // Signal-to-noise ratio
+  noiseLevel    NoiseLevel
+  clipping      Boolean      @default(false)
+  
+  // Extended metrics
+  peakDb        Float?
+  avgDb         Float?
+  dynamicRange  Float?
+  
+  createdAt     DateTime     @default(now())
+}
+
+enum NoiseLevel {
+  LOW
+  MODERATE
+  HIGH
+}
+
+// ============================================
+// QUALITY SCORING & DATASET ASSEMBLY
+// ============================================
+
+// Composite Quality Score per session/asset
+model CompositeQualityScore {
+  id                    String       @id @default(uuid())
+  mediaAssetId          String       @unique
+  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  clarityScore          Float        // Video/audio clarity
+  annotationConfidence  Float        // Avg model confidence
+  stabilityScore        Float        // Motion stability
+  complianceScore       Float        // Consent/rights check
+  overallScore          Float        // Weighted composite
+  
+  // Threshold flags
+  isPremiumQuality      Boolean      @default(false) // overallScore >= 0.85
+  excludedFromDatasets  Boolean      @default(false) // overallScore < 0.5
+  
+  // Calculation metadata
+  calculatedAt          DateTime     @default(now())
+  modelVersions         Json?        // { yolo: "8.0", whisper: "large-v3", ... }
+}
+
+// Dataset Manifest for versioned delivery
+model DatasetManifest {
+  id              String       @id @default(uuid())
+  datasetId       String
+  dataset         Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  
+  version         String       // Semantic versioning: 1.0.0
+  hours           Float
+  contributorCount Int
+  assetCount      Int
+  
+  annotationTypes String[]     // [actions, failures, speech, etc.]
+  modalities      String[]     // [video, audio]
+  
+  // Manifest content
+  manifestJson    Json         // Full manifest data
+  
+  // Change tracking
+  changeType      String?      // minor (annotation update), major (schema change)
+  previousVersion String?
+  changelog       String?      @db.Text
+  
+  createdAt       DateTime     @default(now())
+  
+  @@unique([datasetId, version])
+  @@index([datasetId])
+}
+
+// Provenance Record for compliance
+model ProvenanceRecord {
+  id                String       @id @default(uuid())
+  mediaAssetId      String
+  mediaAsset        MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  // File provenance
+  originalHash      String       // SHA-256
+  originalFilename  String
+  originalSizeBytes BigInt
+  
+  // Contributor provenance
+  contributorId     String
+  agreementId       String?      // Link to ConsentRecord
+  
+  // Capture context
+  uploadTimestamp   DateTime
+  ipRegion          String?
+  deviceFingerprint String?
+  
+  // Annotation provenance
+  annotationModels  Json         // { model_name: version }
+  annotationRuns    Json?        // [{ run_id, timestamp, models }]
+  
+  // Audit trail
+  accessLog         Json?        // [{ accessor, timestamp, action }]
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@index([mediaAssetId])
+  @@index([contributorId])
+}
+
+// Annotation Pipeline Job (orchestration)
+model AnnotationPipelineJob {
+  id            String         @id @default(uuid())
+  mediaAssetId  String
+  mediaAsset    MediaAsset     @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  pipelineType  PipelineType
+  status        JobStatus      @default(QUEUED)
+  progress      Int            @default(0)
+  
+  // Stage tracking
+  currentStage  String?        // preprocessing, hand_detection, object_detection, etc.
+  stagesCompleted String[]     @default([])
+  
+  // Results summary
+  annotationCounts Json?       // { hand_detections: 1234, objects: 567, ... }
+  
+  // Timing
+  startedAt     DateTime?
+  completedAt   DateTime?
+  errorMessage  String?
+  
+  // Retry tracking
+  retryCount    Int            @default(0)
+  maxRetries    Int            @default(3)
+  
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  @@index([status])
+  @@index([mediaAssetId])
+}
+
+enum PipelineType {
+  VIDEO_FULL           // All video annotations
+  AUDIO_FULL           // All audio annotations
+  VIDEO_AUDIO_FULL     // Both pipelines
+  VIDEO_OBJECTS_ONLY   // Just object detection
+  VIDEO_ACTIONS_ONLY   // Just action recognition
+  AUDIO_ASR_ONLY       // Just transcription
+}
+
+// ============================================
+// COMMERCIAL & LAB-FACING METADATA
+// ============================================
+
+// A. Dataset Commercialization Metadata
+model DatasetCommercialMetadata {
+  id                      String       @id @default(uuid())
+  datasetId               String       @unique
+  dataset                 Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  
+  // Use case targeting
+  intendedUse             String[]     // imitation_learning, long_horizon_planning, failure_recovery
+  notSuitableFor          String[]     // facial_recognition, biometric_identification
+  
+  // Quality signals
+  trainingReadinessScore  Float        // 0-1 score for model training readiness
+  estimatedModelGain      String?      // qualitative, quantitative
+  
+  // Bias disclosure
+  knownBiases             String[]     // right_hand_dominant, indoor_lighting_only
+  
+  // I. Differentiation flags
+  containsFailureRecovery Boolean      @default(false)
+  longHorizonSequences    Boolean      @default(false)
+  humanSkillVariance      Boolean      @default(false)
+  rightsCleared           Boolean      @default(true)
+  multiViewCapture        Boolean      @default(false)
+  temporalConsistency     Boolean      @default(true)
+  
+  // H. Recommended splits
+  trainSplit              Float        @default(0.7)
+  validationSplit         Float        @default(0.15)
+  testSplit               Float        @default(0.15)
+  splitMethod             String       @default("by_contributor") // by_contributor, random, temporal
+  
+  // J. Extension paths
+  canAddContributors      Boolean      @default(true)
+  canAddObjectIdentity    Boolean      @default(true)
+  canAddMultiView         Boolean      @default(false)
+  canAddLongerSessions    Boolean      @default(true)
+  
+  // K. Auto-generated summary
+  oneLiner                String?
+  bestFor                 String[]     // robotics_imitation, planning_models
+  notFor                  String[]     // speech_only_models
+  
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+}
+
+// B. Contributor Skill Profiling (per session)
+model ContributorSkillProfile {
+  id                    String       @id @default(uuid())
+  sessionId             String       @unique
+  session               CaptureSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  // Skill inference
+  estimatedSkillLevel   SkillLevel
+  inferenceMethod       String       @default("action_speed_variance_plus_error_rate")
+  confidence            Float
+  
+  // Derived metrics
+  avgActionDuration     Float?       // ms between actions
+  errorRate             Float?       // errors per minute
+  recoveryEfficiency    Float?       // 0-1 how quickly they recover
+  
+  // Temporal progression
+  skillProgression      Json?        // [{ timestamp, skill_level }] for curriculum learning
+  
+  createdAt             DateTime     @default(now())
+}
+
+enum SkillLevel {
+  NOVICE
+  INTERMEDIATE
+  EXPERT
+}
+
+// C. Cross-Session Action Normalization
+model ActionNormalization {
+  id                  String       @id @default(uuid())
+  
+  canonicalAction     String       // attach, detach, rotate, etc.
+  rawVariants         String[]     // snap, press, connect
+  mappingConfidence   Float
+  
+  // Scope
+  datasetScope        String?      // null = global, or specific dataset
+  
+  // Usage stats
+  occurrenceCount     Int          @default(0)
+  
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  
+  @@unique([canonicalAction, datasetScope])
+}
+
+// D. Temporal Complexity Metrics (per session/asset)
+model TaskComplexityMetrics {
+  id                    String       @id @default(uuid())
+  mediaAssetId          String       @unique
+  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  totalSteps            Int
+  branchingFactor       Int          // parallel paths / choices
+  avgStepDurationMs     Float
+  complexityScore       Float        // 0-1 normalized
+  
+  // Extended metrics
+  longestSequence       Int?         // steps without branching
+  failureRecoveryCount  Int?         // number of failure+recovery cycles
+  
+  createdAt             DateTime     @default(now())
+}
+
+// E. Extended Failure Taxonomy
+model ExtendedFailureEvent {
+  id                    String       @id @default(uuid())
+  mediaAssetId          String
+  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  timestampMs           Float
+  failureType           ExtendedFailureType
+  severity              FailureSeverity
+  humanCorrectionTimeMs Float?
+  
+  // Context
+  precedingAction       String?
+  recoveryAction        String?
+  
+  // Model info
+  confidence            Float
+  modelName             String?
+  modelVersion          String?
+  
+  createdAt             DateTime     @default(now())
+  
+  @@index([mediaAssetId])
+  @@index([failureType])
+}
+
+enum ExtendedFailureType {
+  MISALIGNMENT
+  WRONG_PIECE
+  FORCE_ERROR
+  SEQUENCE_ERROR
+  DROP
+  COLLISION
+  STUCK
+  OTHER
+}
+
+enum FailureSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// F. Audio Linguistic Variation Metadata
+model LinguisticFeatures {
+  id                    String       @id @default(uuid())
+  mediaAssetId          String       @unique
+  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  speechRateWpm         Float        // words per minute
+  prosodyVariance       Float        // 0-1 expressiveness
+  pronunciationEntropy  Float        // 0-1 variation in pronunciation
+  
+  // Extended features
+  avgPauseDurationMs    Float?
+  fillerWordRate        Float?       // uhm, uh per minute
+  
+  createdAt             DateTime     @default(now())
+}
+
+// G. Script Alignment Score
+model ScriptAlignment {
+  id                    String       @id @default(uuid())
+  mediaAssetId          String       @unique
+  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  expectedTextId        String       // script_v1, harvard_sentences, etc.
+  deviations            Int          // number of word deviations
+  alignmentScore        Float        // 0-1
+  
+  // Detailed deviation info
+  deviationDetails      Json?        // [{ position, expected, actual }]
+  
+  createdAt             DateTime     @default(now())
+}
+
+// Dataset Auto-Summary (K - stored separately for quick retrieval)
+model DatasetAutoSummary {
+  id                    String       @id @default(uuid())
+  datasetId             String       @unique
+  dataset               Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  
+  oneLiner              String       // "Human long-horizon LEGO assembly with failure recovery"
+  bestFor               String[]     // robotics_imitation, planning_models
+  notFor                String[]     // speech_only_models
+  
+  totalHours            Float
+  totalContributors     Int
+  totalAssets           Int
+  
+  // Key stats for sales
+  avgQualityScore       Float?
+  failureRecoveryHours  Float?       // Hours of failure+recovery data
+  skillVarianceRange    String?      // "novice to expert"
+  
+  // Generated at
+  generatedAt           DateTime     @default(now())
+  generationModel       String?      // AI model used to generate summary
+}
+
+// ============================================
+// HITL QUALITY PIPELINE: STAGING BIN
+// ============================================
+
+enum StagingStatus {
+  PENDING           // Awaiting human QA review
+  APPROVED          // Ready for annotation  
+  REJECTED          // Bad quality, will not process
+  IN_ANNOTATION     // Annotation in progress
+  PENDING_REVIEW    // Annotation complete, awaiting final review
+  COMPLETED         // Dataset module generated
+}
+
+model StagingBinEntry {
+  id              String        @id @default(uuid())
+  mediaAssetId    String        @unique
+  mediaAsset      MediaAsset    @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+  
+  // QA Status
+  status          StagingStatus @default(PENDING)
+  reviewerId      String?
+  reviewNotes     String?
+  qualityScore    Float?        // 0-1 automated quality check
+  
+  // Rejection handling
+  rejectionReason String?       // "blur", "poor_lighting", "off_topic", "audio_issue"
+  
+  // Annotation tracking
+  annotationJobId String?       // Reference to AnnotationPipelineJob
+  labSchemaOutput Json?         // Lab-compliant annotation output
+  
+  // PDF Module
+  pdfModuleUrl    String?       // S3 URL to generated PDF
+  pdfGeneratedAt  DateTime?
+  
+  createdAt       DateTime      @default(now())
+  reviewedAt      DateTime?
+  completedAt     DateTime?
+  
+  @@index([status])
+  @@index([reviewerId])
+}
