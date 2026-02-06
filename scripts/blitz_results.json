@@ -1,0 +1,296 @@
+{
+  "timestamp": "2026-02-04T23:49:16.790764",
+  "total_urls": 100,
+  "channels": {
+    "indexnow": {
+      "engine": "IndexNow",
+      "results": [
+        {
+          "batch": 1,
+          "count": 100,
+          "status": 202,
+          "success": true
+        }
+      ]
+    },
+    "bing": {
+      "engine": "Bing",
+      "error": "No API key. Set BING_WEBMASTER_API_KEY"
+    },
+    "ping_services": {
+      "engine": "Ping Services",
+      "results": [
+        {
+          "endpoint": "http://ping.twingly.com/RPC2",
+          "status": 404
+        },
+        {
+          "endpoint": "http://rpc.pingomatic.com/",
+          "status": 200
+        },
+        {
+          "endpoint": "http://blogsearch.google.com/ping/RPC2",
+          "status": 429
+        },
+        {
+          "endpoint": "http://ping.feedburner.com",
+          "status": 400
+        }
+      ]
+    },
+    "social": {
+      "social_posts": [
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com",
+          "url": "https://harborml.com"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com",
+          "url": "https://harborml.com"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com",
+          "url": "https://harborml.com"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/about - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/about"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/about for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/about"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/about",
+          "url": "https://harborml.com/about"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/about",
+          "url": "https://harborml.com/about"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/about",
+          "url": "https://harborml.com/about"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/pricing - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/pricing"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/pricing for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/pricing"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/pricing",
+          "url": "https://harborml.com/pricing"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/pricing",
+          "url": "https://harborml.com/pricing"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/pricing",
+          "url": "https://harborml.com/pricing"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/product - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/product"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/product for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/product"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/product",
+          "url": "https://harborml.com/product"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/product",
+          "url": "https://harborml.com/product"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/product",
+          "url": "https://harborml.com/product"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/docs - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/docs"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/docs for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/docs"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/docs",
+          "url": "https://harborml.com/docs"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/docs",
+          "url": "https://harborml.com/docs"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/docs",
+          "url": "https://harborml.com/docs"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/docs/quickstart - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/docs/quickstart"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/docs/quickstart for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/docs/quickstart"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/docs/quickstart",
+          "url": "https://harborml.com/docs/quickstart"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/docs/quickstart",
+          "url": "https://harborml.com/docs/quickstart"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/docs/quickstart",
+          "url": "https://harborml.com/docs/quickstart"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/docs/api - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/docs/api"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/docs/api for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/docs/api"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/docs/api",
+          "url": "https://harborml.com/docs/api"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/docs/api",
+          "url": "https://harborml.com/docs/api"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/docs/api",
+          "url": "https://harborml.com/docs/api"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/contact - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/contact"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/contact for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/contact"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/contact",
+          "url": "https://harborml.com/contact"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/contact",
+          "url": "https://harborml.com/contact"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/contact",
+          "url": "https://harborml.com/contact"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/solutions - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/solutions"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/solutions for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/solutions"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/solutions",
+          "url": "https://harborml.com/solutions"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/solutions",
+          "url": "https://harborml.com/solutions"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/solutions",
+          "url": "https://harborml.com/solutions"
+        },
+        {
+          "platform": "Twitter/X",
+          "content": "\ud83d\ude80 Just discovered https://harborml.com/infrastructure - game changer for ML video training data. #MachineLearning #AI #DataScience",
+          "url": "https://harborml.com/infrastructure"
+        },
+        {
+          "platform": "LinkedIn",
+          "content": "Excited to share our latest work on multimodal AI training datasets. Check out https://harborml.com/infrastructure for details on how we're building enterprise-grade video annotation pipelines.",
+          "url": "https://harborml.com/infrastructure"
+        },
+        {
+          "platform": "Reddit (r/MachineLearning)",
+          "content": "[P] Harbor ML - Open platform for video/audio dataset curation: https://harborml.com/infrastructure",
+          "url": "https://harborml.com/infrastructure"
+        },
+        {
+          "platform": "Hacker News",
+          "content": "Show HN: Harbor ML \u2013 Video dataset platform for AI training https://harborml.com/infrastructure",
+          "url": "https://harborml.com/infrastructure"
+        },
+        {
+          "platform": "Product Hunt",
+          "content": "Harbor ML: Enterprise video datasets for AI training. Build custom multimodal datasets with auto-annotation. https://harborml.com/infrastructure",
+          "url": "https://harborml.com/infrastructure"
+        }
+      ]
+    }
+  }
+}

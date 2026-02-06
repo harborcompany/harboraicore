@@ -1,10 +1,11 @@
 ---
 title: "Building a Data Annotation Pipeline That Scales"
 slug: "data-annotation-pipeline-scales"
-date: "2026-01-30"
+date: "2026-02-06"
 category: "Infrastructure"
 excerpt: "From 1,000 to 1,000,000 samples without quality degradation."
 author: "Harbor Team"
+thumbnail: "/blog-images/data-annotation-pipeline-scales.png"
 ---
 
 # Building a Data Annotation Pipeline That Scales

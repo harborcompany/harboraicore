@@ -7,6 +7,7 @@ gunicorn>=21.0.0
 python-multipart>=0.0.6
 
 # ML Frameworks
+deepeval>=0.20.0  # LLM Evaluation
 torch>=2.1.0
 torchvision>=0.16.0
 torchaudio>=2.1.0
@@ -24,6 +25,15 @@ openai-whisper>=20230918  # ASR
 
 # Scene Detection
 scenedetect>=0.6.2
+
+# Transformers (LiveCC)
+transformers>=4.35.0
+accelerate>=0.24.0
+timm>=0.9.0
+
+# SAM3 (Placeholder - requires Custom Install usually)
+# git+https://github.com/facebookresearch/segment-anything-2.git
+# using standard for now to avoid build break
 
 # Data Processing
 numpy>=1.24.0

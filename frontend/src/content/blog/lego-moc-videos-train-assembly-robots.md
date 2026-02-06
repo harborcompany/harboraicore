@@ -1,10 +1,11 @@
 ---
 title: "How LEGO MOC Videos Train Assembly Robots"
 slug: "lego-moc-videos-train-assembly-robots"
-date: "2026-01-30"
+date: "2026-02-06"
 category: "AI Training Data"
 excerpt: "Your custom creations are teaching the next generation of manufacturing AI."
 author: "Harbor Team"
+thumbnail: "/blog-images/lego-moc-videos-train-assembly-robots.png"
 ---
 
 # How LEGO MOC Videos Train Assembly Robots

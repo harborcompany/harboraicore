@@ -33,6 +33,10 @@ export interface HarborConfig {
 
     // Logging
     logLevel: string;
+
+    // Billing
+    stripeSecretKey: string;
+    stripePublishableKey: string;
 }
 
 function getEnvVar(key: string, defaultValue?: string): string {
@@ -74,6 +78,10 @@ export const config: HarborConfig = {
 
     // Logging
     logLevel: getEnvVar('LOG_LEVEL', 'info'),
+
+    // Billing
+    stripeSecretKey: getEnvVar('STRIPE_SECRET_KEY', ''),
+    stripePublishableKey: getEnvVar('STRIPE_PUBLISHABLE_KEY', ''),
 };
 
 export default config;

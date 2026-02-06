@@ -317,14 +317,34 @@ def main():
         urls.extend(args.urls)
     
     if not urls:
-        # Default: use our standard sitemaps
-        print("No URLs specified. Loading from public sitemaps...")
-        sitemap_dir = "/Users/akeemojuko/.gemini/antigravity/scratch/harboraicore/frontend/public"
-        for filename in ['sitemap-main.xml', 'sitemap-lego.xml']:
-            path = os.path.join(sitemap_dir, filename)
-            if os.path.exists(path):
-                urls.extend(load_urls_from_sitemap(path))
-                sitemaps.append(f"{SITE_URL}/{filename}")
+        # Default: use dynamic backend sitemap
+        print("No URLs specified. Fetching from dynamic backend sitemap...")
+        # Assuming /api/v1 prefix based on standard config, but we'll try /api/seo first or check config
+        # Best guess based on typical patterns: /api/seo/sitemap-index.xml
+        # Verify prefix in next step, but let's assume /api/v1/seo or /api/seo.
+        # Actually, let's use the likely path found in code analysis.
+        sitemap_url = f"{SITE_URL}/api/seo/sitemap-index.xml"
+        
+        try:
+            print(f"Fetching {sitemap_url}...")
+            response = requests.get(sitemap_url, timeout=10)
+            if response.status_code == 200:
+                import re
+                # Parse sub-sitemaps from index
+                sub_sitemaps = re.findall(r'<loc>(.*?)</loc>', response.text)
+                print(f"Found {len(sub_sitemaps)} sub-sitemaps.")
+                
+                for sub in sub_sitemaps:
+                    print(f"  Fetching {sub}...")
+                    sub_resp = requests.get(sub, timeout=10)
+                    if sub_resp.status_code == 200:
+                        page_urls = re.findall(r'<loc>(.*?)</loc>', sub_resp.text)
+                        urls.extend(page_urls)
+                        sitemaps.append(sub)
+            else:
+                print(f"Failed to fetch sitemap index: {response.status_code}")
+        except Exception as e:
+            print(f"Error fetching dynamic sitemaps: {e}")
     
     print(f"Loaded {len(urls)} URLs from {len(sitemaps)} sitemaps")
     

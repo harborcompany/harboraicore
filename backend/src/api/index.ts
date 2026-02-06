@@ -138,6 +138,10 @@ apiRouter.use('/rag', ragRouter);
 import { realtimeRouter } from './routes/realtime.js';
 apiRouter.use('/realtime', realtimeRouter);
 
+// Billing API
+import { billingRouter } from './routes/billing.js';
+apiRouter.use('/billing', billingRouter);
+
 
 // Agent APIs
 apiRouter.use('/agents', agentsRouter);

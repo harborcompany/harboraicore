@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider   = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -10,54 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==========================================
-// 1. IDENTITY & ACCOUNT (Shared)
-// ==========================================
-
-enum UserRole {
-  ADMIN
-  EDITOR
-  VIEWER
-  CONTRIBUTOR // Supply side
-  ENTERPRISE  // Demand side
-}
-
 model User {
-  id               String           @id @default(uuid())
-  email            String           @unique
-  name             String?
-  role             UserRole         @default(VIEWER)
-  accountType      String           @default("individual") // individual, enterprise
-  kycStatus        String           @default("pending") // pending, verified, failed
-  verified         Boolean          @default(false)
-  riskScore        Float            @default(0.0) // 0-1 risk scoring
-  walletId         String?          @unique
-  profile          Profile?
-  
-  // Contributor relations
-  captureSessions  CaptureSession[]
-  consentRecords   ConsentRecord[]
-  annotations      UserAnnotation[]
-  earnings         EarningsLedger[]
-  payouts          Payout[]
-  
-  // Enterprise relations
-  orgMemberships   OrgUser[]
-  
-  // Sandbox/Trial access
-  sandboxAccount   SandboxAccount?
-  
-  // Admin relations
-  assetAuditLogs   AssetAuditLog[]  @relation("AuditReviewer")
-  
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String?
+  role            UserRole         @default(VIEWER)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  kycStatus       String           @default("pending")
+  walletId        String?          @unique
+  accountType     String           @default("individual")
+  riskScore       Float            @default(0.0)
+  verified        Boolean          @default(false)
+  assetAuditLogs  AssetAuditLog[]  @relation("AuditReviewer")
+  captureSessions CaptureSession[]
+  consentRecords  ConsentRecord[]
+  earnings        EarningsLedger[]
+  orgMemberships  OrgUser[]
+  payouts         Payout[]
+  profile         Profile?
+  sandboxAccount  SandboxAccount?
+  annotations     UserAnnotation[]
+  contributor     Contributor?
 }
 
 model Profile {
   id                 String   @id @default(uuid())
   userId             String   @unique
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   username           String?  @unique
   avatarUrl          String?
   bio                String?
@@ -65,11 +41,972 @@ model Profile {
   onboardingComplete Boolean  @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ==========================================
-// 2. CONTRIBUTOR SCHEMA (Supply Side)
-// ==========================================
+model CaptureSession {
+  id           String                   @id @default(uuid())
+  userId       String
+  sourceType   SourceType               @default(MOBILE)
+  deviceId     String?
+  startTime    DateTime                 @default(now())
+  endTime      DateTime?
+  createdAt    DateTime                 @default(now())
+  progress     Int                      @default(0)
+  status       String                   @default("active")
+  user         User                     @relation(fields: [userId], references: [id])
+  skillProfile ContributorSkillProfile?
+  assets       MediaAsset[]
+}
+
+model MediaAsset {
+  id                    String                  @id @default(uuid())
+  datasetId             String?
+  filename              String
+  sizeBytes             BigInt
+  duration              Float?
+  status                MediaStatus             @default(PROCESSING)
+  createdAt             DateTime                @default(now())
+  checksum              String?
+  resolution            String?
+  sessionId             String?
+  storagePointer        String?
+  type                  String
+  pipelineJobs          AnnotationPipelineJob[]
+  auditLogs             AssetAuditLog[]
+  audioQualityMetrics   AudioQualityMetrics?
+  compositeQualityScore CompositeQualityScore?
+  consent               ConsentRecord?
+  earnings              EarningsLedger[]
+  extendedFailures      ExtendedFailureEvent[]
+  failureRecoveryEvents FailureRecoveryEvent[]
+  handPoseDetections    HandPoseDetection[]
+  linguisticFeatures    LinguisticFeatures?
+  dataset               Dataset?                @relation(fields: [datasetId], references: [id])
+  session               CaptureSession?         @relation(fields: [sessionId], references: [id])
+  objectDetections      ObjectDetection[]
+  preprocessingJobs     PreprocessingJob[]
+  provenanceRecords     ProvenanceRecord[]
+  sceneSegments         SceneSegment[]
+  scriptAlignment       ScriptAlignment?
+  speechSegments        SpeechSegment[]
+  stagingBinEntry       StagingBinEntry?
+  taskComplexity        TaskComplexityMetrics?
+  temporalActions       TemporalAction[]
+  transcriptSegments    TranscriptSegment[]
+  uploadMetadata        UploadMetadata?
+  annotations           UserAnnotation[]
+}
+
+model AssetAuditLog {
+  id         String     @id @default(uuid())
+  assetId    String
+  stage      String
+  result     String
+  confidence Float?
+  reviewerId String?
+  metadata   Json?
+  createdAt  DateTime   @default(now())
+  asset      MediaAsset @relation(fields: [assetId], references: [id])
+  reviewer   User?      @relation("AuditReviewer", fields: [reviewerId], references: [id])
+}
+
+model Client {
+  id           String   @id @default(uuid())
+  name         String
+  industry     String?
+  tier         String   @default("standard")
+  billingEmail String?
+  billingPlan  String   @default("usage")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deals        Deal[]
+}
+
+model Deal {
+  id           String   @id @default(uuid())
+  clientId     String
+  datasetIds   String[]
+  pricingModel String
+  termMonths   Int      @default(12)
+  usageLimits  Json?
+  slaTier      String   @default("standard")
+  status       String   @default("active")
+  totalValue   Decimal  @db.Decimal(18, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  client       Client   @relation(fields: [clientId], references: [id])
+}
+
+model ConsentRecord {
+  id          String     @id @default(uuid())
+  userId      String
+  mediaId     String     @unique
+  licenseType String
+  usageScope  Json
+  revSharePct Float      @default(50.0)
+  timestamp   DateTime   @default(now())
+  asset       MediaAsset @relation(fields: [mediaId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
+}
+
+model UserAnnotation {
+  id          String     @id @default(uuid())
+  mediaId     String
+  userId      String
+  labelType   String
+  confidence  Float      @default(1.0)
+  timestamp   DateTime   @default(now())
+  boundingBox Json?
+  endTime     Float?
+  labels      String[]
+  startTime   Float?
+  status      String     @default("pending")
+  asset       MediaAsset @relation(fields: [mediaId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
+}
+
+model EarningsLedger {
+  id        String      @id @default(uuid())
+  userId    String
+  mediaId   String?
+  eventType String
+  amount    Decimal     @db.Decimal(18, 8)
+  currency  String      @default("USD")
+  timestamp DateTime    @default(now())
+  asset     MediaAsset? @relation(fields: [mediaId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
+}
+
+model Payout {
+  id        String   @id @default(uuid())
+  userId    String
+  amount    Decimal  @db.Decimal(18, 8)
+  method    String
+  status    String   @default("pending")
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Organization {
+  id             String          @id @default(uuid())
+  name           String
+  industry       String?
+  billingPlan    String          @default("free")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  apiKeys        APICredential[]
+  adProjects     AdProject[]
+  datasets       DatasetAccess[]
+  builds         DatasetBuild[]
+  invoices       Invoice[]
+  members        OrgUser[]
+  outreachAssets OutreachAsset[]
+  usage          UsageRecord[]
+}
+
+model OrgUser {
+  id     String       @id @default(uuid())
+  userId String
+  orgId  String
+  role   OrgRole      @default(ANALYST)
+  org    Organization @relation(fields: [orgId], references: [id])
+  user   User         @relation(fields: [userId], references: [id])
+}
+
+model Dataset {
+  id                  String                     @id @default(uuid())
+  name                String
+  version             String
+  description         String?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  annotationSchema    Json?
+  licenseTerms        String?
+  mediaType           String
+  ragEnabled          Boolean                    @default(false)
+  annotationTypes     String[]
+  benchmarkResults    Json?
+  datasetStatus       DatasetStatus              @default(DRAFT)
+  governanceProfileId String?
+  intendedUseCases    String[]
+  isAnchor            Boolean                    @default(false)
+  licenseType         LicenseType                @default(COMMERCIAL)
+  modalities          String[]
+  modelReadinessScore Float?
+  pricingModel        PricingModel               @default(USAGE)
+  qualityProfileId    String?
+  totalHours          Float?
+  vertical            DatasetVertical            @default(OTHER)
+  annotationEvents    AnnotationEvent[]
+  governanceProfile   GovernanceProfile?         @relation(fields: [governanceProfileId], references: [id])
+  qualityProfile      QualityProfile?            @relation(fields: [qualityProfileId], references: [id])
+  access              DatasetAccess[]
+  autoSummary         DatasetAutoSummary?
+  commercialMetadata  DatasetCommercialMetadata?
+  manifests           DatasetManifest[]
+  mediaAssets         MediaAsset[]
+  outreachAssets      OutreachAsset[]
+}
+
+model DatasetAccess {
+  id         String       @id @default(uuid())
+  orgId      String
+  datasetId  String
+  accessType String
+  expiresAt  DateTime?
+  dataset    Dataset      @relation(fields: [datasetId], references: [id])
+  org        Organization @relation(fields: [orgId], references: [id])
+}
+
+model DatasetBuild {
+  id           String       @id @default(uuid())
+  orgId        String
+  sourceAssets Json
+  filters      Json?
+  ragRules     Json?
+  status       String       @default("queued")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  org          Organization @relation(fields: [orgId], references: [id])
+}
+
+model AdProject {
+  id        String            @id @default(uuid())
+  name      String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  status    String            @default("draft")
+  goal      String
+  orgId     String
+  platform  String
+  runs      AdGenerationRun[]
+  org       Organization      @relation(fields: [orgId], references: [id])
+}
+
+model AdGenerationRun {
+  id            String    @id @default(uuid())
+  projectId     String
+  promptVersion String
+  model         String
+  outputAssets  Json?
+  metrics       Json?
+  createdAt     DateTime  @default(now())
+  project       AdProject @relation(fields: [projectId], references: [id])
+}
+
+model APICredential {
+  id        String       @id @default(uuid())
+  orgId     String
+  apiKey    String       @unique
+  scope     String
+  rateLimit Int          @default(1000)
+  createdAt DateTime     @default(now())
+  org       Organization @relation(fields: [orgId], references: [id])
+}
+
+model UsageRecord {
+  id        String       @id @default(uuid())
+  orgId     String
+  service   String
+  units     Int
+  cost      Decimal      @db.Decimal(10, 4)
+  timestamp DateTime     @default(now())
+  org       Organization @relation(fields: [orgId], references: [id])
+}
+
+model Invoice {
+  id        String       @id @default(uuid())
+  orgId     String
+  amount    Decimal      @db.Decimal(10, 2)
+  period    String
+  status    String       @default("unpaid")
+  createdAt DateTime     @default(now())
+  org       Organization @relation(fields: [orgId], references: [id])
+}
+
+model Blog {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  content   String
+  excerpt   String?
+  author    String?
+  thumbnail String?
+  published Boolean  @default(false)
+  category  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SeoPage {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  h1          String?
+  description String?
+  content     Json?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GovernanceProfile {
+  id                     String    @id @default(uuid())
+  name                   String
+  consentSource          String
+  usageRights            String[]
+  geographicRestrictions String[]
+  dataRetentionPolicy    String    @default("indefinite")
+  auditLogEnabled        Boolean   @default(true)
+  complianceTags         String[]
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  datasets               Dataset[]
+}
+
+model QualityProfile {
+  id                      String    @id @default(uuid())
+  name                    String
+  annotationConfidenceAvg Float     @default(0)
+  interAnnotatorAgreement Float     @default(0)
+  reviewPassRate          Float     @default(0)
+  benchmarkTasks          String[]
+  lastAuditAt             DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  datasets                Dataset[]
+}
+
+model AnnotationEvent {
+  id            String   @id @default(uuid())
+  datasetId     String
+  annotatorType String
+  confidence    Float    @default(1.0)
+  reviewed      Boolean  @default(false)
+  version       String
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  dataset       Dataset  @relation(fields: [datasetId], references: [id])
+}
+
+model SystemAuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  actorId    String?
+  resourceId String?
+  details    Json?
+  ipAddress  String?
+  status     String
+  timestamp  DateTime @default(now())
+}
+
+model OutreachAsset {
+  id          String        @id @default(uuid())
+  datasetId   String?
+  orgId       String?
+  type        String
+  format      String
+  url         String
+  generatedAt DateTime      @default(now())
+  dataset     Dataset?      @relation(fields: [datasetId], references: [id])
+  org         Organization? @relation(fields: [orgId], references: [id])
+}
+
+model DatasetRevenueLedger {
+  id           String   @id @default(uuid())
+  datasetId    String
+  buyerType    String
+  buyerOrgId   String?
+  usageUnits   Int
+  priceUsd     Decimal  @db.Decimal(18, 2)
+  revenueShare Json
+  notes        String?
+  createdAt    DateTime @default(now())
+}
+
+model SandboxAccount {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  apiKeyScope       String[]
+  rateLimit         Int      @default(100)
+  datasetsPreloaded String[]
+  expiresAt         DateTime
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model QuickstartProject {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  type        String
+  datasetId   String?
+  steps       String[]
+  difficulty  String   @default("beginner")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tutorial {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  summary       String?
+  datasetsUsed  String[]
+  tools         String[]
+  estimatedTime String
+  content       String
+  published     Boolean  @default(false)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model EndpointDoc {
+  id             String   @id @default(uuid())
+  endpoint       String   @unique
+  method         String
+  description    String
+  parameters     Json?
+  examples       Json
+  avgLatencyMs   Float?
+  commonUseCases String[]
+  tags           String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ContractTemplate {
+  id          String              @id @default(uuid())
+  type        String
+  name        String
+  description String?
+  content     String
+  variables   String[]
+  isActive    Boolean             @default(true)
+  version     String              @default("1.0")
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  contracts   GeneratedContract[]
+}
+
+model GeneratedContract {
+  id             String           @id @default(uuid())
+  templateId     String
+  orgId          String?
+  datasetId      String?
+  variables      Json
+  content        String
+  status         String           @default("draft")
+  signedAt       DateTime?
+  signedByUserId String?
+  expiresAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  template       ContractTemplate @relation(fields: [templateId], references: [id])
+}
+
+model UserMemory {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  staticContext  Json      @default("{}")
+  dynamicContext Json      @default("{}")
+  searchPatterns String[]
+  preferredTypes String[]
+  topDatasets    String[]
+  totalQueries   Int       @default(0)
+  avgQueryDepth  Float     @default(2.0)
+  lastQueryAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model MemoryEvent {
+  id         String    @id @default(uuid())
+  userId     String?
+  entityId   String
+  entityType String
+  content    String
+  embedding  Float[]
+  weight     Float     @default(1.0)
+  reinforced Int       @default(0)
+  metadata   Json?
+  source     String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+model LabDataset {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  category    String
+  price       Float
+  isPublic    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  videos      LabeledVideo[]
+}
+
+model LabeledVideo {
+  id          String            @id @default(uuid())
+  datasetId   String
+  filename    String
+  url         String
+  duration    Int
+  status      String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  dataset     LabDataset        @relation(fields: [datasetId], references: [id])
+  annotations VideoAnnotation[]
+}
+
+model VideoAnnotation {
+  id          String       @id @default(uuid())
+  videoId     String
+  timestamp   Float
+  label       String
+  action      String?
+  confidence  Float
+  boundingBox Json?
+  createdAt   DateTime     @default(now())
+  video       LabeledVideo @relation(fields: [videoId], references: [id])
+}
+
+model UploadMetadata {
+  id                   String               @id @default(uuid())
+  mediaAssetId         String               @unique
+  uploaderId           String
+  datasetType          DatasetType
+  deviceModel          String
+  recordingEnvironment RecordingEnvironment
+  consentSigned        Boolean              @default(true)
+  rightsGranted        Boolean              @default(true)
+  country              String               @db.Char(2)
+  uploadTimestamp      DateTime             @default(now())
+  originalFilename     String
+  originalSizeBytes    BigInt
+  originalHash         String
+  ipRegion             String?
+  createdAt            DateTime             @default(now())
+  mediaAsset           MediaAsset           @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([uploaderId])
+  @@index([datasetType])
+}
+
+model PreprocessingJob {
+  id           String            @id @default(uuid())
+  mediaAssetId String
+  jobType      PreprocessingType
+  status       JobStatus         @default(QUEUED)
+  progress     Int               @default(0)
+  inputPath    String
+  outputPath   String?
+  metrics      Json?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  errorMessage String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  mediaAsset   MediaAsset        @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([mediaAssetId])
+}
+
+model HandPoseDetection {
+  id           String     @id @default(uuid())
+  mediaAssetId String
+  frameId      Int
+  timestampMs  Float
+  handId       HandType
+  keypoints    Json
+  confidence   Float
+  modelName    String     @default("mediapipe_hands")
+  modelVersion String     @default("0.10.0")
+  createdAt    DateTime   @default(now())
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([frameId])
+}
+
+model ObjectDetection {
+  id           String     @id @default(uuid())
+  mediaAssetId String
+  frameId      Int
+  timestampMs  Float
+  objectType   String
+  bbox         Json
+  confidence   Float
+  category     String?
+  orientation  Json?
+  pieceId      String?
+  modelName    String     @default("yolov8")
+  modelVersion String     @default("8.0.0")
+  createdAt    DateTime   @default(now())
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([frameId])
+  @@index([objectType])
+}
+
+model TemporalAction {
+  id            String       @id @default(uuid())
+  mediaAssetId  String
+  startMs       Float
+  endMs         Float
+  action        ActionLabel
+  confidence    Float
+  metadata      Json?
+  modelName     String       @default("timesformer")
+  modelVersion  String       @default("1.0.0")
+  humanReviewed Boolean      @default(false)
+  humanLabel    ActionLabel?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([action])
+}
+
+model FailureRecoveryEvent {
+  id              String      @id @default(uuid())
+  mediaAssetId    String
+  timestampMs     Float
+  failureType     FailureType
+  recoveryAction  String?
+  confidence      Float
+  detectionMethod String      @default("hybrid")
+  modelName       String?
+  modelVersion    String?
+  humanVerified   Boolean     @default(false)
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  createdAt       DateTime    @default(now())
+  mediaAsset      MediaAsset  @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([failureType])
+}
+
+model SceneSegment {
+  id           String     @id @default(uuid())
+  mediaAssetId String
+  stepId       String     @default(uuid())
+  startMs      Float
+  endMs        Float
+  description  String?
+  sceneType    String?
+  modelName    String     @default("pyscenedetect")
+  modelVersion String     @default("0.6.0")
+  createdAt    DateTime   @default(now())
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+}
+
+model SpeechSegment {
+  id           String     @id @default(uuid())
+  mediaAssetId String
+  startMs      Float
+  endMs        Float
+  isSpeech     Boolean    @default(true)
+  speakerId    String?
+  modelName    String     @default("pyannote_vad")
+  modelVersion String     @default("3.0.0")
+  createdAt    DateTime   @default(now())
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([speakerId])
+}
+
+model TranscriptSegment {
+  id               String     @id @default(uuid())
+  mediaAssetId     String
+  text             String
+  startMs          Float
+  endMs            Float
+  confidence       Float
+  wordTimings      Json?
+  language         String     @default("en")
+  accent           String?
+  accentConfidence Float?
+  modelName        String     @default("whisper")
+  modelVersion     String     @default("large-v3")
+  humanCorrected   Boolean    @default(false)
+  correctedText    String?
+  correctedBy      String?
+  correctedAt      DateTime?
+  createdAt        DateTime   @default(now())
+  mediaAsset       MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([language])
+}
+
+model AudioQualityMetrics {
+  id           String     @id @default(uuid())
+  mediaAssetId String     @unique
+  snrDb        Float
+  noiseLevel   NoiseLevel
+  clipping     Boolean    @default(false)
+  peakDb       Float?
+  avgDb        Float?
+  dynamicRange Float?
+  createdAt    DateTime   @default(now())
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model CompositeQualityScore {
+  id                   String     @id @default(uuid())
+  mediaAssetId         String     @unique
+  clarityScore         Float
+  annotationConfidence Float
+  stabilityScore       Float
+  complianceScore      Float
+  overallScore         Float
+  isPremiumQuality     Boolean    @default(false)
+  excludedFromDatasets Boolean    @default(false)
+  calculatedAt         DateTime   @default(now())
+  modelVersions        Json?
+  mediaAsset           MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model DatasetManifest {
+  id               String   @id @default(uuid())
+  datasetId        String
+  version          String
+  hours            Float
+  contributorCount Int
+  assetCount       Int
+  annotationTypes  String[]
+  modalities       String[]
+  manifestJson     Json
+  changeType       String?
+  previousVersion  String?
+  changelog        String?
+  createdAt        DateTime @default(now())
+  dataset          Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@unique([datasetId, version])
+  @@index([datasetId])
+}
+
+model ProvenanceRecord {
+  id                String     @id @default(uuid())
+  mediaAssetId      String
+  originalHash      String
+  originalFilename  String
+  originalSizeBytes BigInt
+  contributorId     String
+  agreementId       String?
+  uploadTimestamp   DateTime
+  ipRegion          String?
+  deviceFingerprint String?
+  annotationModels  Json
+  annotationRuns    Json?
+  accessLog         Json?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  mediaAsset        MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([contributorId])
+}
+
+model AnnotationPipelineJob {
+  id               String       @id @default(uuid())
+  mediaAssetId     String
+  pipelineType     PipelineType
+  status           JobStatus    @default(QUEUED)
+  progress         Int          @default(0)
+  currentStage     String?
+  stagesCompleted  String[]     @default([])
+  annotationCounts Json?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  errorMessage     String?
+  retryCount       Int          @default(0)
+  maxRetries       Int          @default(3)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  mediaAsset       MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([mediaAssetId])
+}
+
+model DatasetCommercialMetadata {
+  id                      String   @id @default(uuid())
+  datasetId               String   @unique
+  intendedUse             String[]
+  notSuitableFor          String[]
+  trainingReadinessScore  Float
+  estimatedModelGain      String?
+  knownBiases             String[]
+  containsFailureRecovery Boolean  @default(false)
+  longHorizonSequences    Boolean  @default(false)
+  humanSkillVariance      Boolean  @default(false)
+  rightsCleared           Boolean  @default(true)
+  multiViewCapture        Boolean  @default(false)
+  temporalConsistency     Boolean  @default(true)
+  trainSplit              Float    @default(0.7)
+  validationSplit         Float    @default(0.15)
+  testSplit               Float    @default(0.15)
+  splitMethod             String   @default("by_contributor")
+  canAddContributors      Boolean  @default(true)
+  canAddObjectIdentity    Boolean  @default(true)
+  canAddMultiView         Boolean  @default(false)
+  canAddLongerSessions    Boolean  @default(true)
+  oneLiner                String?
+  bestFor                 String[]
+  notFor                  String[]
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  dataset                 Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+}
+
+model ContributorSkillProfile {
+  id                  String         @id @default(uuid())
+  sessionId           String         @unique
+  estimatedSkillLevel SkillLevel
+  inferenceMethod     String         @default("action_speed_variance_plus_error_rate")
+  confidence          Float
+  avgActionDuration   Float?
+  errorRate           Float?
+  recoveryEfficiency  Float?
+  skillProgression    Json?
+  createdAt           DateTime       @default(now())
+  session             CaptureSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model ActionNormalization {
+  id                String   @id @default(uuid())
+  canonicalAction   String
+  rawVariants       String[]
+  mappingConfidence Float
+  datasetScope      String?
+  occurrenceCount   Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([canonicalAction, datasetScope])
+}
+
+model TaskComplexityMetrics {
+  id                   String     @id @default(uuid())
+  mediaAssetId         String     @unique
+  totalSteps           Int
+  branchingFactor      Int
+  avgStepDurationMs    Float
+  complexityScore      Float
+  longestSequence      Int?
+  failureRecoveryCount Int?
+  createdAt            DateTime   @default(now())
+  mediaAsset           MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model ExtendedFailureEvent {
+  id                    String              @id @default(uuid())
+  mediaAssetId          String
+  timestampMs           Float
+  failureType           ExtendedFailureType
+  severity              FailureSeverity
+  humanCorrectionTimeMs Float?
+  precedingAction       String?
+  recoveryAction        String?
+  confidence            Float
+  modelName             String?
+  modelVersion          String?
+  createdAt             DateTime            @default(now())
+  mediaAsset            MediaAsset          @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([mediaAssetId])
+  @@index([failureType])
+}
+
+model LinguisticFeatures {
+  id                   String     @id @default(uuid())
+  mediaAssetId         String     @unique
+  speechRateWpm        Float
+  prosodyVariance      Float
+  pronunciationEntropy Float
+  avgPauseDurationMs   Float?
+  fillerWordRate       Float?
+  createdAt            DateTime   @default(now())
+  mediaAsset           MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model ScriptAlignment {
+  id               String     @id @default(uuid())
+  mediaAssetId     String     @unique
+  expectedTextId   String
+  deviations       Int
+  alignmentScore   Float
+  deviationDetails Json?
+  createdAt        DateTime   @default(now())
+  mediaAsset       MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model DatasetAutoSummary {
+  id                   String   @id @default(uuid())
+  datasetId            String   @unique
+  oneLiner             String
+  bestFor              String[]
+  notFor               String[]
+  totalHours           Float
+  totalContributors    Int
+  totalAssets          Int
+  avgQualityScore      Float?
+  failureRecoveryHours Float?
+  skillVarianceRange   String?
+  generatedAt          DateTime @default(now())
+  generationModel      String?
+  dataset              Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+}
+
+model StagingBinEntry {
+  id              String        @id @default(uuid())
+  mediaAssetId    String        @unique
+  status          StagingStatus @default(PENDING)
+  reviewerId      String?
+  reviewNotes     String?
+  qualityScore    Float?
+  rejectionReason String?
+  annotationJobId String?
+  labSchemaOutput Json?
+  pdfModuleUrl    String?
+  pdfGeneratedAt  DateTime?
+  createdAt       DateTime      @default(now())
+  reviewedAt      DateTime?
+  completedAt     DateTime?
+  mediaAsset      MediaAsset    @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([reviewerId])
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+  CONTRIBUTOR
+  ENTERPRISE
+}
 
 enum SourceType {
   MOBILE
@@ -78,366 +1015,11 @@ enum SourceType {
   API
 }
 
-model CaptureSession {
-  id         String       @id @default(uuid())
-  userId     String
-  user       User         @relation(fields: [userId], references: [id])
-  sourceType SourceType   @default(MOBILE)
-  deviceId   String?
-  status     String       @default("active") // active, completed, failed
-  progress   Int          @default(0)
-  startTime  DateTime     @default(now())
-  endTime    DateTime?
-  assets     MediaAsset[]
-  
-  // Skill profiling
-  skillProfile ContributorSkillProfile?
-  
-  createdAt  DateTime     @default(now())
-}
-
-
-model MediaAsset {
-  id             String           @id @default(uuid())
-  sessionId      String?
-  session        CaptureSession?  @relation(fields: [sessionId], references: [id])
-  datasetId      String?
-  dataset        Dataset?         @relation(fields: [datasetId], references: [id])
-  
-  type           String           // video, audio, multimodal
-  filename       String
-  sizeBytes      BigInt
-  duration       Float?           // in seconds
-  resolution     String?
-  checksum       String?
-  storagePointer String?          // s3 bucket/key
-  status         MediaStatus      @default(PROCESSING)
-  
-  // Admin audit trail
-  auditLogs      AssetAuditLog[]
-  
-  consent        ConsentRecord[]
-  annotations    UserAnnotation[]
-  earnings       EarningsLedger[]
-  
-  // Harbor ML Pipeline relations
-  uploadMetadata         UploadMetadata?
-  preprocessingJobs      PreprocessingJob[]
-  handPoseDetections     HandPoseDetection[]
-  objectDetections       ObjectDetection[]
-  temporalActions        TemporalAction[]
-  failureRecoveryEvents  FailureRecoveryEvent[]
-  sceneSegments          SceneSegment[]
-  speechSegments         SpeechSegment[]
-  transcriptSegments     TranscriptSegment[]
-  audioQualityMetrics    AudioQualityMetrics?
-  compositeQualityScore  CompositeQualityScore?
-  provenanceRecords      ProvenanceRecord[]
-  pipelineJobs           AnnotationPipelineJob[]
-  
-  // Commercial/Lab-facing relations
-  taskComplexity         TaskComplexityMetrics?
-  extendedFailures       ExtendedFailureEvent[]
-  linguisticFeatures     LinguisticFeatures?
-  scriptAlignment        ScriptAlignment?
-  
-  // HITL Quality Pipeline
-  stagingBinEntry        StagingBinEntry?
-  
-  createdAt      DateTime         @default(now())
-}
-
-
-
-// ==========================================
-// ADMIN PANEL: Asset Audit Trail
-// ==========================================
-
-model AssetAuditLog {
-  id           String     @id @default(uuid())
-  assetId      String
-  asset        MediaAsset @relation(fields: [assetId], references: [id])
-  
-  stage        String     // "fingerprint", "similarity", "web_scrape", "human_review"
-  result       String     // "passed", "failed", "flagged"
-  confidence   Float?
-  reviewerId   String?    // Human reviewer if applicable
-  reviewer     User?      @relation("AuditReviewer", fields: [reviewerId], references: [id])
-  metadata     Json?      // Fingerprint hash, similarity scores, etc.
-  
-  createdAt    DateTime   @default(now())
-}
-
-// ==========================================
-// ADMIN PANEL: Enterprise Clients
-// ==========================================
-
-model Client {
-  id           String          @id @default(uuid())
-  name         String
-  industry     String?
-  tier         String          @default("standard") // standard, premium, enterprise
-  
-  // Billing
-  billingEmail String?
-  billingPlan  String          @default("usage") // usage, subscription, exclusive
-  
-  // Deals
-  deals        Deal[]
-  
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-}
-
-model Deal {
-  id            String   @id @default(uuid())
-  clientId      String
-  client        Client   @relation(fields: [clientId], references: [id])
-  
-  datasetIds    String[] // Datasets included in deal
-  pricingModel  String   // usage, flat_fee, revenue_share
-  termMonths    Int      @default(12)
-  usageLimits   Json?    // { "queries": 10000, "downloads": 100 }
-  slaTier       String   @default("standard") // standard, premium, enterprise
-  
-  status        String   @default("active") // active, expired, cancelled
-  totalValue    Decimal  @db.Decimal(18, 2)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model ConsentRecord {
-  id           String     @id @default(uuid())
-  userId       String
-  user         User       @relation(fields: [userId], references: [id])
-  mediaId      String     @unique
-  asset        MediaAsset @relation(fields: [mediaId], references: [id])
-  
-  licenseType  String     // standard, premium, exclusive
-  usageScope   Json       // ["ai_training", "commercial_ads", etc.]
-  revSharePct  Float      @default(50.0)
-  timestamp    DateTime   @default(now())
-}
-
-model UserAnnotation {
-  id          String     @id @default(uuid())
-  mediaId     String
-  asset       MediaAsset @relation(fields: [mediaId], references: [id])
-  userId      String
-  user        User       @relation(fields: [userId], references: [id])
-  
-  labelType   String     // "object", "action", "scene", etc.
-  startTime   Float?     // Frame-accurate temporal indexing
-  endTime     Float?
-  boundingBox Json?      // { x, y, w, h } spatial metadata
-  labels      String[]
-  confidence  Float      @default(1.0)
-  status      String     @default("pending") // pending, approved, rejected
-  timestamp   DateTime   @default(now())
-}
-
-model EarningsLedger {
-  id        String     @id @default(uuid())
-  userId    String
-  user      User       @relation(fields: [userId], references: [id])
-  mediaId   String?
-  asset     MediaAsset? @relation(fields: [mediaId], references: [id])
-  
-  eventType String     // upload, usage, resale
-  amount    Decimal    @db.Decimal(18, 8)
-  currency  String     @default("USD")
-  timestamp DateTime   @default(now())
-}
-
-model Payout {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  amount    Decimal  @db.Decimal(18, 8)
-  method    String   // bank, stripe, crypto
-  status    String   @default("pending") // pending, paid, failed
-  timestamp DateTime @default(now())
-}
-
-// ==========================================
-// 3. ENTERPRISE SCHEMA (Demand Side)
-// ==========================================
-
-model Organization {
-  id          String   @id @default(uuid())
-  name        String
-  industry    String?
-  billingPlan String   @default("free")
-  
-  members     OrgUser[]
-  datasets    DatasetAccess[]
-  builds      DatasetBuild[]
-  adProjects  AdProject[]
-  apiKeys     APICredential[]
-  usage       UsageRecord[]
-  invoices    Invoice[]
-  outreachAssets OutreachAsset[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
 enum OrgRole {
   ADMIN
   ANALYST
   CREATIVE
 }
-
-model OrgUser {
-  id        String       @id @default(uuid())
-  userId    String
-  user      User         @relation(fields: [userId], references: [id])
-  orgId     String
-  org       Organization @relation(fields: [orgId], references: [id])
-  role      OrgRole      @default(ANALYST)
-}
-
-model Dataset {
-  id               String          @id @default(uuid())
-  name             String
-  version          String
-  
-  // Lab-Ready Data Platform Extensions
-  vertical         DatasetVertical @default(OTHER)
-  modalities       String[]        // ["video", "audio"]
-  annotationTypes  String[]        // ["scene", "action", "speech", "emotion"]
-  totalHours       Float?
-  datasetStatus    DatasetStatus   @default(DRAFT)
-  licenseType      LicenseType     @default(COMMERCIAL)
-  pricingModel     PricingModel    @default(USAGE)
-  
-  // Original fields
-  mediaType        String          // Mixed, Video, Audio
-  annotationSchema Json?           // Mapping of expected labels
-  licenseTerms     String?
-  ragEnabled       Boolean         @default(false)
-  description      String?
-  
-  // Governance & Quality links
-  governanceProfileId String?
-  governanceProfile   GovernanceProfile? @relation(fields: [governanceProfileId], references: [id])
-  qualityProfileId    String?
-  qualityProfile      QualityProfile?    @relation(fields: [qualityProfileId], references: [id])
-  
-  // Anchor dataset metadata
-  isAnchor            Boolean        @default(false)
-  intendedUseCases    String[]
-  modelReadinessScore Float?
-  benchmarkResults    Json?
-  
-  // Relations
-  mediaAssets      MediaAsset[]
-  access           DatasetAccess[]
-  annotationEvents AnnotationEvent[]
-  outreachAssets   OutreachAsset[]
-  manifests        DatasetManifest[]  // Versioned manifests for delivery
-  
-  // Commercial/Lab-facing relations
-  commercialMetadata DatasetCommercialMetadata?
-  autoSummary        DatasetAutoSummary?
-  
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-}
-
-
-model DatasetAccess {
-  id         String       @id @default(uuid())
-  orgId      String
-  org        Organization @relation(fields: [orgId], references: [id])
-  datasetId  String
-  dataset    Dataset      @relation(fields: [datasetId], references: [id])
-  
-  accessType String       // read, query, generate
-  expiresAt  DateTime?
-}
-
-model DatasetBuild {
-  id           String       @id @default(uuid())
-  orgId        String
-  org          Organization @relation(fields: [orgId], references: [id])
-  
-  sourceAssets Json         // List of IDs or filters
-  filters      Json?
-  ragRules     Json?
-  status       String       @default("queued") // queued, building, ready
-  
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-}
-
-model AdProject {
-  id              String             @id @default(uuid())
-  orgId           String
-  org             Organization       @relation(fields: [orgId], references: [id])
-  
-  name            String
-  goal            String
-  platform        String             // tiktok, meta, youtube
-  status          String             @default("draft")
-  runs            AdGenerationRun[]
-  
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-}
-
-model AdGenerationRun {
-  id            String    @id @default(uuid())
-  projectId     String
-  project       AdProject @relation(fields: [projectId], references: [id])
-  
-  promptVersion String
-  model         String    // veo, sora
-  outputAssets  Json?     // List of generated asset URLs
-  metrics       Json?     // CTR, conversion, etc.
-  
-  createdAt     DateTime  @default(now())
-}
-
-model APICredential {
-  id        String       @id @default(uuid())
-  orgId     String
-  org       Organization @relation(fields: [orgId], references: [id])
-  
-  apiKey    String       @unique
-  scope     String       // dataset_read, rag_query, ads_gen
-  rateLimit Int          @default(1000)
-  
-  createdAt DateTime     @default(now())
-}
-
-model UsageRecord {
-  id        String       @id @default(uuid())
-  orgId     String
-  org       Organization @relation(fields: [orgId], references: [id])
-  
-  service   String       // rag_query, ad_gen, storage
-  units     Int
-  cost      Decimal      @db.Decimal(10, 4)
-  timestamp DateTime     @default(now())
-}
-
-model Invoice {
-  id        String       @id @default(uuid())
-  orgId     String
-  org       Organization @relation(fields: [orgId], references: [id])
-  
-  amount    Decimal      @db.Decimal(10, 2)
-  period    String       // "2024-01"
-  status    String       @default("unpaid")
-  
-  createdAt DateTime     @default(now())
-}
-
-// ==========================================
-// 4. SHARED CORE ENUMS & METADATA
-// ==========================================
 
 enum MediaStatus {
   PROCESSING
@@ -445,7 +1027,6 @@ enum MediaStatus {
   ERROR
 }
 
-// Lab-Ready Data Platform Enums
 enum DatasetVertical {
   AUTOMOTIVE
   BROADCAST
@@ -473,351 +1054,6 @@ enum PricingModel {
   EXCLUSIVE
 }
 
-// Marketing / SEO Artifacts
-model Blog {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  content     String   @db.Text
-  excerpt     String?
-  author      String?
-  thumbnail   String?
-  published   Boolean  @default(false)
-  category    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model SeoPage {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  h1          String?
-  description String?
-  content     Json?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// ==========================================
-// 5. LAB-READY DATA PLATFORM MODELS
-// ==========================================
-
-// Governance Profile - Compliance & consent tracking
-model GovernanceProfile {
-  id                     String    @id @default(uuid())
-  name                   String
-  consentSource          String    // "user_app", "enterprise", "broadcaster"
-  usageRights            String[]  // ["training", "evaluation", "commercial"]
-  geographicRestrictions String[]  // ["EU", "US"]
-  dataRetentionPolicy    String    @default("indefinite") // "indefinite", "5y", "2y"
-  auditLogEnabled        Boolean   @default(true)
-  complianceTags         String[]  // ["GDPR", "CCPA"]
-  
-  datasets               Dataset[]
-  
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-}
-
-// Quality Profile - Annotation quality metrics
-model QualityProfile {
-  id                       String    @id @default(uuid())
-  name                     String
-  annotationConfidenceAvg  Float     @default(0)
-  interAnnotatorAgreement  Float     @default(0)
-  reviewPassRate           Float     @default(0)
-  benchmarkTasks           String[]  // ["asr", "action_detection"]
-  lastAuditAt              DateTime?
-  
-  datasets                 Dataset[]
-  
-  createdAt                DateTime  @default(now())
-  updatedAt                DateTime  @updatedAt
-}
-
-// Annotation Event - Immutable audit trail for all annotation operations
-model AnnotationEvent {
-  id            String   @id @default(uuid())
-  datasetId     String
-  dataset       Dataset  @relation(fields: [datasetId], references: [id])
-  annotatorType String   // "human" | "model"
-  confidence    Float    @default(1.0)
-  reviewed      Boolean  @default(false)
-  version       String
-  metadata      Json?    // Additional event-specific data
-  createdAt     DateTime @default(now())
-}
-
-// Requirement IX: System Audit Log - Centralized audit trail for compliance
-model SystemAuditLog {
-  id          String   @id @default(uuid())
-  action      String   // "DATASET_PUBLISH", "GOVERNANCE_CHECK", "QUERY_EXECUTION", "CONTRACT_GENERATED"
-  actorId     String?  // User or System ID
-  resourceId  String?  // Dataset ID, Contract ID, etc.
-  details     Json?    // Contextual metadata (e.g. query params, diffs)
-  ipAddress   String?
-  status      String   // "SUCCESS", "FAILURE", "DENIED"
-  timestamp   DateTime @default(now())
-}
-
-// Outreach Asset - Auto-assembled marketing materials (One-pagers, diagrams)
-model OutreachAsset {
-  id          String   @id @default(uuid())
-  datasetId   String?
-  dataset     Dataset? @relation(fields: [datasetId], references: [id])
-  orgId       String?
-  org         Organization? @relation(fields: [orgId], references: [id])
-  
-  type        String   // "one_pager", "architecture_diagram", "security_doc"
-  format      String   // "pdf", "svg", "html"
-  url         String   // Storage location
-  generatedAt DateTime @default(now())
-}
-
-// Dataset Revenue Ledger - Marketplace transactions & revenue tracking
-model DatasetRevenueLedger {
-  id           String   @id @default(uuid())
-  datasetId    String
-  buyerType    String   // "lab", "enterprise", "startup"
-  buyerOrgId   String?  // Optional link to Organization
-  usageUnits   Int
-  priceUsd     Decimal  @db.Decimal(18, 2)
-  revenueShare Json     // { "harbor": 0.25, "contributor": 0.75 }
-  notes        String?
-  createdAt    DateTime @default(now())
-}
-
-// Sandbox Account - Trial/demo access with scoped permissions
-model SandboxAccount {
-  id                String   @id @default(uuid())
-  userId            String   @unique
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  apiKeyScope       String[] // ["query", "rag"]
-  rateLimit         Int      @default(100) // requests per day
-  datasetsPreloaded String[] // anchor dataset IDs
-  expiresAt         DateTime
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-}
-
-// Quickstart Project - Guided integration flows for onboarding
-model QuickstartProject {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  description String?
-  type        String   // "notebook" | "api_demo"
-  datasetId   String?  // Optional anchor dataset for the project
-  steps       String[] // ["authenticate", "query", "train", "evaluate"]
-  difficulty  String   @default("beginner") // beginner, intermediate, advanced
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// Tutorial - RAG tutorials and guides
-model Tutorial {
-  id            String   @id @default(uuid())
-  title         String
-  slug          String   @unique
-  summary       String?
-  datasetsUsed  String[]  // Dataset IDs
-  tools         String[]  // ["PyTorch", "Harbor SDK"]
-  estimatedTime String    // "30 min"
-  content       String    @db.Text
-  published     Boolean   @default(false)
-  order         Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-// Endpoint Doc - Auto-generated API documentation
-model EndpointDoc {
-  id             String   @id @default(uuid())
-  endpoint       String   @unique  // "/datasets/query"
-  method         String   // "GET", "POST", etc.
-  description    String
-  parameters     Json?    // Parameter definitions
-  examples       Json     // [{ language: "python", code: "..." }]
-  avgLatencyMs   Float?
-  commonUseCases String[]
-  tags           String[] // For categorization
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-// Contract Template - System-aware contract templates
-model ContractTemplate {
-  id           String              @id @default(uuid())
-  type         String              // "license", "dpa", "revenue_share"
-  name         String
-  description  String?
-  content      String              @db.Text
-  variables    String[]            // Variables to inject: ["dataset_id", "org_name", etc.]
-  isActive     Boolean             @default(true)
-  version      String              @default("1.0")
-  
-  contracts    GeneratedContract[]
-  
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-}
-
-// Generated Contract - Contract instances linked to datasets/orgs
-model GeneratedContract {
-  id             String           @id @default(uuid())
-  templateId     String
-  template       ContractTemplate @relation(fields: [templateId], references: [id])
-  orgId          String?
-  datasetId      String?
-  variables      Json             // Filled variable values
-  content        String           @db.Text // Rendered contract content
-  status         String           @default("draft") // draft, pending_signature, signed, expired
-  signedAt       DateTime?
-  signedByUserId String?
-  expiresAt      DateTime?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-}
-
-// ==========================================
-// 10. ELITE MEMORY SYSTEM
-// ==========================================
-
-// User Memory Profile - Learned preferences and context
-model UserMemory {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  
-  // Static context (always-relevant info)
-  staticContext   Json     @default("{}") // role, org, preferences
-  
-  // Dynamic context (recent activity, episodic)
-  dynamicContext  Json     @default("{}") // recent queries, sessions
-  
-  // Learned patterns
-  searchPatterns  String[] // Common query patterns
-  preferredTypes  String[] // Favorite content types: scene, object, etc.
-  topDatasets     String[] // Most accessed dataset IDs
-  
-  // Memory stats
-  totalQueries    Int      @default(0)
-  avgQueryDepth   Float    @default(2.0)
-  lastQueryAt     DateTime?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-// Memory Event - Temporal memories with decay
-model MemoryEvent {
-  id          String    @id @default(uuid())
-  userId      String?
-  entityId    String    // Media entity, dataset, or query reference
-  entityType  String    // query, view, purchase, annotate, search
-  
-  // Content and context
-  content     String    @db.Text // The actual memory content
-  embedding   Float[]   // Vector embedding for similarity (optional)
-  
-  // Temporal weighting
-  weight      Float     @default(1.0) // Decays over time
-  reinforced  Int       @default(0)   // Times this memory was accessed
-  
-  // Metadata
-  metadata    Json?
-  source      String?   // Where this memory came from
-  
-  // TTL support
-  expiresAt   DateTime?
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  @@index([userId])
-  @@index([entityType])
-  @@index([createdAt])
-}
-
-// ============================================
-// LAB-READY DATA MODELS
-// ============================================
-
-model LabDataset {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  category    String   // e.g. "Lego Assembly", "Cooking", "Retail"
-  price       Float    // Price for the dataset
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  videos      LabeledVideo[]
-}
-
-model LabeledVideo {
-  id          String   @id @default(uuid())
-  datasetId   String
-  dataset     LabDataset @relation(fields: [datasetId], references: [id])
-  
-  filename    String
-  url         String   // Storage URL
-  duration    Int      // Duration in seconds
-  status      String   // "PROCESSING", "COMPLETED", "FAILED"
-  
-  annotations VideoAnnotation[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model VideoAnnotation {
-  id          String   @id @default(uuid())
-  videoId     String
-  video       LabeledVideo @relation(fields: [videoId], references: [id])
-  
-  timestamp   Float    // Time in seconds from start
-  label       String   // e.g. "Red Brick 2x4", "Person"
-  action      String?  // e.g. "Pickup", "Install", "Inspect"
-  confidence  Float    // 0.0 to 1.0
-  boundingBox Json?    // {x, y, w, h}
-  
-  createdAt   DateTime @default(now())
-}
-
-// ============================================
-// HARBOR ML AUTO-ANNOTATION PIPELINE
-// ============================================
-
-// Upload metadata required from all contributors
-model UploadMetadata {
-  id                    String       @id @default(uuid())
-  mediaAssetId          String       @unique
-  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  uploaderId            String
-  datasetType           DatasetType
-  deviceModel           String
-  recordingEnvironment  RecordingEnvironment
-  consentSigned         Boolean      @default(true)
-  rightsGranted         Boolean      @default(true)
-  country               String       @db.Char(2) // ISO-3166-1 alpha-2
-  uploadTimestamp       DateTime     @default(now())
-  
-  // Provenance
-  originalFilename      String
-  originalSizeBytes     BigInt
-  originalHash          String       // SHA-256
-  ipRegion              String?      // Derived from request
-  
-  createdAt             DateTime     @default(now())
-  
-  @@index([uploaderId])
-  @@index([datasetType])
-}
-
 enum DatasetType {
   LEGO_VIDEO
   AUDIO_SPEECH
@@ -829,35 +1065,6 @@ enum RecordingEnvironment {
   QUIET
   MODERATE
   NOISY
-}
-
-// Preprocessing job tracking
-model PreprocessingJob {
-  id            String              @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset          @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  jobType       PreprocessingType
-  status        JobStatus           @default(QUEUED)
-  progress      Int                 @default(0) // 0-100
-  
-  // Input/Output
-  inputPath     String
-  outputPath    String?
-  
-  // Metrics extracted during preprocessing
-  metrics       Json?               // { duration, resolution, fps, etc. }
-  
-  // Timing
-  startedAt     DateTime?
-  completedAt   DateTime?
-  errorMessage  String?
-  
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  
-  @@index([status])
-  @@index([mediaAssetId])
 }
 
 enum PreprocessingType {
@@ -876,93 +1083,9 @@ enum JobStatus {
   CANCELLED
 }
 
-// ============================================
-// VIDEO AUTO-ANNOTATION MODELS
-// ============================================
-
-// Hand & Pose Detection (MediaPipe)
-model HandPoseDetection {
-  id            String       @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  frameId       Int
-  timestampMs   Float
-  handId        HandType
-  keypoints     Json         // [{ x, y, z?, name }]
-  confidence    Float
-  
-  // Model provenance
-  modelName     String       @default("mediapipe_hands")
-  modelVersion  String       @default("0.10.0")
-  
-  createdAt     DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-  @@index([frameId])
-}
-
 enum HandType {
   LEFT
   RIGHT
-}
-
-// Object Detection (YOLO)
-model ObjectDetection {
-  id            String       @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  frameId       Int
-  timestampMs   Float
-  objectType    String       // brick, piece, hand, tool, etc.
-  bbox          Json         // { x, y, w, h }
-  confidence    Float
-  
-  // Extended attributes (Phase 2)
-  category      String?      // Brick category
-  orientation   Json?        // Orientation vector
-  pieceId       String?      // Unique piece identifier
-  
-  // Model provenance
-  modelName     String       @default("yolov8")
-  modelVersion  String       @default("8.0.0")
-  
-  createdAt     DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-  @@index([frameId])
-  @@index([objectType])
-}
-
-// Temporal Action Recognition
-model TemporalAction {
-  id            String       @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  startMs       Float
-  endMs         Float
-  action        ActionLabel
-  confidence    Float
-  
-  // Extended metadata
-  metadata      Json?        // Additional action-specific data
-  
-  // Model provenance
-  modelName     String       @default("timesformer")
-  modelVersion  String       @default("1.0.0")
-  
-  // HITL override
-  humanReviewed Boolean      @default(false)
-  humanLabel    ActionLabel?
-  reviewedBy    String?
-  reviewedAt    DateTime?
-  
-  createdAt     DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-  @@index([action])
 }
 
 enum ActionLabel {
@@ -977,35 +1100,6 @@ enum ActionLabel {
   OTHER
 }
 
-// Failure & Recovery Detection
-model FailureRecoveryEvent {
-  id              String       @id @default(uuid())
-  mediaAssetId    String
-  mediaAsset      MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  timestampMs     Float
-  failureType     FailureType
-  recoveryAction  String?      // rotate_and_retry, reposition, etc.
-  confidence      Float
-  
-  // Detection method
-  detectionMethod String       @default("hybrid") // rule_based, ml, hybrid
-  
-  // Model provenance
-  modelName       String?
-  modelVersion    String?
-  
-  // HITL override
-  humanVerified   Boolean      @default(false)
-  verifiedBy      String?
-  verifiedAt      DateTime?
-  
-  createdAt       DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-  @@index([failureType])
-}
-
 enum FailureType {
   MISALIGNMENT
   WRONG_PIECE
@@ -1015,384 +1109,25 @@ enum FailureType {
   OTHER
 }
 
-// Scene & Session Segmentation
-model SceneSegment {
-  id            String       @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  stepId        String       @default(uuid())
-  startMs       Float
-  endMs         Float
-  description   String?
-  
-  // Scene metadata
-  sceneType     String?      // setup, assembly, completion, etc.
-  
-  // Model provenance
-  modelName     String       @default("pyscenedetect")
-  modelVersion  String       @default("0.6.0")
-  
-  createdAt     DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-}
-
-// ============================================
-// AUDIO AUTO-ANNOTATION MODELS
-// ============================================
-
-// Voice Activity Detection Segment
-model SpeechSegment {
-  id            String       @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  startMs       Float
-  endMs         Float
-  isSpeech      Boolean      @default(true)
-  
-  // Speaker diarization
-  speakerId     String?      // spk_01, spk_02, etc.
-  
-  // Model provenance
-  modelName     String       @default("pyannote_vad")
-  modelVersion  String       @default("3.0.0")
-  
-  createdAt     DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-  @@index([speakerId])
-}
-
-// ASR Transcription Segment
-model TranscriptSegment {
-  id            String       @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  text          String       @db.Text
-  startMs       Float
-  endMs         Float
-  confidence    Float
-  
-  // Word-level alignment
-  wordTimings   Json?        // [{ word, start_ms, end_ms }]
-  
-  // Language/Dialect
-  language      String       @default("en")
-  accent        String?      // British_Northern, American_Southern, etc.
-  accentConfidence Float?
-  
-  // Model provenance
-  modelName     String       @default("whisper")
-  modelVersion  String       @default("large-v3")
-  
-  // HITL override
-  humanCorrected Boolean     @default(false)
-  correctedText  String?     @db.Text
-  correctedBy    String?
-  correctedAt    DateTime?
-  
-  createdAt     DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-  @@index([language])
-}
-
-// Audio Quality Metrics
-model AudioQualityMetrics {
-  id            String       @id @default(uuid())
-  mediaAssetId  String       @unique
-  mediaAsset    MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  snrDb         Float        // Signal-to-noise ratio
-  noiseLevel    NoiseLevel
-  clipping      Boolean      @default(false)
-  
-  // Extended metrics
-  peakDb        Float?
-  avgDb         Float?
-  dynamicRange  Float?
-  
-  createdAt     DateTime     @default(now())
-}
-
 enum NoiseLevel {
   LOW
   MODERATE
   HIGH
 }
 
-// ============================================
-// QUALITY SCORING & DATASET ASSEMBLY
-// ============================================
-
-// Composite Quality Score per session/asset
-model CompositeQualityScore {
-  id                    String       @id @default(uuid())
-  mediaAssetId          String       @unique
-  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  clarityScore          Float        // Video/audio clarity
-  annotationConfidence  Float        // Avg model confidence
-  stabilityScore        Float        // Motion stability
-  complianceScore       Float        // Consent/rights check
-  overallScore          Float        // Weighted composite
-  
-  // Threshold flags
-  isPremiumQuality      Boolean      @default(false) // overallScore >= 0.85
-  excludedFromDatasets  Boolean      @default(false) // overallScore < 0.5
-  
-  // Calculation metadata
-  calculatedAt          DateTime     @default(now())
-  modelVersions         Json?        // { yolo: "8.0", whisper: "large-v3", ... }
-}
-
-// Dataset Manifest for versioned delivery
-model DatasetManifest {
-  id              String       @id @default(uuid())
-  datasetId       String
-  dataset         Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  
-  version         String       // Semantic versioning: 1.0.0
-  hours           Float
-  contributorCount Int
-  assetCount      Int
-  
-  annotationTypes String[]     // [actions, failures, speech, etc.]
-  modalities      String[]     // [video, audio]
-  
-  // Manifest content
-  manifestJson    Json         // Full manifest data
-  
-  // Change tracking
-  changeType      String?      // minor (annotation update), major (schema change)
-  previousVersion String?
-  changelog       String?      @db.Text
-  
-  createdAt       DateTime     @default(now())
-  
-  @@unique([datasetId, version])
-  @@index([datasetId])
-}
-
-// Provenance Record for compliance
-model ProvenanceRecord {
-  id                String       @id @default(uuid())
-  mediaAssetId      String
-  mediaAsset        MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  // File provenance
-  originalHash      String       // SHA-256
-  originalFilename  String
-  originalSizeBytes BigInt
-  
-  // Contributor provenance
-  contributorId     String
-  agreementId       String?      // Link to ConsentRecord
-  
-  // Capture context
-  uploadTimestamp   DateTime
-  ipRegion          String?
-  deviceFingerprint String?
-  
-  // Annotation provenance
-  annotationModels  Json         // { model_name: version }
-  annotationRuns    Json?        // [{ run_id, timestamp, models }]
-  
-  // Audit trail
-  accessLog         Json?        // [{ accessor, timestamp, action }]
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  
-  @@index([mediaAssetId])
-  @@index([contributorId])
-}
-
-// Annotation Pipeline Job (orchestration)
-model AnnotationPipelineJob {
-  id            String         @id @default(uuid())
-  mediaAssetId  String
-  mediaAsset    MediaAsset     @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  pipelineType  PipelineType
-  status        JobStatus      @default(QUEUED)
-  progress      Int            @default(0)
-  
-  // Stage tracking
-  currentStage  String?        // preprocessing, hand_detection, object_detection, etc.
-  stagesCompleted String[]     @default([])
-  
-  // Results summary
-  annotationCounts Json?       // { hand_detections: 1234, objects: 567, ... }
-  
-  // Timing
-  startedAt     DateTime?
-  completedAt   DateTime?
-  errorMessage  String?
-  
-  // Retry tracking
-  retryCount    Int            @default(0)
-  maxRetries    Int            @default(3)
-  
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  
-  @@index([status])
-  @@index([mediaAssetId])
-}
-
 enum PipelineType {
-  VIDEO_FULL           // All video annotations
-  AUDIO_FULL           // All audio annotations
-  VIDEO_AUDIO_FULL     // Both pipelines
-  VIDEO_OBJECTS_ONLY   // Just object detection
-  VIDEO_ACTIONS_ONLY   // Just action recognition
-  AUDIO_ASR_ONLY       // Just transcription
-}
-
-// ============================================
-// COMMERCIAL & LAB-FACING METADATA
-// ============================================
-
-// A. Dataset Commercialization Metadata
-model DatasetCommercialMetadata {
-  id                      String       @id @default(uuid())
-  datasetId               String       @unique
-  dataset                 Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  
-  // Use case targeting
-  intendedUse             String[]     // imitation_learning, long_horizon_planning, failure_recovery
-  notSuitableFor          String[]     // facial_recognition, biometric_identification
-  
-  // Quality signals
-  trainingReadinessScore  Float        // 0-1 score for model training readiness
-  estimatedModelGain      String?      // qualitative, quantitative
-  
-  // Bias disclosure
-  knownBiases             String[]     // right_hand_dominant, indoor_lighting_only
-  
-  // I. Differentiation flags
-  containsFailureRecovery Boolean      @default(false)
-  longHorizonSequences    Boolean      @default(false)
-  humanSkillVariance      Boolean      @default(false)
-  rightsCleared           Boolean      @default(true)
-  multiViewCapture        Boolean      @default(false)
-  temporalConsistency     Boolean      @default(true)
-  
-  // H. Recommended splits
-  trainSplit              Float        @default(0.7)
-  validationSplit         Float        @default(0.15)
-  testSplit               Float        @default(0.15)
-  splitMethod             String       @default("by_contributor") // by_contributor, random, temporal
-  
-  // J. Extension paths
-  canAddContributors      Boolean      @default(true)
-  canAddObjectIdentity    Boolean      @default(true)
-  canAddMultiView         Boolean      @default(false)
-  canAddLongerSessions    Boolean      @default(true)
-  
-  // K. Auto-generated summary
-  oneLiner                String?
-  bestFor                 String[]     // robotics_imitation, planning_models
-  notFor                  String[]     // speech_only_models
-  
-  createdAt               DateTime     @default(now())
-  updatedAt               DateTime     @updatedAt
-}
-
-// B. Contributor Skill Profiling (per session)
-model ContributorSkillProfile {
-  id                    String       @id @default(uuid())
-  sessionId             String       @unique
-  session               CaptureSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
-  // Skill inference
-  estimatedSkillLevel   SkillLevel
-  inferenceMethod       String       @default("action_speed_variance_plus_error_rate")
-  confidence            Float
-  
-  // Derived metrics
-  avgActionDuration     Float?       // ms between actions
-  errorRate             Float?       // errors per minute
-  recoveryEfficiency    Float?       // 0-1 how quickly they recover
-  
-  // Temporal progression
-  skillProgression      Json?        // [{ timestamp, skill_level }] for curriculum learning
-  
-  createdAt             DateTime     @default(now())
+  VIDEO_FULL
+  AUDIO_FULL
+  VIDEO_AUDIO_FULL
+  VIDEO_OBJECTS_ONLY
+  VIDEO_ACTIONS_ONLY
+  AUDIO_ASR_ONLY
 }
 
 enum SkillLevel {
   NOVICE
   INTERMEDIATE
   EXPERT
-}
-
-// C. Cross-Session Action Normalization
-model ActionNormalization {
-  id                  String       @id @default(uuid())
-  
-  canonicalAction     String       // attach, detach, rotate, etc.
-  rawVariants         String[]     // snap, press, connect
-  mappingConfidence   Float
-  
-  // Scope
-  datasetScope        String?      // null = global, or specific dataset
-  
-  // Usage stats
-  occurrenceCount     Int          @default(0)
-  
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  
-  @@unique([canonicalAction, datasetScope])
-}
-
-// D. Temporal Complexity Metrics (per session/asset)
-model TaskComplexityMetrics {
-  id                    String       @id @default(uuid())
-  mediaAssetId          String       @unique
-  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  totalSteps            Int
-  branchingFactor       Int          // parallel paths / choices
-  avgStepDurationMs     Float
-  complexityScore       Float        // 0-1 normalized
-  
-  // Extended metrics
-  longestSequence       Int?         // steps without branching
-  failureRecoveryCount  Int?         // number of failure+recovery cycles
-  
-  createdAt             DateTime     @default(now())
-}
-
-// E. Extended Failure Taxonomy
-model ExtendedFailureEvent {
-  id                    String       @id @default(uuid())
-  mediaAssetId          String
-  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  timestampMs           Float
-  failureType           ExtendedFailureType
-  severity              FailureSeverity
-  humanCorrectionTimeMs Float?
-  
-  // Context
-  precedingAction       String?
-  recoveryAction        String?
-  
-  // Model info
-  confidence            Float
-  modelName             String?
-  modelVersion          String?
-  
-  createdAt             DateTime     @default(now())
-  
-  @@index([mediaAssetId])
-  @@index([failureType])
 }
 
 enum ExtendedFailureType {
@@ -1412,102 +1147,149 @@ enum FailureSeverity {
   HIGH
 }
 
-// F. Audio Linguistic Variation Metadata
-model LinguisticFeatures {
-  id                    String       @id @default(uuid())
-  mediaAssetId          String       @unique
-  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  speechRateWpm         Float        // words per minute
-  prosodyVariance       Float        // 0-1 expressiveness
-  pronunciationEntropy  Float        // 0-1 variation in pronunciation
-  
-  // Extended features
-  avgPauseDurationMs    Float?
-  fillerWordRate        Float?       // uhm, uh per minute
-  
-  createdAt             DateTime     @default(now())
-}
-
-// G. Script Alignment Score
-model ScriptAlignment {
-  id                    String       @id @default(uuid())
-  mediaAssetId          String       @unique
-  mediaAsset            MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
-  
-  expectedTextId        String       // script_v1, harvard_sentences, etc.
-  deviations            Int          // number of word deviations
-  alignmentScore        Float        // 0-1
-  
-  // Detailed deviation info
-  deviationDetails      Json?        // [{ position, expected, actual }]
-  
-  createdAt             DateTime     @default(now())
-}
-
-// Dataset Auto-Summary (K - stored separately for quick retrieval)
-model DatasetAutoSummary {
-  id                    String       @id @default(uuid())
-  datasetId             String       @unique
-  dataset               Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  
-  oneLiner              String       // "Human long-horizon LEGO assembly with failure recovery"
-  bestFor               String[]     // robotics_imitation, planning_models
-  notFor                String[]     // speech_only_models
-  
-  totalHours            Float
-  totalContributors     Int
-  totalAssets           Int
-  
-  // Key stats for sales
-  avgQualityScore       Float?
-  failureRecoveryHours  Float?       // Hours of failure+recovery data
-  skillVarianceRange    String?      // "novice to expert"
-  
-  // Generated at
-  generatedAt           DateTime     @default(now())
-  generationModel       String?      // AI model used to generate summary
-}
-
-// ============================================
-// HITL QUALITY PIPELINE: STAGING BIN
-// ============================================
-
 enum StagingStatus {
-  PENDING           // Awaiting human QA review
-  APPROVED          // Ready for annotation  
-  REJECTED          // Bad quality, will not process
-  IN_ANNOTATION     // Annotation in progress
-  PENDING_REVIEW    // Annotation complete, awaiting final review
-  COMPLETED         // Dataset module generated
+  PENDING
+  APPROVED
+  REJECTED
+  IN_ANNOTATION
+  PENDING_REVIEW
+  COMPLETED
 }
 
-model StagingBinEntry {
-  id              String        @id @default(uuid())
-  mediaAssetId    String        @unique
-  mediaAsset      MediaAsset    @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+// --- HARBOR CONTRIBUTOR PIPELINE EXTENSIONS ---
+
+enum ContributorStatus {
+  APPLIED
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ContributorDatasetType {
+  LEGO
+  AUDIO
+}
+
+enum ContributorMediaType {
+  VIDEO
+  AUDIO
+}
+
+enum SubmissionStatus {
+  UPLOADED
+  PROCESSING
+  ANNOTATED
+  REVIEWED
+}
+
+enum ReviewVerdict {
+  APPROVED
+  REJECTED
+  PARTIAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SCHEDULED
+  PAID
+}
+
+model Contributor {
+  id            String          @id @default(uuid())
+  userId        String          @unique
+  email         String          @unique
+  country       String?
+  deviceType    String?
+  status        ContributorStatus @default(APPLIED)
+  consentSigned Boolean         @default(false)
+  appliedAt     DateTime?
+  approvedAt    DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   
-  // QA Status
-  status          StagingStatus @default(PENDING)
-  reviewerId      String?
-  reviewNotes     String?
-  qualityScore    Float?        // 0-1 automated quality check
+  user          User            @relation(fields: [userId], references: [id])
+  applications  ContributorApplication[]
+  submissions   Submission[]
+  payments      ContributorPayment[]
+}
+
+model ContributorApplication {
+  id               String            @id @default(uuid())
+  contributorId    String
+  datasetType      ContributorDatasetType
+  eligibilityFlags Json?
+  adminNotes       String?
+  status           ApplicationStatus @default(PENDING)
+  submittedAt      DateTime          @default(now())
+  reviewedAt       DateTime?
   
-  // Rejection handling
-  rejectionReason String?       // "blur", "poor_lighting", "off_topic", "audio_issue"
+  contributor      Contributor       @relation(fields: [contributorId], references: [id])
+}
+
+model Submission {
+  id              String           @id @default(uuid())
+  contributorId   String
+  datasetId       String?
+  mediaType       ContributorMediaType
+  durationSeconds Int?
+  resolution      String?
+  filePath        String
+  uploadStatus    SubmissionStatus @default(UPLOADED)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   
-  // Annotation tracking
-  annotationJobId String?       // Reference to AnnotationPipelineJob
-  labSchemaOutput Json?         // Lab-compliant annotation output
+  contributor     Contributor      @relation(fields: [contributorId], references: [id])
+  dataset         Dataset?         @relation(fields: [datasetId], references: [id])
   
-  // PDF Module
-  pdfModuleUrl    String?       // S3 URL to generated PDF
-  pdfGeneratedAt  DateTime?
+  autoAnnotations AutoAnnotation[]
+  humanReviews    HumanReview[]
+  payments        ContributorPayment[]
+}
+
+model AutoAnnotation {
+  id               String     @id @default(uuid())
+  submissionId     String
+  modelUsed        String?
+  actionLabels     Json?
+  objectDetections Json?
+  failureEvents    Json?
+  qualityScore     Float?
+  confidenceScore  Float?
+  createdAt        DateTime   @default(now())
   
-  createdAt       DateTime      @default(now())
-  reviewedAt      DateTime?
-  completedAt     DateTime?
+  submission       Submission @relation(fields: [submissionId], references: [id])
+}
+
+model HumanReview {
+  id             String        @id @default(uuid())
+  submissionId   String
+  reviewerId     String?
+  verdict        ReviewVerdict
+  reviewerNotes  String?
+  additionalTags Json?
+  reviewedAt     DateTime      @default(now())
   
-  @@index([status])
-  @@index([reviewerId])
+  submission     Submission    @relation(fields: [submissionId], references: [id])
+  reviewer       User?         @relation(fields: [reviewerId], references: [id])
+}
+
+model ContributorPayment {
+  id            String        @id @default(uuid())
+  contributorId String
+  submissionId  String
+  amountUsd     Float
+  status        PaymentStatus @default(PENDING)
+  eligibleAt    DateTime?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  contributor   Contributor   @relation(fields: [contributorId], references: [id])
+  submission    Submission    @relation(fields: [submissionId], references: [id])
 }

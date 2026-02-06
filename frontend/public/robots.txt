@@ -4,8 +4,8 @@
 User-agent: *
 Allow: /
 
-# Sitemap location - Points to clean index only
-Sitemap: https://harborml.com/sitemap-index.xml
+# Sitemap location - Points to dynamic backend sitemap
+Sitemap: https://harborml.com/api/seo/sitemap-index.xml
 
 # Allow core content paths
 Allow: /tools/
