@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
-import AuthLayout from '../../components/layouts/AuthLayout';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import AuthSplitLayout from '../../components/layouts/AuthSplitLayout';
 import { authStore } from '../../lib/authStore';
 
 const Signup: React.FC = () => {
@@ -60,13 +60,11 @@ const Signup: React.FC = () => {
     };
 
     return (
-        <AuthLayout>
-            <div className="text-center mb-8">
-                <h1 className="text-2xl font-serif text-[#1A1A1A] mb-2">Create your Harbor account</h1>
-                <p className="text-stone-500 text-sm">
-                    Use a work email. Personal domains may require manual review.
-                </p>
-            </div>
+        <AuthSplitLayout
+            title="Create your account"
+            subtitle="Use a work email. Personal domains may require manual review."
+            imageSrc="/auth-side-image.png"
+        >
 
             {errors.form && (
                 <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
@@ -80,14 +78,19 @@ const Signup: React.FC = () => {
                     <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-2">
                         Work Email
                     </label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={`w-full bg-white border ${errors.email ? 'border-red-400' : 'border-stone-200'} rounded-lg px-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors`}
-                        placeholder="you@company.com"
-                    />
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Mail size={18} className="text-stone-400" />
+                        </div>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className={`w-full bg-white border ${errors.email ? 'border-red-400' : 'border-stone-200'} rounded-lg pl-10 pr-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors`}
+                            placeholder="you@company.com"
+                        />
+                    </div>
                     {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
 
@@ -97,21 +100,26 @@ const Signup: React.FC = () => {
                         Password
                     </label>
                     <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Lock size={18} className="text-stone-400" />
+                        </div>
                         <input
                             type={showPassword ? 'text' : 'password'}
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className={`w-full bg-white border ${errors.password ? 'border-red-400' : 'border-stone-200'} rounded-lg px-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors pr-12`}
+                            className={`w-full bg-white border ${errors.password ? 'border-red-400' : 'border-stone-200'} rounded-lg pl-10 pr-12 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors`}
                             placeholder="8+ characters"
                         />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 inset-y-0 flex items-center text-stone-400 hover:text-stone-600"
-                        >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="text-stone-400 hover:text-stone-600 focus:outline-none"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </div>
                     {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                 </div>
@@ -121,14 +129,19 @@ const Signup: React.FC = () => {
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-stone-700 mb-2">
                         Confirm Password
                     </label>
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="confirmPassword"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`w-full bg-white border ${errors.confirmPassword ? 'border-red-400' : 'border-stone-200'} rounded-lg px-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors`}
-                        placeholder="Confirm your password"
-                    />
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Lock size={18} className="text-stone-400" />
+                        </div>
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            id="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className={`w-full bg-white border ${errors.confirmPassword ? 'border-red-400' : 'border-stone-200'} rounded-lg pl-10 pr-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors`}
+                            placeholder="Confirm your password"
+                        />
+                    </div>
                     {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
                 </div>
 
@@ -151,7 +164,7 @@ const Signup: React.FC = () => {
                     </Link>
                 </p>
             </div>
-        </AuthLayout>
+        </AuthSplitLayout>
     );
 };
 

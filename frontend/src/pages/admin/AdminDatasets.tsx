@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeader, DataTable, Tabs, StatusBadge, Button, KPICard } from '../../components/admin/AdminComponents';
+import { DatasetQADashboard } from '../../components/qa';
 
 interface Dataset {
     id: string;
@@ -14,10 +15,77 @@ interface Dataset {
     clients: number;
     createdAt: string;
     videos?: any[]; // Raw backend videos
+    qaScore?: {
+        overallScore: number;
+        medianAssetScore: number;
+        meanAssetScore: number;
+        lowQualityPenalty: number;
+        status: 'PRODUCTION_GRADE' | 'TRAINING_READY' | 'RESEARCH_ONLY' | 'NOT_DELIVERABLE';
+        distributionBuckets: {
+            '90-100': number;
+            '80-89': number;
+            '70-79': number;
+            '<70': number;
+        };
+        totalAssets: number;
+        exportReady: boolean;
+        lastCalculatedAt: string;
+    };
 }
 
 export function AdminDatasets() {
-    const [datasets, setDatasets] = useState<Dataset[]>([]);
+    const [datasets, setDatasets] = useState<Dataset[]>([
+        {
+            id: 'd_lego_v1',
+            name: 'LEGO Assembly Instructions',
+            vertical: 'ROBOTICS',
+            modality: ['video', 'annotation'],
+            hours: 450,
+            assetCount: 1240,
+            license: 'COMMERCIAL',
+            status: 'PUBLISHED',
+            revenue: 12500,
+            clients: 8,
+            createdAt: '2026-01-15',
+            videos: [],
+            qaScore: {
+                overallScore: 91,
+                medianAssetScore: 92.5,
+                meanAssetScore: 89.4,
+                lowQualityPenalty: 0,
+                status: 'PRODUCTION_GRADE',
+                distributionBuckets: { '90-100': 45, '80-89': 30, '70-79': 15, '<70': 5 },
+                totalAssets: 95,
+                exportReady: true,
+                lastCalculatedAt: new Date().toISOString()
+            }
+        },
+        {
+            id: 'd_audio_conversational',
+            name: 'Multilingual Conversational Audio',
+            vertical: 'SPEECH',
+            modality: ['audio', 'transcription'],
+            hours: 1200,
+            assetCount: 5600,
+            license: 'COMMERCIAL',
+            status: 'DRAFT',
+            revenue: 0,
+            clients: 0,
+            createdAt: '2026-02-01',
+            videos: [],
+            qaScore: {
+                overallScore: 68,
+                medianAssetScore: 72.0,
+                meanAssetScore: 65.5,
+                lowQualityPenalty: 25,
+                status: 'NOT_DELIVERABLE',
+                distributionBuckets: { '90-100': 5, '80-89': 15, '70-79': 40, '<70': 40 },
+                totalAssets: 100,
+                exportReady: false,
+                lastCalculatedAt: new Date().toISOString()
+            }
+        }
+    ]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
     const [selectedDataset, setSelectedDataset] = useState<any | null>(null);
@@ -44,7 +112,18 @@ export function AdminDatasets() {
                 revenue: d.price * 10, // Mock revenue logic
                 clients: Math.floor(Math.random() * 20),
                 createdAt: new Date(d.createdAt).toISOString().split('T')[0],
-                videos: d.videos // Keep raw videos for details
+                videos: d.videos, // Keep raw videos for details
+                qaScore: {
+                    overallScore: 91,
+                    medianAssetScore: 92.5,
+                    meanAssetScore: 89.4,
+                    lowQualityPenalty: 0,
+                    status: 'PRODUCTION_GRADE',
+                    distributionBuckets: { '90-100': 45, '80-89': 30, '70-79': 15, '<70': 5 },
+                    totalAssets: 95,
+                    exportReady: true,
+                    lastCalculatedAt: new Date().toISOString()
+                }
             }));
             setDatasets(mapped);
         } catch (e) {
@@ -197,6 +276,25 @@ export function AdminDatasets() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {selectedDataset && selectedDataset.qaScore && (
+                <div className="fixed inset-0 z-[101] pointer-events-none flex items-center justify-center">
+                    <div className="pointer-events-auto w-[600px] shadow-2xl">
+                        <DatasetQADashboard
+                            data={selectedDataset.qaScore}
+                            datasetName={selectedDataset.name}
+                            onRecalculate={() => alert('Recalculating score...')}
+                            onExport={() => alert('Exporting...')}
+                        />
+                        <button
+                            onClick={() => setSelectedDataset(null)}
+                            className="absolute top-[-40px] right-0 text-white bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full text-sm backdrop-blur"
+                        >
+                            Close Overlay
+                        </button>
                     </div>
                 </div>
             )}

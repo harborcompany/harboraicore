@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, CheckCircle, Lock, Loader2, AlertCircle } from 'lucide-react';
-import AuthLayout from '../../components/layouts/AuthLayout';
+import AuthSplitLayout from '../../components/layouts/AuthSplitLayout';
 import { authStore } from '../../lib/authStore';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -80,18 +80,17 @@ const Reset: React.FC = () => {
 
     if (submitted) {
         return (
-            <AuthLayout>
+            <AuthSplitLayout
+                title="Check your email"
+                subtitle={`We've sent a password reset link to ${email}.`}
+                imageSrc="/auth-side-image.png"
+            >
                 <div className="text-center">
                     <div className="mb-6 flex justify-center">
-                        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
                             <CheckCircle className="w-8 h-8 text-green-600" />
                         </div>
                     </div>
-
-                    <h1 className="text-2xl font-serif text-[#1A1A1A] mb-2">Check your email</h1>
-                    <p className="text-stone-500 text-sm mb-8">
-                        We've sent a password reset link to {email}.
-                    </p>
 
                     <Link
                         to="/auth/login"
@@ -100,20 +99,17 @@ const Reset: React.FC = () => {
                         Back to sign in
                     </Link>
                 </div>
-            </AuthLayout>
+            </AuthSplitLayout>
         );
     }
 
     if (mode === 'update') {
         return (
-            <AuthLayout>
-                <div className="text-center mb-8">
-                    <h1 className="text-2xl font-serif text-[#1A1A1A] mb-2">Set new password</h1>
-                    <p className="text-stone-500 text-sm">
-                        Enter your new password below.
-                    </p>
-                </div>
-
+            <AuthSplitLayout
+                title="Set new password"
+                subtitle="Enter your new password below."
+                imageSrc="/auth-side-image.png"
+            >
                 {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
                         <AlertCircle size={20} />
@@ -124,25 +120,35 @@ const Reset: React.FC = () => {
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-stone-700 mb-1.5">New Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-white border border-stone-200 rounded-lg px-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors"
-                            placeholder="••••••••"
-                            required
-                        />
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Lock size={18} className="text-stone-400" />
+                            </div>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent outline-none transition-all"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-stone-700 mb-1.5">Confirm New Password</label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full bg-white border border-stone-200 rounded-lg px-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors"
-                            placeholder="••••••••"
-                            required
-                        />
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Lock size={18} className="text-stone-400" />
+                            </div>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent outline-none transition-all"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
                     </div>
                     <button
                         type="submit"
@@ -152,25 +158,16 @@ const Reset: React.FC = () => {
                         {loading ? 'Updating...' : 'Update Password'}
                     </button>
                 </form>
-            </AuthLayout>
+            </AuthSplitLayout>
         );
     }
 
     return (
-        <AuthLayout>
-            <div className="text-center mb-8">
-                <div className="mb-6 flex justify-center">
-                    <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center">
-                        <Mail className="w-8 h-8 text-stone-600" />
-                    </div>
-                </div>
-
-                <h1 className="text-2xl font-serif text-[#1A1A1A] mb-2">Reset your password</h1>
-                <p className="text-stone-500 text-sm">
-                    Enter your email and we'll send you a reset link.
-                </p>
-            </div>
-
+        <AuthSplitLayout
+            title="Reset your password"
+            subtitle="Enter your email and we'll send you a reset link."
+            imageSrc="/auth-side-image.png"
+        >
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
                     <AlertCircle size={20} />
@@ -181,18 +178,23 @@ const Reset: React.FC = () => {
             <form onSubmit={handleRequestReset} className="space-y-5">
                 {/* Email */}
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
                         Email
                     </label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-white border border-stone-200 rounded-lg px-4 py-3 text-[#1A1A1A] placeholder-stone-400 focus:outline-none focus:border-[#1A1A1A] transition-colors"
-                        placeholder="you@company.com"
-                        required
-                    />
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Mail size={18} className="text-stone-400" />
+                        </div>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 border border-stone-200 rounded-lg focus:ring-2 focus:ring-[#1A1A1A] focus:border-transparent outline-none transition-all"
+                            placeholder="you@company.com"
+                            required
+                        />
+                    </div>
                 </div>
 
                 {/* Submit */}
@@ -201,7 +203,14 @@ const Reset: React.FC = () => {
                     disabled={loading}
                     className="w-full bg-[#1A1A1A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#333] transition-colors disabled:opacity-50"
                 >
-                    {loading ? 'Sending...' : 'Send Reset Link'}
+                    {loading ? (
+                        <div className="flex items-center justify-center gap-2">
+                            <Loader2 size={18} className="animate-spin" />
+                            <span>Sending...</span>
+                        </div>
+                    ) : (
+                        'Send Reset Link'
+                    )}
                 </button>
             </form>
 
@@ -211,7 +220,7 @@ const Reset: React.FC = () => {
                     Back to sign in
                 </Link>
             </div>
-        </AuthLayout>
+        </AuthSplitLayout>
     );
 };
 

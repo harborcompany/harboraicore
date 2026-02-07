@@ -1,72 +1,74 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './src/lib/authStore';
+import { useAuth } from './lib/authStore';
+import { RequireAuth } from './components/auth/RequireAuth';
+import { RequireAdmin } from './components/auth/RequireAdmin';
 
 // Public Layout
-import Layout from './src/components/Layout';
+import Layout from './components/Layout';
 
 // Public Pages
 // Public Pages
-import Landing from './src/pages/Landing';
-import Product from './src/pages/Product';
-import Token from './src/pages/Token';
-import Datasets from './src/pages/Datasets';
-import Ads from './src/pages/AdsPage';
-import Infrastructure from './src/pages/Infrastructure';
-import Pricing from './src/pages/Pricing';
-import Contact from './src/pages/Contact';
-import Blog from './src/pages/Blog';
-import BlogPost from './src/pages/BlogPost';
-import SeoLanding from './src/pages/SeoLanding';
-import About from './src/pages/About';
-import Docs from './src/pages/Docs';
-import HowItWorks from './src/pages/HowItWorks';
-import UseCases from './src/pages/UseCases';
-import Ambassadors from './src/pages/Ambassadors';
-import Trust from './src/pages/Trust';
-import Terms from './src/pages/Terms';
-import Privacy from './src/pages/Privacy';
-import StatusPage from './src/pages/Status';
-import SeoPage from './src/pages/SeoPage';
-import ModelDataRequests from './src/pages/ModelDataRequests';
-import Jobs from './src/pages/Jobs';
-import JobApplication from './src/pages/JobApplication';
+import Landing from './pages/Landing';
+import Product from './pages/Product';
+import Token from './pages/Token';
+import Datasets from './pages/Datasets';
+import Ads from './pages/AdsPage';
+import Infrastructure from './pages/Infrastructure';
+import Pricing from './pages/Pricing';
+import Contact from './pages/Contact';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
+import SeoLanding from './pages/SeoLanding';
+import About from './pages/About';
+import Docs from './pages/Docs';
+import HowItWorks from './pages/HowItWorks';
+import UseCases from './pages/UseCases';
+import Ambassadors from './pages/Ambassadors';
+import Trust from './pages/Trust';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import StatusPage from './pages/Status';
+import SeoPage from './pages/SeoPage';
+import ModelDataRequests from './pages/ModelDataRequests';
+import Jobs from './pages/Jobs';
+import JobApplication from './pages/JobApplication';
 
 // Auth Pages
-import AuthGateway from './src/pages/auth/AuthGateway';
-import Signup from './src/pages/auth/Signup';
-import Verify from './src/pages/auth/Verify';
-import Login from './src/pages/auth/Login';
-import Reset from './src/pages/auth/Reset';
+import AuthGateway from './pages/auth/AuthGateway';
+import Signup from './pages/auth/Signup';
+import Verify from './pages/auth/Verify';
+import Login from './pages/auth/Login';
+import Reset from './pages/auth/Reset';
 
 // Onboarding Pages
-import Intent from './src/pages/onboarding/Intent';
-import Organization from './src/pages/onboarding/Organization';
-import DataTypes from './src/pages/onboarding/DataTypes';
-import Consent from './src/pages/onboarding/Consent';
-import LegoExperience from './src/pages/onboarding/LegoExperience';
-import Complete from './src/pages/onboarding/Complete';
+import Intent from './pages/onboarding/Intent';
+import Organization from './pages/onboarding/Organization';
+import DataTypes from './pages/onboarding/DataTypes';
+import Consent from './pages/onboarding/Consent';
+import LegoExperience from './pages/onboarding/LegoExperience';
+import Complete from './pages/onboarding/Complete';
 
 // App Layout & Pages (Asymmetric)
-import AppLayout from './src/components/layouts/AppLayout';
-import Overview from './src/pages/app/Overview';
-import ContributorDashboard from './src/pages/app/ContributorDashboard';
-import EnterpriseDashboard from './src/pages/app/EnterpriseDashboard';
-import DatasetEngine from './src/pages/app/DatasetEngine';
-import DatasetView from './src/pages/app/DatasetView';
-import Inbox from './src/pages/app/Inbox';
-import MarketplacePage from './src/pages/app/MarketplacePage';
-import AdsPage from './src/pages/app/AdsPage';
-import ContributePage from './src/pages/app/ContributePage';
-import ApiPage from './src/pages/app/ApiPage';
-import Settings from './src/pages/app/Settings';
-import MeetingPage from './src/pages/app/MeetingPage';
+import AppLayout from './components/layouts/AppLayout';
+import Overview from './pages/app/Overview';
+import ContributorDashboard from './pages/app/ContributorDashboard';
+import EnterpriseDashboard from './pages/app/EnterpriseDashboard';
+import DatasetEngine from './pages/app/DatasetEngine';
+import DatasetView from './pages/app/DatasetView';
+import Inbox from './pages/app/Inbox';
+import MarketplacePage from './pages/app/MarketplacePage';
+import AdsPage from './pages/app/AdsPage';
+import ContributePage from './pages/app/ContributePage';
+import ApiPage from './pages/app/ApiPage';
+import Settings from './pages/app/Settings';
+import MeetingPage from './pages/app/MeetingPage';
 
 // Docs Components
-import DocsLayout from './src/layouts/DocsLayout';
-import DocsIntroduction from './src/pages/docs/Introduction';
-import DocsQuickstart from './src/pages/docs/Quickstart';
-import DocsApiOverview from './src/pages/docs/ApiOverview';
+import DocsLayout from './layouts/DocsLayout';
+import DocsIntroduction from './pages/docs/Introduction';
+import DocsQuickstart from './pages/docs/Quickstart';
+import DocsApiOverview from './pages/docs/ApiOverview';
 
 // Admin Panel Pages
 import {
@@ -86,7 +88,7 @@ import {
   AdminSettings,
   AdminContributors,
   AdminSubmissionReview,
-} from './src/pages/admin';
+} from './pages/admin';
 
 // ScrollToTop component
 const ScrollToTopWrapper: React.FC = () => {
@@ -99,17 +101,7 @@ const ScrollToTopWrapper: React.FC = () => {
   return null;
 };
 
-// Auth Guard - Redirects unauthenticated users
-const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const user = useAuth();
-  const location = useLocation();
 
-  if (!user.authenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
-
-  return <>{children}</>;
-};
 
 // Onboarding Guard - Redirects to onboarding if incomplete
 const RequireOnboarding: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -202,7 +194,7 @@ const App: React.FC = () => {
         <Route path="/onboarding/*" element={<Navigate to="/app" replace />} />
 
         {/* Protected App Routes - Role Based */}
-        <Route path="/app" element={<RequireOnboarding><AppLayout /></RequireOnboarding>}>
+        <Route path="/app" element={<RequireAuth><AppLayout /></RequireAuth>}>
           <Route index element={<Overview />} />
 
           {/* Supply Side (Contributor) */}
@@ -223,7 +215,13 @@ const App: React.FC = () => {
         </Route>
 
         {/* Admin Panel Routes - Internal Only */}
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminLayout />
+            </RequireAdmin>
+          </RequireAuth>
+        }>
           <Route index element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="contributors" element={<AdminContributors />} />

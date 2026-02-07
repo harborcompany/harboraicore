@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
-import AuthLayout from '../../components/layouts/AuthLayout';
+import AuthSplitLayout from '../../components/layouts/AuthSplitLayout';
 import { authStore } from '../../lib/authStore';
 
 const Login = () => {
@@ -32,13 +32,11 @@ const Login = () => {
     }, []);
 
     return (
-        <AuthLayout>
-            <div className="text-center mb-8">
-                <h1 className="text-2xl font-serif text-[#1A1A1A] mb-2">Welcome back</h1>
-                <p className="text-stone-500 text-sm">
-                    Sign in to your Harbor account
-                </p>
-            </div>
+        <AuthSplitLayout
+            title="Welcome back"
+            subtitle="Sign in to your Harbor account"
+            imageSrc="/auth-side-image.png"
+        >
 
             {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
@@ -51,7 +49,9 @@ const Login = () => {
                 <div>
                     <label className="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
                     <div className="relative">
-                        <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Mail size={18} className="text-stone-400" />
+                        </div>
                         <input
                             type="email"
                             value={email}
@@ -66,7 +66,9 @@ const Login = () => {
                 <div>
                     <label className="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
                     <div className="relative">
-                        <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Lock size={18} className="text-stone-400" />
+                        </div>
                         <input
                             type="password"
                             value={password}
@@ -114,7 +116,7 @@ const Login = () => {
             </div>
 
 
-        </AuthLayout>
+        </AuthSplitLayout>
     );
 };
 

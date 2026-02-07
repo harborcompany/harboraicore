@@ -96,6 +96,7 @@ model MediaAsset {
   transcriptSegments    TranscriptSegment[]
   uploadMetadata        UploadMetadata?
   annotations           UserAnnotation[]
+  qaScore               AssetQAScore?
 }
 
 model AssetAuditLog {
@@ -247,6 +248,8 @@ model Dataset {
   manifests           DatasetManifest[]
   mediaAssets         MediaAsset[]
   outreachAssets      OutreachAsset[]
+  submissions         Submission[]
+  qaScore             DatasetQAScore?
 }
 
 model DatasetAccess {
@@ -1292,4 +1295,74 @@ model ContributorPayment {
   
   contributor   Contributor   @relation(fields: [contributorId], references: [id])
   submission    Submission    @relation(fields: [submissionId], references: [id])
+}
+
+// --- HARBOR QA SCORING SYSTEM ---
+
+enum AssetQAStatus {
+  APPROVED
+  NEEDS_REVIEW
+  REJECTED
+}
+
+enum DatasetQAStatus {
+  PRODUCTION_GRADE
+  TRAINING_READY
+  RESEARCH_ONLY
+  NOT_DELIVERABLE
+}
+
+model AssetQAScore {
+  id                String        @id @default(uuid())
+  mediaAssetId      String        @unique
+  
+  // 5-Component Scoring (0-100 each)
+  accuracyScore     Float         @default(0)  // Weight: 35%
+  consistencyScore  Float         @default(0)  // Weight: 20%
+  technicalScore    Float         @default(0)  // Weight: 20%
+  completenessScore Float         @default(0)  // Weight: 15%
+  confidenceScore   Float         @default(0)  // Weight: 10%
+  
+  // Computed Overall
+  overallScore      Float         @default(0)  // Weighted sum 0-100
+  status            AssetQAStatus @default(NEEDS_REVIEW)
+  
+  // Critical Failure Handling
+  criticalFailure   Boolean       @default(false)
+  failureReasons    Json?         // Array of failure reason strings
+  
+  // Metadata
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  mediaAsset        MediaAsset    @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+}
+
+model DatasetQAScore {
+  id                  String          @id @default(uuid())
+  datasetId           String          @unique
+  
+  // Aggregate Metrics
+  medianAssetScore    Float           @default(0)
+  meanAssetScore      Float           @default(0)
+  lowQualityPenalty   Float           @default(0)  // % assets below 70
+  
+  // Computed Overall
+  overallScore        Float           @default(0)  // Weighted: 50% median + 30% mean + 20% penalty
+  status              DatasetQAStatus @default(NOT_DELIVERABLE)
+  
+  // Distribution Buckets
+  distributionBuckets Json?           // { "90-100": 12, "80-89": 45, "70-79": 30, "<70": 8 }
+  totalAssets         Int             @default(0)
+  
+  // Export Readiness
+  exportReady         Boolean         @default(false)
+  lastCalculatedAt    DateTime        @default(now())
+  
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  
+  dataset             Dataset         @relation(fields: [datasetId], references: [id], onDelete: Cascade)
 }

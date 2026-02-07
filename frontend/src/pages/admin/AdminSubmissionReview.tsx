@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Play, Pause, Check, X, AlertTriangle, Eye, ChevronRight } from 'lucide-react';
 import { PageHeader, StatusBadge } from '../../components/admin/AdminComponents';
+import { AssetQACard } from '../../components/qa';
+
 
 export const AdminSubmissionReview: React.FC = () => {
     const [playing, setPlaying] = useState(false);
@@ -25,6 +27,17 @@ export const AdminSubmissionReview: React.FC = () => {
             failures: [
                 { time: '4:20', type: 'misalignment', severity: 'low' }
             ]
+        },
+        qaScore: {
+            overallScore: 87,
+            accuracyScore: 92,
+            consistencyScore: 85,
+            technicalScore: 94,
+            completenessScore: 100,
+            confidenceScore: 78,
+            status: 'NEEDS_REVIEW' as const,
+            criticalFailure: false,
+            failureReasons: ['Low confidence in final assembly step']
         }
     };
 
@@ -76,19 +89,7 @@ export const AdminSubmissionReview: React.FC = () => {
                 <div className="col-span-4 flex flex-col gap-6 min-h-0">
 
                     {/* Metrics Card */}
-                    <div className="bg-[#141414] border border-gray-800 rounded-xl p-5">
-                        <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Quality Metrics</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <div className="text-2xl font-bold text-white mb-1">{submission.autoAnnotations.qualityScore}</div>
-                                <div className="text-xs text-gray-500">Quality Score</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-white mb-1">{(submission.autoAnnotations.confidence * 100).toFixed(0)}%</div>
-                                <div className="text-xs text-gray-500">AI Confidence</div>
-                            </div>
-                        </div>
-                    </div>
+                    <AssetQACard score={submission.qaScore} assetName="LEGO Assembly - Session 12" />
 
                     {/* Annotations List */}
                     <div className="bg-[#141414] border border-gray-800 rounded-xl flex-1 overflow-hidden flex flex-col">

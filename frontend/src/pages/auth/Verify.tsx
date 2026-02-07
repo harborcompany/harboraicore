@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, RefreshCw, CheckCircle } from 'lucide-react';
-import AuthLayout from '../../components/layouts/AuthLayout';
+import AuthSplitLayout from '../../components/layouts/AuthSplitLayout';
 import { authStore, useAuth } from '../../lib/authStore';
 
 const Verify: React.FC = () => {
@@ -40,7 +40,14 @@ const Verify: React.FC = () => {
     }, [countdown]);
 
     return (
-        <AuthLayout>
+        <AuthSplitLayout
+            title={status === 'verified' ? 'Email Verified' : 'Verify your email'}
+            subtitle={status === 'verified'
+                ? 'Redirecting to onboarding...'
+                : `We've sent a verification link to ${user.email || 'your email address'}.`
+            }
+            imageSrc="/auth-side-image.png"
+        >
             <div className="text-center">
                 {/* Icon */}
                 <div className="mb-6 flex justify-center">
@@ -54,17 +61,6 @@ const Verify: React.FC = () => {
                         </div>
                     )}
                 </div>
-
-                <h1 className="text-2xl font-serif text-[#1A1A1A] mb-2">
-                    {status === 'verified' ? 'Email Verified' : 'Verify your email'}
-                </h1>
-
-                <p className="text-stone-500 text-sm mb-8">
-                    {status === 'verified'
-                        ? 'Redirecting to onboarding...'
-                        : `We've sent a verification link to ${user.email || 'your email address'}.`
-                    }
-                </p>
 
                 {status !== 'verified' && (
                     <>
@@ -90,7 +86,7 @@ const Verify: React.FC = () => {
                     </>
                 )}
             </div>
-        </AuthLayout>
+        </AuthSplitLayout>
     );
 };
 
