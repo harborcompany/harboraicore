@@ -10,6 +10,7 @@ import {
     Key,
     Settings,
     LogOut,
+    Menu,
     X,
     Mail
 } from 'lucide-react';
@@ -23,6 +24,7 @@ const AppLayout: React.FC = () => {
     const navigate = useNavigate();
     const user = useAuth();
     const [showBanner, setShowBanner] = React.useState(true);
+    const [showMobileMenu, setShowMobileMenu] = React.useState(false);
 
     const isContributor = user.role === 'contributor' || user.intent === 'contributor';
 
@@ -68,15 +70,135 @@ const AppLayout: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F9F9F9] flex font-sans text-[#111] antialiased selection:bg-black selection:text-white">
+        <div className="min-h-screen bg-[#F9F9F9] flex flex-col md:flex-row font-sans text-[#111] antialiased selection:bg-black selection:text-white">
             {/* Onboarding Modal Overlay */}
             {showOnboarding && <SmartOnboardingModal onComplete={handleOnboardingComplete} />}
 
             {/* API Docs Drawer */}
             <ApiDocsDrawer />
 
-            {/* Sidebar */}
-            <aside className="w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm">
+            {/* Mobile Header */}
+            <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-40">
+                <Link to="/" className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-black">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="6" cy="12" r="5" />
+                            <rect x="13" y="7" width="10" height="10" />
+                        </svg>
+                    </div>
+                    <span className="text-sm font-bold tracking-tight uppercase text-black">HARBOR</span>
+                </Link>
+                <button
+                    onClick={() => setShowMobileMenu(true)}
+                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                >
+                    <Menu size={24} />
+                </button>
+            </div>
+
+            {/* Mobile Sidebar Overlay */}
+            {showMobileMenu && (
+                <div className="fixed inset-0 z-50 md:hidden">
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in"
+                        onClick={() => setShowMobileMenu(false)}
+                    />
+                    <aside className="absolute top-0 bottom-0 left-0 w-72 bg-white border-r border-gray-200 flex flex-col shadow-xl animate-in slide-in-from-left duration-300">
+                        <div className="p-4 flex items-center justify-between border-b border-gray-100">
+                            <Link to="/" className="flex items-center gap-2 group" onClick={() => setShowMobileMenu(false)}>
+                                <div className="flex items-center gap-1 text-black">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="6" cy="12" r="5" />
+                                        <rect x="13" y="7" width="10" height="10" />
+                                    </svg>
+                                </div>
+                                <span className="text-sm font-bold tracking-tight uppercase text-black">HARBOR</span>
+                            </Link>
+                            <button
+                                onClick={() => setShowMobileMenu(false)}
+                                className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Navigation Copy */}
+                        <nav className="flex-1 p-4 space-y-0.5 overflow-y-auto">
+                            {navItems.map((item) => {
+                                const isActive = location.pathname === item.path ||
+                                    (item.path !== '/app' && location.pathname.startsWith(item.path));
+
+                                if (item.label === 'API') {
+                                    return (
+                                        <button
+                                            key={item.path}
+                                            onClick={() => {
+                                                uiStore.openApiDocs('overview');
+                                                setShowMobileMenu(false);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm text-gray-500 hover:text-[#111] hover:bg-gray-50`}
+                                        >
+                                            <item.icon size={16} strokeWidth={1.5} />
+                                            <span className="font-normal tracking-tight">{item.label}</span>
+                                        </button>
+                                    );
+                                }
+
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        onClick={() => setShowMobileMenu(false)}
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm ${isActive
+                                            ? 'bg-black text-white font-medium shadow-sm'
+                                            : 'text-gray-500 hover:text-[#111] hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <item.icon size={16} strokeWidth={isActive ? 2 : 1.5} />
+                                        <span className={isActive ? 'tracking-tight' : 'font-normal tracking-tight'}>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+
+                        {/* User Section Copy */}
+                        <div className="p-4 border-t border-gray-100">
+                            <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-xl bg-gray-50 border border-gray-100">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-black text-white flex items-center justify-center font-medium shadow-sm">
+                                    {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-gray-900 truncate">
+                                        {user.name || 'User'}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <Link
+                                    to="/app/settings"
+                                    onClick={() => setShowMobileMenu(false)}
+                                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-black hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all text-xs font-medium"
+                                >
+                                    <Settings size={16} />
+                                    Settings
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all text-xs font-medium"
+                                >
+                                    <LogOut size={16} />
+                                    Sign out
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            )}
+
+            {/* Desktop Sidebar (Hidden on Mobile) */}
+            <aside className="hidden md:flex w-72 bg-white border-r border-gray-200 flex-col shadow-sm">
                 {/* Logo */}
                 <div className="p-6 border-b border-gray-100">
                     <Link to="/" className="flex items-center gap-2 group">
@@ -96,12 +218,14 @@ const AppLayout: React.FC = () => {
                         const isActive = location.pathname === item.path ||
                             (item.path !== '/app' && location.pathname.startsWith(item.path));
 
-                        // Special handling for API to open drawer instead of navigate
                         if (item.label === 'API') {
                             return (
                                 <button
                                     key={item.path}
-                                    onClick={() => uiStore.openApiDocs('overview')}
+                                    onClick={() => {
+                                        uiStore.openApiDocs('overview');
+                                        setShowMobileMenu(false);
+                                    }}
                                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm text-gray-500 hover:text-[#111] hover:bg-gray-50`}
                                 >
                                     <item.icon size={16} strokeWidth={1.5} />
@@ -128,24 +252,34 @@ const AppLayout: React.FC = () => {
 
                 {/* User Section */}
                 <div className="p-4 border-t border-gray-100">
-                    <div className="px-4 py-2 mb-2">
-                        <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest leading-none mb-1">Signed in as</p>
-                        <p className="text-xs font-bold text-gray-800 truncate">{user.email}</p>
+                    <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-xl bg-gray-50 border border-gray-100">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-black text-white flex items-center justify-center font-medium shadow-sm">
+                            {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                                {user.name || 'User'}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        </div>
                     </div>
-                    <Link
-                        to="/app/settings"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:text-black hover:bg-gray-50 transition-colors"
-                    >
-                        <Settings size={20} />
-                        <span className="text-sm font-medium">Settings</span>
-                    </Link>
-                    <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:text-black hover:bg-gray-50 transition-colors mt-1"
-                    >
-                        <LogOut size={20} />
-                        <span className="text-sm font-medium">Sign out</span>
-                    </button>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <Link
+                            to="/app/settings"
+                            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-black hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all text-xs font-medium"
+                        >
+                            <Settings size={16} />
+                            Settings
+                        </Link>
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all text-xs font-medium"
+                        >
+                            <LogOut size={16} />
+                            Sign out
+                        </button>
+                    </div>
                 </div>
             </aside>
 
@@ -170,7 +304,7 @@ const AppLayout: React.FC = () => {
                 )}
 
                 {/* Page Content */}
-                <div className="flex-1 p-8 overflow-auto">
+                <div className="flex-1 p-8 overflow-auto animate-in fade-in slide-in-from-bottom-2 duration-500">
                     <Outlet />
                 </div>
             </main>

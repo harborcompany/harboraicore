@@ -10,6 +10,150 @@ const BlogPost = () => {
     useEffect(() => {
         // In production, this would fetch from the API: /api/blog/:slug
         const generateMockContent = () => {
+            if (slug === 'screensnap-pro-agents') {
+                return {
+                    title: "How I Built a Content Team with AI Agents",
+                    date: "March 15, 2024",
+                    author: "ScreenSnap Founder",
+                    category: "How-To",
+                    readTime: "12 min read",
+                    content: [
+                        {
+                            type: 'hook',
+                            text: `I'm building ScreenSnap Pro, a Mac screenshot app. Like every indie SaaS founder, I needed content marketing — blog posts, SEO, social media. But hiring a content team wasn't in the budget.`
+                        },
+                        {
+                            type: 'hook',
+                            text: `So I built one. Out of OpenClaw AI agents. Not one agent doing everything. A squad of specialized agents, each with a specific job, running autonomously on cron schedules, coordinating through a shared Notion database.`
+                        },
+                        {
+                            type: 'header',
+                            text: 'The Architecture'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `I run on OpenClaw — an open-source framework that lets you orchestrate AI agents with cron jobs, isolated sessions, and tool access. The agents are Claude-powered, each with their own skill file (instructions + tools + constraints).`
+                        },
+                        {
+                            type: 'header',
+                            text: 'Meet the Squad'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `🔍 **Scout**: Finds topics with real keyword data - Every 6h`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `✍️ **Quill**: Writes 2000+ word SEO articles - Every hour`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `📚 **Sage**: Reviews quality, plagiarism, readability 3x/day`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `📢 **Ezra**: Publishes to production - Every 3h`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `📣 **Herald**: Amplifies on social media - 2x/day`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `👀 **Lurker**: Scouts Reddit for outreach Every 8h`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `📊 **Archie**: Weekly analytics reports - Weekly`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `📋 **Morgan**: Project manager — unblocks bottlenecks - 3x/day`
+                        },
+                        {
+                            type: 'header',
+                            text: 'The Pipeline'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `Scout (research) → Quill (write) → Sage (edit) → Ezra (publish) → Herald (promote) → Archie (measure)`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `Each agent reads from and writes to a shared Notion database. Articles flow through statuses: Backlog → To Do → In Progress → Review → Ready to Publish → Done. No human in the loop for most of it. I check in once a day and review what shipped.`
+                        },
+                        {
+                            type: 'header',
+                            text: 'What I Got Right'
+                        },
+                        {
+                            type: 'sub-header', // We might need to handle this type, or just use bold in paragraph
+                            text: '1. Specialization Over Generalization'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `My first attempt was one agent doing everything — research, write, edit, publish. It was mediocre at all of it. Splitting into specialists was the breakthrough. Scout has keyword research tools and competition analysis. Quill has brand voice guidelines and SEO rules. Sage has a plagiarism checker (Copyscape) and a 100-point scoring rubric with a 90+ pass threshold.`
+                        },
+                        {
+                            type: 'sub-header',
+                            text: '2. Quality Gates That Actually Reject'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `Sage isn't a rubber stamp. It checks plagiarism via Copyscape API (~3¢ per check), SEO scoring on a 100-point rubric, and readability (Flesch-Kincaid 60+). If an article fails, Sage sends it back to Quill with specific notes. About 40% of first drafts get sent back. After revision, 95%+ pass.`
+                        },
+                        {
+                            type: 'sub-header',
+                            text: '3. Notion as the Central System'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `Every agent reads and writes to the same Notion database. Any agent can see what every other agent has done. Status transitions are atomic and visible. I can monitor the entire pipeline from one board.`
+                        },
+                        {
+                            type: 'sub-header',
+                            text: '4. The Project Manager Agent'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `Morgan (📋) was a game-changer. 3x/day, Morgan checks if there are enough topics, if articles are stuck in review, or if publishing is lagging. Morgan can spawn other agents on demand to fix bottlenecks. It's the closest thing to a self-healing pipeline.`
+                        },
+                        {
+                            type: 'header',
+                            text: 'What Broke (And How I Fixed It)'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `**Problem 1: The Race Condition** 💥. Day 3. I scaled Quill to 5 parallel writers. All 5 grabbed the same article. The fix? Claim locking. Each Quill instance generates a unique claim ID and atomically updates Notion. I also added 25-second staggered spawning.`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `**Problem 2: Feature Hallucinations** 🤥. Day 5. Sage caught two articles claiming ScreenSnap Pro can take scrolling screenshots. It can't. The fix? I created a strict PRODUCT_CONTEXT.md file that every agent loads.`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `**Problem 3: Cron Sessions Didn't Execute** 😤. Day 1. Jobs queued up waiting for a "main" session. The fix? Changed all agents to sessionTarget: "isolated".`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `**Problem 4: Agents Writing Novels** 📚. Early articles were 3000+ words of waffle. The fix? Readability gate. Sage enforces a minimum 60 Flesch-Kincaid score.`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `**Problem 5: 404 Links From Draft Articles** 🔗. Published articles were linking to drafts. The fix? Writer skill now enforces: "ONLY link to articles with Status = Done in Notion."`
+                        },
+                        {
+                            type: 'paragraph',
+                            text: `**Problem 6: Duplicate Social Posts** 📣. Herald promoting twice. The fix? Added Social Status and Herald Claim columns to Notion.`
+                        },
+                        {
+                            type: 'close',
+                            text: `This squad now runs my entire content operation. It's not perfect, but it scales.` // Fallback close
+                        }
+                    ]
+                };
+            }
+
             const title = slug?.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'Harbor Insight';
 
             return {
@@ -127,8 +271,15 @@ const BlogPost = () => {
                         if (block.type === 'paragraph') {
                             return (
                                 <p key={index} className="text-stone-400 leading-loose mb-6 text-lg">
-                                    {block.text}
+                                    <span dangerouslySetInnerHTML={{ __html: block.text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-medium">$1</strong>') }} />
                                 </p>
+                            );
+                        }
+                        if (block.type === 'sub-header') {
+                            return (
+                                <h3 key={index} className="text-xl font-serif text-white mt-8 mb-4">
+                                    {block.text}
+                                </h3>
                             );
                         }
                         if (block.type === 'close') {

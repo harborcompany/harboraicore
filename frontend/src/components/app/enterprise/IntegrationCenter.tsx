@@ -29,8 +29,8 @@ export const IntegrationCenter: React.FC = () => {
                             <p className="text-sm font-mono text-[#111]">2 hours ago</p>
                         </div>
                         <div className="pt-2 flex gap-3">
-                            <button className="text-xs bg-[#111] text-white px-3 py-2 rounded-md font-medium hover:bg-black transition-colors">Generate Key</button>
-                            <button className="text-xs bg-white border border-gray-200 text-[#111] px-3 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors">Manage</button>
+                            <button onClick={() => alert("Key generation is disabled in dev mode.")} className="text-xs bg-[#111] text-white px-3 py-2 rounded-md font-medium hover:bg-black transition-colors">Generate Key</button>
+                            <button onClick={() => alert("Key management coming soon.")} className="text-xs bg-white border border-gray-200 text-[#111] px-3 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors">Manage</button>
                         </div>
                     </div>
                 </div>

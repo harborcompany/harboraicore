@@ -6,6 +6,8 @@ import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 export interface UserProfile {
     id: string;
     email: string;
+    name?: string;
+    avatarUrl?: string;
     authenticated: boolean;
     emailVerified: boolean;
     onboardingComplete: boolean;
@@ -59,8 +61,17 @@ const mapSupabaseUser = (user: SupabaseUser | null): UserProfile => {
         ...defaultProfile,
         id: user.id,
         email: user.email || '',
+        name: user.user_metadata?.full_name || user.user_metadata?.name,
+        avatarUrl: user.user_metadata?.avatar_url,
         authenticated: true,
         emailVerified: !!user.email_confirmed_at,
+        onboardingComplete: !!user.user_metadata?.onboardingComplete,
+        intent: user.user_metadata?.intent || null,
+        role: user.user_metadata?.role || null,
+        organization: user.user_metadata?.organization || null,
+        dataTypes: user.user_metadata?.dataTypes || defaultProfile.dataTypes,
+        acceptedTerms: !!user.user_metadata?.acceptedTerms,
+        hasDataRights: !!user.user_metadata?.hasDataRights
     };
 };
 
@@ -80,9 +91,18 @@ export const authStore = {
     // Initialize - call this on app mount
     initialize: async (): Promise<void> => {
         const { data: { session } } = await supabase.auth.getSession();
-        currentSession = session;
-        currentProfile = mapSupabaseUser(session?.user ?? null);
-        notifyListeners();
+
+        // check for dev mode persistence
+        const isDevMode = localStorage.getItem('harbor_dev_mode') === 'true';
+
+        if (!session && isDevMode) {
+            // restore dev session
+            await authStore.devLogin();
+        } else {
+            currentSession = session;
+            currentProfile = mapSupabaseUser(session?.user ?? null);
+            notifyListeners();
+        }
 
         // Listen for auth changes
         supabase.auth.onAuthStateChange((_event, session) => {
@@ -136,9 +156,23 @@ export const authStore = {
         return { error: error ? new Error(error.message) : null };
     },
 
+    // Resend Confirmation Email
+    resendConfirmationEmail: async (email: string): Promise<{ error: Error | null }> => {
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email: email,
+            options: {
+                emailRedirectTo: `${window.location.origin}/app`
+            }
+        });
+        return { error: error ? new Error(error.message) : null };
+    },
+
     // Sign Out
     signOut: async (): Promise<void> => {
         await supabase.auth.signOut();
+        localStorage.removeItem('harbor_dev_mode');
+        localStorage.removeItem('harbor_onboarding_complete');
         currentProfile = defaultProfile;
         currentSession = null;
         notifyListeners();
@@ -187,8 +221,14 @@ export const authStore = {
     },
 
     completeOnboarding: async () => {
+        // Optimistic update
         currentProfile = { ...currentProfile, onboardingComplete: true };
         notifyListeners();
+
+        // Persist to Supabase
+        await supabase.auth.updateUser({
+            data: { onboardingComplete: true }
+        });
     },
 
     subscribe: (listener: () => void): () => void => {
@@ -230,6 +270,7 @@ export const authStore = {
             ...defaultProfile,
             id: mockUser.id,
             email: mockUser.email || '',
+            name: 'Dev Admin',
             authenticated: true,
             emailVerified: true,
             onboardingComplete: true, // Bypass onboarding
@@ -249,6 +290,11 @@ export const authStore = {
             acceptedTerms: true,
             hasDataRights: true
         };
+
+        // Fix: Set localStorage to prevent AppLayout modal from showing
+        localStorage.setItem('harbor_onboarding_complete', 'true');
+        // Fix: Persist dev mode
+        localStorage.setItem('harbor_dev_mode', 'true');
 
         notifyListeners();
     }

@@ -20,7 +20,15 @@ const Login = () => {
 
         setLoading(false);
         if (error) {
-            setError(error.message);
+            // Check for various forms of email verification errors
+            const errorMessage = error.message.toLowerCase();
+            if (errorMessage.includes('email not confirmed') ||
+                errorMessage.includes('email link is invalid') ||
+                errorMessage.includes('verify your email')) {
+                navigate('/auth/verify', { state: { email } });
+            } else {
+                setError(error.message);
+            }
         } else {
             navigate('/app');
         }
@@ -38,10 +46,22 @@ const Login = () => {
             imageSrc="/auth-side-image.png"
         >
 
-            {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
+            {(!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) && (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3 text-amber-800">
                     <AlertCircle size={20} />
-                    <span className="text-sm">{error}</span>
+                    <div className="text-sm">
+                        <p className="font-bold">Configuration Error</p>
+                        <p>Supabase Environment Variables are missing. Please check your deployment configuration.</p>
+                    </div>
+                </div>
+            )}
+
+            {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex flex-col gap-3 text-red-700">
+                    <div className="flex items-center gap-3">
+                        <AlertCircle size={20} />
+                        <span className="text-sm">{error}</span>
+                    </div>
                 </div>
             )}
 
@@ -104,6 +124,22 @@ const Login = () => {
                         'Sign in'
                     )}
                 </button>
+
+                <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t border-stone-200"></div>
+                    <span className="flex-shrink-0 mx-4 text-stone-400 text-xs">DEV TOOLS</span>
+                    <div className="flex-grow border-t border-stone-200"></div>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => {
+                        authStore.devLogin().then(() => navigate('/app'));
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-stone-100 text-stone-600 py-3 px-4 rounded-lg font-medium hover:bg-stone-200 transition-colors"
+                >
+                    Bypass Login (Dev Mode)
+                </button>
             </form>
 
             <div className="mt-8 text-center">
@@ -116,29 +152,12 @@ const Login = () => {
             </div>
 
 
+
         </AuthSplitLayout>
     );
 };
 
-// Dev Login Button Component
-/*
-const DevLoginButton = () => {
-    const navigate = useNavigate();
-    const handleDevLogin = async () => {
-        await authStore.devLogin();
-        navigate('/app');
-    };
 
-    return (
-        <button 
-            onClick={handleDevLogin}
-            className="mt-4 w-full py-2 bg-stone-100 text-stone-600 rounded-lg text-xs hover:bg-stone-200 transition-colors"
-        >
-            [DEV] Login as Test User
-        </button>
-    );
-};
-*/
 
 
 export default Login;

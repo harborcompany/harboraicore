@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Check, ArrowRight, ShieldCheck, Database, Zap, Layout, Play, Terminal, SkipForward } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { authStore } from '../../lib/authStore';
+
 interface StepOption {
     id: string;
     label: string;
@@ -143,14 +145,43 @@ const SmartOnboardingModal: React.FC<OnboardingProps> = ({ onComplete }) => {
     };
 
     const finish = () => {
-        // Determine redirect based on first answer
-        const intent = answers['interest'] as string;
-        const targetRoute = STEPS[0].options.find(o => o.id === intent)?.route || '/app';
+        // 1. Collect all answers
+        const intent = answers['interest'] as any;
+        const organization = answers['org_profile'] as any; // We might need to map this if store expects object
+        const dataTypes = answers['modalities'] as any;
+        const compliance = answers['compliance'] as any;
 
-        // Save to local storage or backend
-        localStorage.setItem('harbor_user_intent', intent);
+        // 2. Persist to Auth Store
+        if (intent) authStore.setIntent(intent);
 
+        // Map simple ID to organization object structure if needed, or just store ID for now
+        // The store expects specific shape, adapting to simple updates for now or assuming backend handles it
+        if (organization) {
+            authStore.setOrganization({
+                name: 'New Organization', // Placeholder since we didn't ask name
+                size: '1-10',            // Placeholder
+                industry: organization   // Mapping ID to industry
+            });
+        }
+
+        if (dataTypes) {
+            authStore.setDataTypes({
+                audio: dataTypes.includes('audio'),
+                video: dataTypes.includes('video'),
+                multimodal: dataTypes.includes('multimodal'),
+                videoFormats: []
+            });
+        }
+
+        // 3. Mark Complete
+        authStore.completeOnboarding();
+
+        // 4. Trigger Parent Callback (Fixes AppLayout loop)
         onComplete();
+
+        // 5. Navigate
+        // Determine redirect based on first answer
+        const targetRoute = STEPS[0].options.find(o => o.id === intent)?.route || '/app';
         navigate(targetRoute);
     };
 

@@ -21,36 +21,28 @@ export function AdminOverview() {
     const [kpis, setKpis] = useState<KPIs | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Mock data - replace with API calls
+    // Initialize with zero/empty values
     useEffect(() => {
-        setTimeout(() => {
-            setKpis({
-                totalActiveUsers: 12847,
-                uploads24h: 3421,
-                uploads7d: 24893,
-                approvalRate: '87.3',
-                rejectionRate: '12.7',
-                activeDatasets: 47,
-                pendingPayoutLiability: 127500
-            });
-            setLoading(false);
-        }, 500);
+        setKpis({
+            totalActiveUsers: 0,
+            uploads24h: 0,
+            uploads7d: 0,
+            approvalRate: '0.0',
+            rejectionRate: '0.0',
+            activeDatasets: 0,
+            pendingPayoutLiability: 0
+        });
+        setLoading(false);
     }, []);
 
     const systemSignals: SystemSignal[] = [
-        { name: 'Ingestion Latency', status: 'healthy', value: '124ms' },
-        { name: 'Annotation Backlog', status: 'warning', value: '2,341 items' },
-        { name: 'Audit Failure Rate', status: 'healthy', value: '0.4%' },
-        { name: 'API Response Time', status: 'healthy', value: '89ms' },
+        { name: 'Ingestion Latency', status: 'healthy', value: '0ms' },
+        { name: 'Annotation Backlog', status: 'healthy', value: '0 items' },
+        { name: 'Audit Failure Rate', status: 'healthy', value: '0.0%' },
+        { name: 'API Response Time', status: 'healthy', value: '0ms' },
     ];
 
-    const recentActivity = [
-        { id: '1', type: 'upload', user: 'alice@example.com', asset: 'video_001.mp4', time: '2 min ago' },
-        { id: '2', type: 'approved', user: 'bob@example.com', asset: 'audio_session_42.wav', time: '5 min ago' },
-        { id: '3', type: 'dataset', user: 'admin', asset: 'Urban Driving v3', time: '12 min ago' },
-        { id: '4', type: 'payout', user: 'charlie@example.com', asset: '$1,250.00', time: '18 min ago' },
-        { id: '5', type: 'rejected', user: 'dave@example.com', asset: 'image_batch_99.zip', time: '24 min ago' },
-    ];
+    const recentActivity: any[] = [];
 
     if (loading) {
         return <div className="loading">Loading dashboard...</div>;
@@ -108,21 +100,25 @@ export function AdminOverview() {
                 {/* Recent Activity */}
                 <ChartCard title="Recent Activity">
                     <div className="activity-list">
-                        {recentActivity.map((item) => (
-                            <div key={item.id} className="activity-row">
-                                <StatusBadge
-                                    label={item.type}
-                                    variant={
-                                        item.type === 'approved' ? 'success' :
-                                            item.type === 'rejected' ? 'error' :
-                                                item.type === 'payout' ? 'info' : 'neutral'
-                                    }
-                                />
-                                <span className="activity-user">{item.user}</span>
-                                <span className="activity-asset">{item.asset}</span>
-                                <span className="activity-time">{item.time}</span>
-                            </div>
-                        ))}
+                        {recentActivity.length > 0 ? (
+                            recentActivity.map((item) => (
+                                <div key={item.id} className="activity-row">
+                                    <StatusBadge
+                                        label={item.type}
+                                        variant={
+                                            item.type === 'approved' ? 'success' :
+                                                item.type === 'rejected' ? 'error' :
+                                                    item.type === 'payout' ? 'info' : 'neutral'
+                                        }
+                                    />
+                                    <span className="activity-user">{item.user}</span>
+                                    <span className="activity-asset">{item.asset}</span>
+                                    <span className="activity-time">{item.time}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-stone-500 text-sm py-4 text-center">No recent activity</div>
+                        )}
                     </div>
                 </ChartCard>
 

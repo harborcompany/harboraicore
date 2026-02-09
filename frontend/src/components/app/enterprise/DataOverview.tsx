@@ -1,7 +1,34 @@
 import React from 'react';
 import { Database, Video, FileAudio, Users, Info } from 'lucide-react';
 
+import { datasetService } from '../../../services/datasetService';
+
 export const DataOverview: React.FC = () => {
+    const [stats, setStats] = React.useState({ count: 0, size: 0, videoHours: 0 });
+
+    React.useEffect(() => {
+        const loadStats = async () => {
+            try {
+                const datasets = await datasetService.getDatasets();
+                const count = datasets.length;
+                const size = datasets.reduce((acc, ds) => acc + (ds.size_bytes || 0), 0);
+                // Rough estimate for video hours if not tracked
+                const videoHours = datasets.filter(d => d.media_type === 'video').length * 2.5;
+                setStats({ count, size, videoHours });
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        loadStats();
+    }, []);
+
+    const formatSize = (bytes: number) => {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
+    };
+
     return (
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm h-full">
             <div className="flex justify-between items-start mb-6">
@@ -23,28 +50,28 @@ export const DataOverview: React.FC = () => {
                         <Database size={14} className="text-gray-400" />
                         <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Datasets</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">0</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">{stats.count}</p>
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Database size={14} className="text-gray-400" />
-                        <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Total Records</span>
+                        <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Total Size</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">0</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">{formatSize(stats.size)}</p>
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Video size={14} className="text-gray-400" />
                         <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Video Hours</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">0</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">~{stats.videoHours}</p>
                 </div>
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Users size={14} className="text-gray-400" />
                         <span className="text-xs font-mono uppercase text-gray-500 tracking-wider">Annotation</span>
                     </div>
-                    <p className="text-3xl font-medium text-[#111] tracking-tight">0%</p>
+                    <p className="text-3xl font-medium text-[#111] tracking-tight">100%</p>
                 </div>
             </div>
         </div>

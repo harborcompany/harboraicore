@@ -35,7 +35,8 @@ const LegoExperience: React.FC = () => {
             themes: selectedThemes,
             filmsBuilds
         });
-        navigate('/onboarding/organization');
+
+        navigate('/app/contribute');
     };
 
     const isValid = level && selectedThemes.length > 0 && filmsBuilds !== null;

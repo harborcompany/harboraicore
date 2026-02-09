@@ -98,9 +98,9 @@ const DatasetList: React.FC = () => {
                         </select>
                     </div>
 
-                    <button className="bg-[#111] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors whitespace-nowrap flex items-center gap-2 border border-[#111]">
+                    <Link to="/app/contribute" className="bg-[#111] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors whitespace-nowrap flex items-center gap-2 border border-[#111]">
                         <Plus size={16} /> New Dataset
-                    </button>
+                    </Link>
                 </div>
             </div>
 

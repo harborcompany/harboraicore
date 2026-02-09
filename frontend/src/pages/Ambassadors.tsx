@@ -26,8 +26,41 @@ const Ambassadors: React.FC = () => {
     return (
         <div className="bg-[#FAFAFA] min-h-screen text-[#111] font-sans selection:bg-blue-100 selection:text-blue-900">
             <SeoHead
-                title="Harbor Ambassador Program | Build the Data Engine for AI"
-                description="Join the Harbor Ambassador Program. Earn cash, early access to next-gen tools, and help shape how real-world data powers AI."
+                title="Ambassador Program: Earn Cash Building AI Data (2026) | Harbor"
+                description="Join Harbor's Ambassador Program and earn cash by contributing AI training data. Get paid monthly, access exclusive tools, and shape the future of AI. Apply now →"
+                canonical="https://harbor.ai/ambassadors"
+                keywords="ambassador program, AI data, earn money, data contribution, Harbor AI, referral program"
+                ogTitle="Become a Harbor Ambassador | Earn Cash Building AI Data"
+                ogDescription="Join Harbor's Ambassador Program. Contribute data, refer creators, and earn monthly payouts while shaping the future of AI."
+                ogImage="https://harbor.ai/og-ambassador.png"
+                ogType="website"
+                twitterCard="summary_large_image"
+                jsonLd={[
+                    {
+                        "@type": "Organization",
+                        "name": "Harbor AI",
+                        "url": "https://harbor.ai",
+                        "logo": "https://harbor.ai/logo.png",
+                        "sameAs": [
+                            "https://twitter.com/harborai"
+                        ]
+                    },
+                    {
+                        "@type": "WebPage",
+                        "name": "Harbor Ambassador Program",
+                        "description": "Earn cash by contributing AI training data through Harbor's Ambassador Program",
+                        "url": "https://harbor.ai/ambassadors",
+                        "mainEntity": {
+                            "@type": "Product",
+                            "name": "Harbor Ambassador Program",
+                            "description": "A participation-based program where contributors earn cash by submitting audio/video data and referring other creators.",
+                            "brand": {
+                                "@type": "Brand",
+                                "name": "Harbor AI"
+                            }
+                        }
+                    }
+                ]}
             />
 
             {/* HERO SECTION */}
@@ -64,7 +97,7 @@ const Ambassadors: React.FC = () => {
                         transition={{ delay: 0.2 }}
                         className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 font-light leading-relaxed"
                     >
-                        Earn cash, early access to next-generation tools, and help shape how real-world data powers AI.
+                        The Harbor Ambassador Program lets you earn cash, get early access to next-generation tools, and help shape how real-world data powers AI.
                     </motion.p>
 
                     <motion.div
@@ -89,7 +122,7 @@ const Ambassadors: React.FC = () => {
                 </div>
 
                 {/* 3D Dashboard Mockup - Light Mode */}
-                <div className="mt-24 max-w-6xl mx-auto px-4 perspective-1000">
+                <div className="mt-32 max-w-6xl mx-auto px-4 perspective-1000">
                     <motion.div
                         initial={{ opacity: 0, rotateX: 20, y: 40 }}
                         animate={{ opacity: 1, rotateX: 0, y: 0 }}
@@ -193,7 +226,7 @@ const Ambassadors: React.FC = () => {
                             { title: "Refer Contributors", icon: <Users className="text-purple-600 mb-4" size={32} />, desc: "Invite creators, builders, or specialists who can contribute valuable data." },
                             { title: "Shape the Platform", icon: <Layers className="text-green-600 mb-4" size={32} />, desc: "Early ambassadors help define new data categories, workflows, and tools." }
                         ].map((item, i) => (
-                            <div key={i} className="p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-gray-200 transition-all">
+                            <div key={i} className="p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-gray-300 hover:shadow-md transition-all duration-200">
                                 {item.icon}
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
                                 <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
@@ -207,13 +240,13 @@ const Ambassadors: React.FC = () => {
             <section className="py-24 px-6 bg-[#FAFAFA]">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-semibold mb-6 text-black">How You Earn</h2>
+                        <h2 className="text-3xl md:text-4xl font-semibold mb-6 text-black">How You Earn</h2>
                         <p className="text-gray-500 text-lg">This is not a one-time payout program. It’s a long-term participation model.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Cash Payouts */}
-                        <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                        <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200">
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6 text-green-600">
                                 <DollarSign size={28} />
                             </div>
@@ -235,7 +268,7 @@ const Ambassadors: React.FC = () => {
                         </div>
 
                         {/* Compounding Rewards */}
-                        <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                        <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200">
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 text-blue-600">
                                 <Workflow size={28} />
                             </div>
@@ -328,7 +361,7 @@ const Ambassadors: React.FC = () => {
             <section id="how-it-works" className="py-24 px-6 bg-[#FAFAFA]">
                 <div className="max-w-5xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-semibold mb-6 text-black">How the Program Works</h2>
+                        <h2 className="text-3xl md:text-4xl font-semibold mb-6 text-black">How the Program Works</h2>
                     </div>
 
                     <div className="relative">
@@ -364,7 +397,7 @@ const Ambassadors: React.FC = () => {
                 <div className="absolute inset-0 bg-blue-900/10" />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <Cpu className="mx-auto text-blue-500 mb-6" size={48} />
-                    <h2 className="text-3xl md:text-5xl font-semibold mb-8">Long-Term Vision</h2>
+                    <h2 className="text-3xl md:text-4xl font-semibold mb-8">Long-Term Vision</h2>
                     <p className="text-xl text-gray-400 mb-12 font-light">
                         Harbor Ambassadors will be the first users of real-time data capture tools, wearable-enabled data collection, and AI-assisted workflows that reward participation.
                     </p>
@@ -375,7 +408,7 @@ const Ambassadors: React.FC = () => {
             </section>
 
             {/* FAQ */}
-            <section className="py-24 px-6 bg-white border-t border-gray-200">
+            <section id="faq" className="py-24 px-6 bg-white border-t border-gray-200">
                 <div className="max-w-3xl mx-auto">
                     <h2 className="text-3xl md:text-4xl font-semibold mb-12 text-black">Frequently asked questions</h2>
                     <div className="space-y-4">

@@ -10,7 +10,10 @@ import { DocsWidget } from '../../components/app/enterprise/DocsWidget';
 
 import { uiStore } from '../../lib/uiStore';
 
+import { useNavigate } from 'react-router-dom';
+
 const EnterpriseDashboard: React.FC = () => {
+    const navigate = useNavigate();
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-12">
             {/* Header Section */}
@@ -30,7 +33,10 @@ const EnterpriseDashboard: React.FC = () => {
                     >
                         View API Documentation
                     </button>
-                    <button className="px-5 py-2.5 bg-[#111] text-white text-sm font-medium rounded-lg hover:bg-black transition-colors border border-[#111]">
+                    <button
+                        onClick={() => navigate('/app/workflows/new')}
+                        className="px-5 py-2.5 bg-[#111] text-white text-sm font-medium rounded-lg hover:bg-black transition-colors border border-[#111]"
+                    >
                         Create Workflow
                     </button>
                 </div>

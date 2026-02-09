@@ -18,14 +18,21 @@ const DocsSidebar: React.FC = () => {
                 { label: 'Authentication', path: '/docs/api/auth' },
                 { label: 'Datasets', path: '/docs/api/datasets' },
                 { label: 'Ingestion', path: '/docs/api/ingestion' },
+                { label: 'Webhooks', path: '/docs/webhooks' },
             ]
         },
         {
             category: 'Guides',
             items: [
-                { label: 'Python SDK', path: '/docs/python-sdk' },
-                { label: 'Manifests', path: '/docs/manifests' },
+                { label: 'SDKs & Libraries', path: '/docs/sdks' },
+                { label: 'Contributor Guide', path: '/docs/contributors' },
                 { label: 'Best Practices', path: '/docs/best-practices' },
+            ]
+        },
+        {
+            category: 'Security',
+            items: [
+                { label: 'Security & Compliance', path: '/docs/security' },
             ]
         }
     ];

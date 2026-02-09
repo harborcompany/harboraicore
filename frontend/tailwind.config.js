@@ -14,8 +14,9 @@ export default {
                 muted: '#6B7280',
                 border: '#E5E7EB',
                 accent: '#6366F1',
-                cream: '#FFFFFF', // Resetting 'cream' to white as per brief
-                charcoal: '#111827', // Mapping old var to new neutral
+                cream: '#FFFFFF',
+                charcoal: '#111827',
+                'brand-dark': '#111111',
             },
             borderRadius: {
                 'xl': '12px',

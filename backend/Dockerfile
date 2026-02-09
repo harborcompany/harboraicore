@@ -6,10 +6,13 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.15/main" >> /etc/apk/repositories && \
+    apk add --no-cache openssl libssl1.1
 RUN npm ci
 
 # Copy source and build
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 
 # Production image
@@ -21,6 +24,10 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
+
+# Install runtime dependencies (OpenSSL 1.1 compat)
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.15/main" >> /etc/apk/repositories && \
+    apk add --no-cache openssl libssl1.1
 
 # Create storage directory
 RUN mkdir -p /app/storage

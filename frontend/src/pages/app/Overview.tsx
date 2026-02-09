@@ -50,13 +50,27 @@ const Overview: React.FC = () => {
                     Command Center
                 </h1>
                 <p className="text-stone-500 font-light text-sm">
-                    System operational. All services valid.
+                    Select an action to get started.
                 </p>
             </div>
 
-            <div className="flex items-center gap-3 text-stone-400 font-mono text-xs uppercase tracking-widest mt-12">
-                <div className="w-4 h-4 rounded-full border-2 border-stone-200 border-t-stone-800 animate-spin" />
-                Loading Workspace
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {quickActions.map((action) => (
+                    <Link
+                        key={action.title}
+                        to={action.link}
+                        className="p-6 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all group"
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors">
+                                <action.icon size={20} className="text-[#111]" />
+                            </div>
+                            <ArrowRight size={16} className="text-gray-300 group-hover:text-[#111] transition-colors" />
+                        </div>
+                        <h3 className="font-medium text-[#111] mb-1">{action.title}</h3>
+                        <p className="text-sm text-stone-500">{action.description}</p>
+                    </Link>
+                ))}
             </div>
         </div>
     );

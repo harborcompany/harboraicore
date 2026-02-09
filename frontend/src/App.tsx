@@ -47,6 +47,7 @@ import Organization from './pages/onboarding/Organization';
 import DataTypes from './pages/onboarding/DataTypes';
 import Consent from './pages/onboarding/Consent';
 import LegoExperience from './pages/onboarding/LegoExperience';
+import VoiceExperience from './pages/onboarding/VoiceExperience';
 import Complete from './pages/onboarding/Complete';
 
 // App Layout & Pages (Asymmetric)
@@ -63,12 +64,17 @@ import ContributePage from './pages/app/ContributePage';
 import ApiPage from './pages/app/ApiPage';
 import Settings from './pages/app/Settings';
 import MeetingPage from './pages/app/MeetingPage';
+import WorkflowBuilder from './pages/app/WorkflowBuilder';
 
 // Docs Components
 import DocsLayout from './layouts/DocsLayout';
 import DocsIntroduction from './pages/docs/Introduction';
 import DocsQuickstart from './pages/docs/Quickstart';
 import DocsApiOverview from './pages/docs/ApiOverview';
+import DocsSecurity from './pages/docs/Security';
+import DocsSDKs from './pages/docs/SDKs';
+import DocsWebhooks from './pages/docs/Webhooks';
+import DocsContributors from './pages/docs/Contributors';
 
 // Admin Panel Pages
 import {
@@ -161,6 +167,10 @@ const App: React.FC = () => {
             <Route index element={<DocsIntroduction />} />
             <Route path="quickstart" element={<DocsQuickstart />} />
             <Route path="api" element={<DocsApiOverview />} />
+            <Route path="security" element={<DocsSecurity />} />
+            <Route path="sdks" element={<DocsSDKs />} />
+            <Route path="webhooks" element={<DocsWebhooks />} />
+            <Route path="contributors" element={<DocsContributors />} />
             {/* Fallback for uncreated routes to Intro for now */}
             <Route path="*" element={<DocsIntroduction />} />
           </Route>
@@ -191,6 +201,7 @@ const App: React.FC = () => {
         {/* Onboarding Routes - Deprecated, redirect to App */}
         <Route path="/onboarding/intent" element={<Intent />} />
         <Route path="/onboarding/lego-experience" element={<LegoExperience />} />
+        <Route path="/onboarding/voice-experience" element={<VoiceExperience />} />
         <Route path="/onboarding/*" element={<Navigate to="/app" replace />} />
 
         {/* Protected App Routes - Role Based */}
@@ -212,6 +223,7 @@ const App: React.FC = () => {
           <Route path="api" element={<ApiPage />} />
           <Route path="settings" element={<Settings />} />
           <Route path="meet/:room" element={<MeetingPage />} />
+          <Route path="workflows/new" element={<WorkflowBuilder />} />
         </Route>
 
         {/* Admin Panel Routes - Internal Only */}

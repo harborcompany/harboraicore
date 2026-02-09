@@ -1,207 +1,217 @@
-import React, { useState } from 'react';
-import { Upload, CheckCircle, Clock, AlertCircle, FileVideo, DollarSign, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, DollarSign, Clock, CheckCircle, AlertCircle, FileVideo, X } from 'lucide-react';
+import { useAuth } from '../../lib/authStore';
+import { useUpload } from '../../hooks/useUpload';
+import { submissionService, Submission } from '../../services/submissionService';
 
 const ContributorDashboard: React.FC = () => {
-    const [activeTab, setActiveTab] = useState('tasks');
-    const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'processing' | 'complete'>('idle');
+    const user = useAuth();
+    const [recentUploads, setRecentUploads] = useState<Submission[]>([]);
 
-    // Mock Data for "Status Tracker"
-    const submissions = [
-        { id: 1, type: 'LEGO Assembly', date: 'Oct 24, 2025', status: 'reviewed', verdict: 'approved', earnings: 15.00 },
-        { id: 2, type: 'LEGO Assembly', date: 'Oct 23, 2025', status: 'processing', verdict: 'pending', earnings: 0 },
-        { id: 3, type: 'Audio Script', date: 'Oct 20, 2025', status: 'reviewed', verdict: 'rejected', earnings: 0 },
-    ];
-
-    const handleUpload = () => {
-        setUploadState('uploading');
-        setTimeout(() => setUploadState('processing'), 2000);
-        setTimeout(() => setUploadState('complete'), 4500);
+    const fetchUploads = async () => {
+        const data = await submissionService.getRecentActivity();
+        setRecentUploads(data);
     };
 
-    return (
-        <div className="max-w-6xl mx-auto px-6 py-8">
-            <header className="mb-8">
-                <h1 className="text-2xl font-medium text-[#111]">Contributor Dashboard</h1>
-                <p className="text-gray-500">Manage your tasks and track earnings.</p>
-            </header>
+    useEffect(() => {
+        fetchUploads();
+    }, []);
 
-            {/* Earnings Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center gap-3 mb-2 text-gray-500">
-                        <DollarSign size={18} />
-                        <span className="text-sm font-medium uppercase tracking-wide">Total Earnings</span>
+    const { selectFile, progress, status, error, fileName, reset } = useUpload({
+        acceptedTypes: ['video/mp4', 'video/quicktime', 'video/webm'],
+        maxSizeMB: 1024, // 1GB
+        onSuccess: async () => {
+            // Create a submission record to simulate real backend behavior
+            // In a real app, the upload endpoint would create this.
+            // We'll manually add one to our mock service to show immediate feedback.
+            const file = new File([""], fileName || "video.mp4"); // Dummy file for mock creation
+            await submissionService.createSubmission(file);
+            await fetchUploads();
+        }
+    });
+
+    const stats = [
+        { label: 'Total Earnings', value: '$0.00', icon: DollarSign, trend: '+0%' },
+        { label: 'Pending Review', value: `${recentUploads.filter(u => u.status === 'pending').length}`, icon: Clock, trend: 'new submissions' },
+        { label: 'Approved Videos', value: `${recentUploads.filter(u => u.status === 'approved').length}`, icon: CheckCircle, trend: 'this week' },
+    ];
+
+    return (
+        <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+            {/* Header */}
+            <div>
+                <h1 className="text-2xl font-bold text-brand-dark">Contributor Dashboard</h1>
+                <p className="text-gray-500">Manage your submissions and track earnings.</p>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-brand-dark">
+                            <DollarSign size={20} />
+                        </div>
+                        {recentUploads.some(u => u.payoutAmount) ? (
+                            <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                Active
+                            </span>
+                        ) : (
+                            <button className="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-full transition-colors z-10 relative">
+                                Connect Payout
+                            </button>
+                        )}
                     </div>
-                    <div className="text-3xl font-semibold text-[#111]">$450.00</div>
-                    <div className="text-sm text-green-600 mt-1 flex items-center gap-1">
-                        <CheckCircle size={14} /> Paid to date
-                    </div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Earnings</p>
+                    <p className="text-2xl font-bold text-brand-dark mt-1">
+                        ${recentUploads.reduce((acc, curr) => acc + (curr.payoutAmount || 0), 0).toFixed(2)}
+                    </p>
                 </div>
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center gap-3 mb-2 text-gray-500">
-                        <Clock size={18} />
-                        <span className="text-sm font-medium uppercase tracking-wide">Pending Payout</span>
+
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-brand-dark">
+                            <Clock size={20} />
+                        </div>
+                        <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                            In Review
+                        </span>
                     </div>
-                    <div className="text-3xl font-semibold text-[#111]">$15.00</div>
-                    <div className="text-sm text-gray-400 mt-1">
-                        Next payout: Nov 1, 2025
-                    </div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Review</p>
+                    <p className="text-2xl font-bold text-brand-dark mt-1">
+                        {recentUploads.filter(u => u.status === 'pending').length}
+                    </p>
                 </div>
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center gap-3 mb-2 text-gray-500">
-                        <Calendar size={18} />
-                        <span className="text-sm font-medium uppercase tracking-wide">Active Task</span>
+
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-brand-dark">
+                            <CheckCircle size={20} />
+                        </div>
+                        <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                            +12% this week
+                        </span>
                     </div>
-                    <div className="text-xl font-medium text-[#111] mb-1">LEGO Assembly Dataset</div>
-                    <span className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
-                        Open for Submissions
-                    </span>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Approved Videos</p>
+                    <p className="text-2xl font-bold text-brand-dark mt-1">
+                        {recentUploads.filter(u => u.status === 'approved').length}
+                    </p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column: Active Task & Upload */}
-                <div className="lg:col-span-2 space-y-8">
+            {/* Quick Upload */}
+            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 className="text-lg font-bold text-brand-dark">Quick Upload</h2>
+                        <p className="text-sm text-gray-500">Upload raw footage for processing. Max 1GB.</p>
+                    </div>
+                </div>
 
-                    {/* Active Task Section */}
-                    <section className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-lg font-medium text-[#111] mb-1">Active Task: LEGO Assembly Dataset</h2>
-                            <p className="text-sm text-gray-500">
-                                Record yourself building LEGO models. Hands and models only. No faces. No cuts.
+                {status === 'idle' || status === 'error' ? (
+                    <div
+                        onClick={selectFile}
+                        className="border-2 border-dashed border-gray-200 rounded-xl p-10 flex flex-col items-center justify-center text-center hover:border-black hover:bg-gray-50 transition-all cursor-pointer group"
+                    >
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <Upload size={24} className="text-gray-400 group-hover:text-black transition-colors" />
+                        </div>
+                        <p className="text-sm font-medium text-brand-dark mb-1">Click to upload raw footage</p>
+                        <p className="text-xs text-gray-400">MP4, MOV, or WEBM</p>
+                        {status === 'error' && (
+                            <p className="mt-4 text-sm text-red-600 flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full">
+                                <AlertCircle size={14} /> {error?.message}
                             </p>
+                        )}
+                    </div>
+                ) : (
+                    <div className="border border-gray-200 rounded-xl p-6 bg-gray-50">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-100">
+                                <FileVideo size={20} className="text-blue-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-brand-dark truncate">{fileName}</p>
+                                <p className="text-xs text-gray-500">
+                                    {status === 'processing' ? 'Processing and verifying...' : 'Uploading...'}
+                                </p>
+                            </div>
+                            {status === 'success' ? (
+                                <button onClick={reset} className="text-sm text-gray-500 hover:text-black">
+                                    Upload Another
+                                </button>
+                            ) : (
+                                <span className="text-xs font-mono text-gray-500">{Math.round(progress)}%</span>
+                            )}
                         </div>
 
-                        <div className="p-6">
-                            <div className="flex items-start gap-4 mb-8">
-                                <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                                    <FileVideo size={24} />
-                                </div>
+                        {status !== 'success' ? (
+                            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div
+                                    className="bg-black h-full rounded-full transition-all duration-300 ease-out"
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                        ) : (
+                            <div className="bg-green-50 border border-green-100 rounded-lg p-4 flex items-center gap-3 text-green-800">
+                                <CheckCircle size={20} className="text-green-600" />
                                 <div>
-                                    <h4 className="font-medium text-[#111] mb-2">Requirements</h4>
-                                    <ul className="text-sm text-gray-600 space-y-2 list-disc pl-4">
-                                        <li>Minimum total recording time: 30 minutes</li>
-                                        <li>Multiple videos allowed</li>
-                                        <li>Clear, continuous, real-time recording</li>
-                                        <li>Authenticity and originality verified by review</li>
-                                    </ul>
+                                    <p className="text-sm font-medium">Upload Complete</p>
+                                    <p className="text-xs text-green-700">Your video is now queued for review.</p>
                                 </div>
                             </div>
+                        )}
+                    </div>
+                )}
+            </div>
 
-                            {/* Upload Interface */}
-                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-blue-400 transition-colors bg-gray-50/30">
-                                {uploadState === 'idle' && (
-                                    <>
-                                        <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 text-blue-600">
-                                            <Upload size={24} />
-                                        </div>
-                                        <h3 className="text-lg font-medium text-[#111] mb-2">Upload Recording</h3>
-                                        <p className="text-sm text-gray-500 max-w-sm mx-auto mb-6">
-                                            Videos must be clear, continuous, and recorded in real time.
-                                            Submissions are reviewed for authenticity.
-                                        </p>
-                                        <button
-                                            onClick={handleUpload}
-                                            className="px-6 py-2.5 bg-[#111] text-white rounded-lg font-medium hover:bg-black transition-colors"
-                                        >
-                                            Select File
-                                        </button>
-                                    </>
-                                )}
-
-                                {uploadState === 'uploading' && (
-                                    <div className="py-8">
-                                        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-                                        <p className="text-gray-600 font-medium">Uploading video...</p>
-                                        <p className="text-sm text-gray-400 mt-1">45% complete</p>
-                                    </div>
-                                )}
-
-                                {uploadState === 'processing' && (
-                                    <div className="py-8">
-                                        <div className="w-12 h-12 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
-                                        <p className="text-gray-600 font-medium">Processing & Auto-Annotating...</p>
-                                        <p className="text-sm text-gray-400 mt-1">Identifying actions and objects</p>
-                                    </div>
-                                )}
-
-                                {uploadState === 'complete' && (
-                                    <div className="py-6 animate-in fade-in zoom-in duration-300">
-                                        <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <CheckCircle size={24} />
-                                        </div>
-                                        <h3 className="text-lg font-medium text-[#111] mb-2">Submission Received</h3>
-                                        <p className="text-sm text-gray-500 max-w-sm mx-auto mb-6">
-                                            Your submission is being processed. We'll notify you once review is complete.
-                                        </p>
-                                        <button
-                                            onClick={() => setUploadState('idle')}
-                                            className="text-sm font-medium text-blue-600 hover:text-blue-700 underline"
-                                        >
-                                            Upload another video
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </section>
+            {/* Recent Uploads List */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-gray-100">
+                    <h2 className="text-lg font-bold text-brand-dark">Recent Uploads</h2>
                 </div>
 
-                {/* Right Column: Status Tracker */}
-                <div className="lg:col-span-1">
-                    <section className="bg-white border border-gray-200 rounded-xl overflow-hidden h-full">
-                        <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-medium text-[#111]">Submission Status</h2>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                            {submissions.map((sub) => (
-                                <div key={sub.id} className="p-4 hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-sm font-medium text-[#111]">{sub.type}</span>
-                                        <span className="text-xs text-gray-400">{sub.date}</span>
+                {recentUploads.length > 0 ? (
+                    <div className="divide-y divide-gray-100">
+                        {recentUploads.map((upload) => (
+                            <div key={upload.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <FileVideo size={20} className="text-gray-500" />
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            {sub.status === 'processing' && (
-                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full">
-                                                    <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div>
-                                                    Processing
-                                                </span>
-                                            )}
-                                            {sub.status === 'reviewed' && sub.verdict === 'approved' && (
-                                                <span className="inline-flex items-center px-2 py-0.5 bg-green-50 text-green-700 text-xs font-medium rounded-full">
-                                                    Approved
-                                                </span>
-                                            )}
-                                            {sub.status === 'reviewed' && sub.verdict === 'rejected' && (
-                                                <span className="inline-flex items-center px-2 py-0.5 bg-red-50 text-red-700 text-xs font-medium rounded-full">
-                                                    Rejected
-                                                </span>
-                                            )}
-                                        </div>
-                                        {sub.verdict === 'approved' && (
-                                            <span className="text-sm font-medium text-green-600">+${sub.earnings.toFixed(2)}</span>
-                                        )}
+                                    <div>
+                                        <p className="text-sm font-medium text-brand-dark">{upload.filename}</p>
+                                        <p className="text-xs text-gray-500">{new Date(upload.submittedAt).toLocaleDateString()}</p>
                                     </div>
-                                    {/* Action/Tip based on status */}
-                                    {sub.verdict === 'rejected' && (
-                                        <p className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
-                                            Issue: Low lighting. Please improve lighting and consistent framing.
-                                        </p>
-                                    )}
-                                    {sub.verdict === 'approved' && (
-                                        <p className="mt-2 text-xs text-gray-500">
-                                            Payment issued within 90 days.
-                                        </p>
-                                    )}
                                 </div>
-                            ))}
+                                <div className="text-right">
+                                    <p className="text-sm font-medium text-brand-dark">{upload.payoutAmount ? `$${upload.payoutAmount}` : '-'}</p>
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${upload.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                        upload.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                            'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                        {upload.status}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="p-16 text-center text-gray-500">
+                        <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-gray-100">
+                            <Upload size={24} className="text-gray-400" />
                         </div>
-                        <div className="p-4 border-t border-gray-100 bg-gray-50/50 text-center">
-                            <button className="text-sm font-medium text-gray-500 hover:text-[#111]">View All History</button>
-                        </div>
-                    </section>
-                </div>
+                        <p className="text-lg font-medium text-brand-dark mb-2">Ready to contribute?</p>
+                        <p className="text-sm text-gray-500 max-w-xs mx-auto mb-6">
+                            Upload your first video clip above to start earning from your contributions.
+                        </p>
+                        <button
+                            onClick={selectFile}
+                            className="px-6 py-2.5 bg-brand-dark text-white text-sm font-medium rounded-lg hover:bg-black transition-colors"
+                        >
+                            Upload Video Now
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

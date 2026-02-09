@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -27,10 +28,63 @@ const navItems: NavItem[] = [
 export function AdminLayout() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   return (
     <div className="admin-layout">
-      <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
+      {/* Mobile Header */}
+      <div className="md:hidden bg-[#0a0a0a] border-b border-[#262626] p-4 flex items-center justify-between sticky top-0 z-40 text-white">
+        <Link to="/admin" className="admin-logo">
+          <span className="admin-logo-text">HARBOR</span>
+          <span className="admin-logo-badge">Admin</span>
+        </Link>
+        <button
+          onClick={() => setShowMobileMenu(true)}
+          className="p-2 text-[#a3a3a3] hover:text-white hover:bg-[#262626] rounded-lg"
+        >
+          <Menu size={24} />
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in"
+            onClick={() => setShowMobileMenu(false)}
+          />
+          <aside className="absolute top-0 bottom-0 left-0 w-64 bg-[#141414] border-r border-[#262626] flex flex-col shadow-xl animate-in slide-in-from-left duration-300 z-50">
+            <div className="p-4 flex items-center justify-between border-b border-[#262626]">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white tracking-wider">HARBOR ADMIN</span>
+              </div>
+              <button
+                onClick={() => setShowMobileMenu(false)}
+                className="p-2 text-[#a3a3a3] hover:text-white hover:bg-[#262626] rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <nav className="admin-nav flex-1 p-4 overflow-y-auto">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setShowMobileMenu(false)}
+                  className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+                >
+                  <span className="admin-nav-icon">{item.icon}</span>
+                  <span className="admin-nav-label">{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
+      <aside className={`admin-sidebar hidden md:flex ${collapsed ? 'collapsed' : ''}`}>
         <div className="admin-sidebar-header">
           <Link to="/admin" className="admin-logo">
             {!collapsed && <span className="admin-logo-text">HARBOR</span>}
@@ -67,18 +121,25 @@ export function AdminLayout() {
         </div>
       </aside>
 
-      <main className="admin-content">
+      <main className="admin-content animate-in fade-in duration-500">
         <Outlet />
       </main>
 
       <style>{`
         .admin-layout {
           display: flex;
+          flex-direction: column;
           min-height: 100vh;
           background: #0a0a0a;
           color: #fafafa;
           font-family: 'Inter', system-ui, sans-serif;
           font-size: 14px;
+        }
+
+        @media (min-width: 768px) {
+            .admin-layout {
+                flex-direction: row;
+            }
         }
         
         .admin-sidebar {
