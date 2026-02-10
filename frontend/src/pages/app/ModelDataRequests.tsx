@@ -83,60 +83,90 @@ const ModelDataRequests: React.FC = () => {
                 </div>
             </section>
 
-            {/* What We're Looking For */}
+            {/* Project Tiers & Examples */}
             <section className="py-20 px-6">
-                <div className="max-w-4xl mx-auto">
-                    <h2 className="text-3xl font-serif font-medium text-center mb-12">What We’re Looking For</h2>
-                    <p className="text-center text-lg text-stone-600 mb-12">
-                        We accept a wide range of builds — from simple to complex.
+                <div className="max-w-6xl mx-auto">
+                    <h2 className="text-3xl font-serif font-medium text-center mb-12">Project Tiers & Examples</h2>
+                    <p className="text-center text-lg text-stone-600 mb-12 max-w-2xl mx-auto">
+                        Select the tier that matches your set. <strong>Session consistency is key.</strong>
                     </p>
 
                     <div className="grid md:grid-cols-2 gap-8">
-                        <div className="border border-stone-200 rounded-xl p-8 hover:border-stone-400 transition-colors">
-                            <h3 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                <Video size={24} /> Accepted Videos
-                            </h3>
-                            <ul className="space-y-3 text-stone-600">
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-800" />
-                                    Hands-only LEGO builds
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-800" />
-                                    New builds started from scratch
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-800" />
-                                    Continuous footage (no cuts or edits)
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-800" />
-                                    Clear view of bricks and hands
-                                </li>
-                            </ul>
+                        {/* Tier 1 */}
+                        <div className="border border-blue-200 bg-blue-50/30 rounded-xl p-8 hover:border-blue-400 transition-colors">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 className="text-xl font-bold text-blue-600 mb-1">TIER 1: STANDARD</h3>
+                                    <div className="text-2xl font-bold text-stone-900">5–10 Minutes</div>
+                                </div>
+                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Most Popular</span>
+                            </div>
+                            <p className="text-stone-600 mb-6">Simple to Medium builds. Focus on sub-assemblies or smaller sets. Ideal for high variety.</p>
+
+                            {/* Video Embed */}
+                            <div className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-4 group">
+                                <img
+                                    src="https://img.youtube.com/vi/iVBQdgAy_YA/maxresdefault.jpg"
+                                    alt="Tier 1 Example"
+                                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                />
+                                <a href="https://www.youtube.com/watch?v=iVBQdgAy_YA" target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                                        <div className="ml-1 w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-stone-900 border-b-[10px] border-b-transparent"></div>
+                                    </div>
+                                </a>
+                            </div>
+                            <p className="text-center text-sm text-stone-500 italic">Target: Clear visibility, static camera.</p>
                         </div>
-                        <div className="border border-stone-200 rounded-xl p-8 hover:border-stone-400 transition-colors">
-                            <h3 className="text-xl font-medium mb-4 flex items-center gap-2">
-                                <Clock size={24} /> Build Types
-                            </h3>
-                            <ul className="space-y-3 text-stone-600">
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-800" />
-                                    Simple builds (5–10 minutes)
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-800" />
-                                    Medium builds (15–30 minutes)
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-800" />
-                                    Longer sessions (up to ~60 minutes)
-                                </li>
-                            </ul>
-                            <p className="mt-4 text-sm text-stone-500">
-                                A mix of short and long builds is ideal. You do not need rare sets or advanced filming equipment.
-                            </p>
+
+                        {/* Tier 2 */}
+                        <div className="border border-purple-200 bg-purple-50/30 rounded-xl p-8 hover:border-purple-400 transition-colors">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 className="text-xl font-bold text-purple-600 mb-1">TIER 2: EXPERT</h3>
+                                    <div className="text-2xl font-bold text-stone-900">20–40 Minutes</div>
+                                </div>
+                                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Advanced</span>
+                            </div>
+                            <p className="text-stone-600 mb-6">Complex sets (Technic/Icons). Clean, uninterrupted focus. Steady hands required.</p>
+
+                            {/* Video Embed */}
+                            <div className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-4 group">
+                                <img
+                                    src="https://img.youtube.com/vi/9H8Ow4BT4bA/maxresdefault.jpg"
+                                    alt="Tier 2 Example"
+                                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                />
+                                <a href="https://www.youtube.com/watch?v=9H8Ow4BT4bA" target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                                        <div className="ml-1 w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-stone-900 border-b-[10px] border-b-transparent"></div>
+                                    </div>
+                                </a>
+                            </div>
+                            <p className="text-center text-sm text-stone-500 italic">Target: Advanced techniques, long sessions.</p>
                         </div>
+                    </div>
+
+                    {/* Critical Rules Section */}
+                    <div className="mt-16 bg-red-50 border border-red-200 rounded-xl p-8 max-w-4xl mx-auto">
+                        <h3 className="text-red-700 font-bold text-xl mb-6 flex items-center gap-2">
+                            <span>🚨</span> CRITICAL QUALITY RULES
+                        </h3>
+                        <p className="text-red-800 font-medium mb-6">Violation of these rules = Instant Rejection.</p>
+                        <ul className="grid md:grid-cols-3 gap-6">
+                            <li className="bg-white p-4 rounded-lg border border-red-100 shadow-sm">
+                                <strong className="block text-red-700 mb-2">Camera Consistency</strong>
+                                <span className="text-stone-700 text-sm">STRICTLY enforce Overhead or 45° Side angle. Camera must be <strong className="text-stone-900">STATIC</strong> (mounted). No handheld/selfie.</span>
+                            </li>
+                            <li className="bg-white p-4 rounded-lg border border-red-100 shadow-sm">
+                                <strong className="block text-red-700 mb-2">Session Length</strong>
+                                <span className="text-stone-700 text-sm">Minimum 5 minutes. Continuous takes ONLY. <strong className="text-stone-900">NO jump cuts</strong>.</span>
+                            </li>
+                            <li className="bg-white p-4 rounded-lg border border-red-100 shadow-sm">
+                                <strong className="block text-red-700 mb-2">Metadata</strong>
+                                <span className="text-stone-700 text-sm">You must track: Builder ID, Duration, Tier, and Set Type for every upload.</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </section>
@@ -149,7 +179,7 @@ const ModelDataRequests: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                         {[
-                            { icon: Camera, title: 'Camera', desc: 'Fixed position (phone, webcam, or camera)' },
+                            { icon: Camera, title: 'Camera', desc: 'Stationary/Mounted ONLY. No handheld or selfie-style.' },
                             { icon: List, title: 'Framing', desc: 'Hands and build area fully visible' }, // Using List as placeholder for Hand icon if unavailable
                             { icon: Video, title: 'Audio', desc: 'No talking, no music, no TV' },
                             { icon: HelpCircle, title: 'Lighting', desc: 'Well-lit, no harsh shadows' }, // Using HelpCircle for Lightbulb

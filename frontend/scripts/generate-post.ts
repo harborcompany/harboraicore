@@ -13,7 +13,11 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { blogTopics, getNextTopic, slugify, BlogTopic } from '../src/lib/blog/keywords';
+import { fileURLToPath } from 'url';
+import { blogTopics, getNextTopic, slugify, BlogTopic } from '../src/lib/blog/keywords.ts';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const CONTENT_DIR = path.join(__dirname, '../src/content/blog');
 const IMAGES_DIR = path.join(__dirname, '../public/blog-images');

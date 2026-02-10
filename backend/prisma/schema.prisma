@@ -28,9 +28,10 @@ model User {
   payouts         Payout[]
   profile         Profile?
   sandboxAccount  SandboxAccount?
-  annotations     UserAnnotation[]
-  contributor     Contributor?
-  humanReviews    HumanReview[]
+  annotations         UserAnnotation[]
+  contributor         Contributor?
+  humanReviews        HumanReview[]
+  reliabilityProfile  UserReliabilityProfile?
 }
 
 model Profile {
@@ -154,19 +155,20 @@ model ConsentRecord {
 }
 
 model UserAnnotation {
-  id          String     @id @default(uuid())
-  mediaId     String
-  userId      String
-  labelType   String
-  confidence  Float      @default(1.0)
-  timestamp   DateTime   @default(now())
-  boundingBox Json?
-  endTime     Float?
-  labels      String[]
-  startTime   Float?
-  status      String     @default("pending")
-  asset       MediaAsset @relation(fields: [mediaId], references: [id])
-  user        User       @relation(fields: [userId], references: [id])
+  id                  String                    @id @default(uuid())
+  mediaId             String
+  userId              String
+  labelType           String
+  confidence          Float                     @default(1.0)
+  timestamp           DateTime                  @default(now())
+  boundingBox         Json?
+  endTime             Float?
+  labels              String[]
+  startTime           Float?
+  status              String                    @default("pending")
+  asset               MediaAsset                @relation(fields: [mediaId], references: [id])
+  user                User                      @relation(fields: [userId], references: [id])
+  confidenceBreakdown AnnotationConfidenceScore?
 }
 
 model EarningsLedger {
@@ -1367,4 +1369,50 @@ model DatasetQAScore {
   updatedAt           DateTime        @updatedAt
   
   dataset             Dataset         @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+}
+
+// --- ANNOTATION CONFIDENCE SCORING ---
+
+model AnnotationConfidenceScore {
+  id                 String         @id @default(uuid())
+  annotationId       String         @unique
+
+  // 4-Component Breakdown (0–1 each)
+  modelAgreement     Float          @default(0)  // Weight: 0.4
+  crossUserAgreement Float          @default(0)  // Weight: 0.3
+  userReliability    Float          @default(0)  // Weight: 0.2
+  contextQuality     Float          @default(0)  // Weight: 0.1
+
+  // Final Computed
+  confidenceScore    Float          @default(0)  // Weighted sum 0–1
+  trainingWeight     Float          @default(0)  // confidence × base_weight
+
+  // Metadata
+  modelVersion       String?
+  computedAt         DateTime       @default(now())
+
+  annotation         UserAnnotation @relation(fields: [annotationId], references: [id], onDelete: Cascade)
+
+  @@index([confidenceScore])
+}
+
+model UserReliabilityProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+
+  reliabilityScore    Float    @default(0.5)  // Clamped 0.2–0.95
+  totalAnnotations    Int      @default(0)
+  consensusMatches    Int      @default(0)
+  consensusMismatches Int      @default(0)
+  avgAnnotationTimeMs Float?
+  fastWrongPenalties  Int      @default(0)
+
+  // XP Integration
+  xpMultiplier        Float    @default(1.0)  // Derived from reliability
+  totalXpEarned       Float    @default(0)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

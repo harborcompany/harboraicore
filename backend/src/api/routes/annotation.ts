@@ -6,6 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { requireScope } from '../middleware/auth.js';
 import { prisma } from '../../lib/prisma.js';
+import { confidenceScorer } from '../../services/annotation/confidence-scorer.js';
 
 export const annotationRouter = Router();
 
@@ -83,6 +84,11 @@ annotationRouter.post('/', requireScope('annotation:write'), async (req: Request
             data: annotation,
             message: 'Annotation created successfully',
         });
+
+        // Async: trigger confidence scoring (fire-and-forget)
+        confidenceScorer.scoreAnnotation(annotation.id).catch(err =>
+            console.error(`[Annotation] Async confidence scoring failed for ${annotation.id}:`, err)
+        );
     } catch (error) {
         console.error('Error creating annotation:', error);
         res.status(500).json({ error: 'Internal Server Error' });

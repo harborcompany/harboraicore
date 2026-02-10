@@ -81,6 +81,8 @@ services:
       retries: 3
 
   # Cognee Graph RAG Service
+  # NOTE: Source directory ./cognee-service is missing from the repository.
+  # Service definition retained for future implementation.
   # cognee:
   #   build:
   #     context: ./cognee-service
@@ -140,33 +142,6 @@ services:
       - "8080:80"
     depends_on:
       - backend
-  # dashboard:
-  #   build:
-  #     context: ./dashboard
-  #     dockerfile: Dockerfile
-  #   container_name: harbor-dashboard
-  #   ports:
-  #     - "8081:80"
-  #   depends_on:
-  #     - backend
-
-  # client-portal:
-  #   build:
-  #     context: ./client-portal
-  #     dockerfile: Dockerfile
-  #   container_name: harbor-client-portal
-  #   ports:
-  #     - "8082:80"
-  #   depends_on:
-  #     - backend
-
-  # blog:
-  #   build:
-  #     context: ./blog
-  #     dockerfile: Dockerfile
-  #   container_name: harbor-blog
-  #   ports:
-  #     - "8083:80"
   # ============================================
   # MONITORING (optional)
   # ============================================

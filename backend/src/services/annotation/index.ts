@@ -4,6 +4,7 @@
 
 export { taskManager, TaskManager } from './task-manager.js';
 export { reviewEngine, ReviewEngine } from './review-engine.js';
+export { confidenceScorer, ConfidenceScorer } from './confidence-scorer.js';
 
 export type {
     TaskType,

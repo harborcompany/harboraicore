@@ -199,3 +199,42 @@ apiRouter.use('/staging', stagingRouter);
 
 // Human Review & Completion
 apiRouter.use('/review', reviewRouter);
+
+// ============================================
+// ANNOTATION CONFIDENCE SCORING
+// ============================================
+import { confidenceRouter } from './routes/confidence.js';
+apiRouter.use('/confidence', confidenceRouter);
+
+// ============================================
+// DATASET EXPORT & LICENSING
+// ============================================
+import { datasetExportRouter } from './routes/dataset-export.js';
+apiRouter.use('/datasets', datasetExportRouter);
+
+// ============================================
+// ML PIPELINE STATUS
+// ============================================
+import { aiService } from '../services/annotation/models.js';
+
+apiRouter.get('/ml/status', async (req, res) => {
+    try {
+        const [health, models] = await Promise.all([
+            aiService.healthCheck(),
+            aiService.listModels(),
+        ]);
+
+        res.json({
+            python_service: health,
+            models,
+            confidence_scorer: { status: 'active', version: '1.0.0' },
+            cognee: {
+                status: process.env.COGNEE_URL ? 'configured' : 'standby',
+                url: process.env.COGNEE_URL || 'not configured',
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to check ML pipeline status' });
+    }
+});
+
