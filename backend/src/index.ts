@@ -66,6 +66,10 @@ app.get('/health', (req, res) => {
 // API routes
 app.use(config.apiPrefix, apiRouter);
 
+// Serve uploaded files (Local Storage)
+import path from 'path';
+app.use('/uploads', express.static(path.join(process.cwd(), 'storage/uploads')));
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({

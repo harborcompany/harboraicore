@@ -87,3 +87,15 @@ export interface Payout {
     paidAt?: string;
     createdAt: string;
 }
+export interface DatasetAsset {
+    id: string;
+    dataset_id: string;
+    media_uri: string;
+    filename: string;
+    media_type: 'video' | 'audio' | 'image' | 'text';
+    file_size_bytes: number;
+    metadata: Record<string, any>;
+    status: 'processing' | 'ready' | 'error';
+    created_at: string;
+    duration_seconds?: number;
+}

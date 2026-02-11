@@ -56,36 +56,43 @@ export const useUpload = (options: UseUploadOptions = {}) => {
             });
 
             try {
-                // Simulate precise progress if the service doesn't support ProgressEvents yet
-                // intended to be replaced by XHR progress if available
-                const progressInterval = setInterval(() => {
-                    setState(prev => {
-                        if (prev.status !== 'uploading') return prev;
-                        // Logarithmic-ish progress curve
-                        const remaining = 100 - prev.progress;
-                        const inc = Math.max(0.5, remaining / 20);
-                        if (prev.progress >= 95) return prev; // Wait for final completion
-                        return { ...prev, progress: prev.progress + inc };
-                    });
-                }, 200);
+                // Real XHR Upload
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file);
 
-                // Perform Upload
-                // In reality, we'd pass an onProgress callback here
-                const result = await service.ingestAsset('temp-dataset-id', file);
+                // Add token if auth is needed (using localStorage for simplicity if authStore isn't directly handy in hook without context)
+                // const token = localStorage.getItem('auth_token'); 
 
-                clearInterval(progressInterval);
+                xhr.open('POST', '/api/storage/upload'); // Relative path uses Vite proxy to backend
+                // if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
-                setState(prev => ({
-                    ...prev,
-                    progress: 100,
-                    status: 'processing' // Service returns, but usually some processing follows
-                }));
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100;
+                        setState(prev => ({ ...prev, progress: percentComplete }));
+                    }
+                };
 
-                // Fake processing delay for UX (if needed) or immediate success
-                setTimeout(() => {
-                    setState(prev => ({ ...prev, status: 'success' }));
-                    options.onSuccess?.(result);
-                }, 1500);
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        const response = JSON.parse(xhr.responseText);
+                        setState(prev => ({
+                            ...prev,
+                            progress: 100,
+                            status: 'success'
+                        }));
+                        options.onSuccess?.(response.data);
+                    } else {
+                        throw new Error(`Upload failed with status ${xhr.status}`);
+                    }
+                };
+
+                xhr.onerror = () => {
+                    throw new Error('Network error during upload');
+                };
+
+                xhr.send(formData);
 
             } catch (err) {
                 const error = err instanceof Error ? err : new Error('Upload failed');

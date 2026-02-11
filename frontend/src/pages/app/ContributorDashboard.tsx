@@ -29,10 +29,12 @@ const ContributorDashboard: React.FC = () => {
     const { selectFile, progress, status, error, fileName, reset } = useUpload({
         acceptedTypes: ['video/mp4', 'video/quicktime', 'video/webm'],
         maxSizeMB: 1024, // 1GB
-        onSuccess: async () => {
-            // Create a submission record to simulate real backend behavior
-            const file = new File([""], fileName || "video.mp4"); // Dummy file for mock creation
-            await submissionService.createSubmission(file);
+        onSuccess: async (result: any) => {
+            // Create a submission record with real backend data
+            // result contains { url, path, metadata: { originalName } }
+            const name = result?.metadata?.originalName || fileName || "video.mp4";
+
+            await submissionService.createSubmission(name, result);
             await fetchUploads();
         }
     });
@@ -210,8 +212,8 @@ const ContributorDashboard: React.FC = () => {
                                 <div className="text-right">
                                     <p className="text-sm font-medium text-brand-dark">{upload.payoutAmount ? `$${upload.payoutAmount}` : '-'}</p>
                                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${upload.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                            upload.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                                'bg-yellow-100 text-yellow-800'
+                                        upload.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                            'bg-yellow-100 text-yellow-800'
                                         }`}>
                                         {upload.status}
                                     </span>

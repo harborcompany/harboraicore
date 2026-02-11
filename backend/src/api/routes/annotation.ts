@@ -10,6 +10,78 @@ import { confidenceScorer } from '../../services/annotation/confidence-scorer.js
 
 export const annotationRouter = Router();
 
+import fs from 'fs';
+import path from 'path';
+import { spatialService } from '../../services/ai/spatial.js';
+
+/**
+ * Smart Annotation: Zero-shot detection using Gemini 2.5
+ * POST /api/annotation/smart/detect
+ */
+annotationRouter.post('/smart/detect', requireScope('annotation:write'), async (req: Request, res: Response) => {
+    const { assetId, classes, mode = '2d' } = req.body;
+
+    if (!assetId || !classes || !Array.isArray(classes)) {
+        res.status(400).json({ error: 'assetId and classes (array) are required' });
+        return;
+    }
+
+    try {
+        // 1. Get the asset path
+        // In a real app, we'd query the DatasetAsset table. 
+        // For this demo, we'll try to find the file in storage/uploads if we can, 
+        // or just use a sample image if it's the specific demo asset.
+
+        // Mocking the lookup for now since we don't have a direct AssetService imported here easily
+        // and we want to link this to the "Real Backend Uploads" we just made.
+
+        // Let's assume the frontend sends the filename or we query it.
+        // For the demo "Lego" flow, we'll look for the most recently uploaded file 
+        // if no specific path is found, or check if assetId corresponds to a known file.
+
+        // TODO: Replace with real DB lookup: const asset = await prisma.datasetAsset.findUnique({ where: { id: assetId } });
+
+        const uploadsDir = path.join(process.cwd(), 'storage/uploads');
+        // Simple heuristic: Find a file that might match the ID or just take the latest for the demo
+        const files = fs.readdirSync(uploadsDir);
+        const latestFile = files
+            .filter(f => !f.startsWith('.'))
+            .map(f => ({ name: f, time: fs.statSync(path.join(uploadsDir, f)).mtime.getTime() }))
+            .sort((a, b) => b.time - a.time)[0];
+
+        if (!latestFile) {
+            res.status(404).json({ error: 'No images found in storage to analyze.' });
+            return;
+        }
+
+        const filePath = path.join(uploadsDir, latestFile.name);
+        const imageBuffer = fs.readFileSync(filePath);
+
+        // 2. Call Spatial Service
+        let predictions;
+        if (mode === '3d') {
+            predictions = await spatialService.detect3D(imageBuffer, classes);
+        } else if (mode === 'segment') {
+            // predictions = await spatialService.segment(imageBuffer, classes); // Implementation pending
+            predictions = await spatialService.detect2D(imageBuffer, classes); // Fallback
+        } else {
+            predictions = await spatialService.detect2D(imageBuffer, classes);
+        }
+
+        res.json({
+            data: {
+                predictions,
+                fileUsed: latestFile.name,
+                mode
+            }
+        });
+
+    } catch (error) {
+        console.error('Smart detection failed:', error);
+        res.status(500).json({ error: 'Smart detection failed', details: (error as Error).message });
+    }
+});
+
 // Get annotations for an asset
 annotationRouter.get('/:assetId', requireScope('annotation:read'), async (req: Request, res: Response) => {
     const { assetId } = req.params;

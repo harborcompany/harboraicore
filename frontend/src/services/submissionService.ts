@@ -7,6 +7,9 @@ export interface Submission {
     submittedAt: string;
     payoutAmount: number | null;
     datasetId?: string;
+    // Real backend fields
+    url?: string;
+    storagePath?: string;
 }
 
 // Mock Submission Store (persisted in localStorage)
@@ -36,15 +39,17 @@ export const submissionService = {
         return [...submissions];
     },
 
-    async createSubmission(file: File, datasetAsset?: DatasetAsset): Promise<Submission> {
-        await delay(800);
+    async createSubmission(filename: string, uploadResult?: any): Promise<Submission> {
+        await delay(200); // reduced delay as we already waited for upload
         const newSubmission: Submission = {
             id: `sub_${Date.now()}`,
-            filename: file.name,
+            filename: filename,
             status: 'pending', // Default to pending
             submittedAt: new Date().toISOString(),
             payoutAmount: null,
-            datasetId: datasetAsset?.dataset_id
+            // Store real backend paths if available
+            url: uploadResult?.url,
+            storagePath: uploadResult?.path
         };
         submissions.unshift(newSubmission);
         saveSubmissions(submissions);
