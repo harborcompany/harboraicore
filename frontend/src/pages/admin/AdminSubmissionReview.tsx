@@ -1,126 +1,211 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Pause, Check, X, AlertTriangle, Eye, ChevronRight } from 'lucide-react';
 import { PageHeader, StatusBadge } from '../../components/admin/AdminComponents';
-import { AssetQACard } from '../../components/qa';
-
+import { AssetQACard } from '../../components/qa'; // Assuming this exists or mocked
+import { useParams } from 'react-router-dom';
+import { AdminAPI } from '../../services/admin';
+import { Submission } from '../../types';
 
 export const AdminSubmissionReview: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const [submission, setSubmission] = useState<Submission | null>(null);
     const [playing, setPlaying] = useState(false);
 
-    // Mock Data
-    const submission = {
-        id: 'sub_8x92',
-        contributor: 'alex.chen@example.com',
-        type: 'LEGO Assembly',
-        duration: '14:20',
-        uploadedAt: '2026-02-06 09:30 AM',
-        status: 'pending_review',
-        autoAnnotations: {
-            qualityScore: 94,
-            confidence: 0.98,
-            actions: [
-                { time: '0:15', label: 'search_piece', conf: 0.99 },
-                { time: '0:45', label: 'align_brick', conf: 0.95 },
-                { time: '1:10', label: 'attach_brick', conf: 0.98 },
-                { time: '1:45', label: 'adjust_fit', conf: 0.88 },
-            ],
-            failures: [
-                { time: '4:20', type: 'misalignment', severity: 'low' }
-            ]
-        },
-        qaScore: {
-            overallScore: 87,
-            accuracyScore: 92,
-            consistencyScore: 85,
-            technicalScore: 94,
-            completenessScore: 100,
-            confidenceScore: 78,
-            status: 'NEEDS_REVIEW' as const,
-            criticalFailure: false,
-            failureReasons: ['Low confidence in final assembly step']
+    // Review State
+    const [verdict, setVerdict] = useState<'APPROVED' | 'PARTIAL' | 'REJECTED' | null>(null);
+    const [reason, setReason] = useState<string>('');
+    const [notes, setNotes] = useState<string>('');
+    const [submitting, setSubmitting] = useState(false);
+    const [completed, setCompleted] = useState(false);
+
+    // Hardcoded Reasons
+    const REJECTION_REASONS = [
+        'Poor visibility / Lighting',
+        'Insufficient motion / Static',
+        'Excessive occlusion',
+        'Non-compliant recording angle',
+        'Low annotation confidence',
+        'Other (See notes)'
+    ];
+
+    const PARTIAL_REASONS = [
+        'Minor occlusion',
+        'Short duration',
+        'Background noise',
+        'Usable but non-core'
+    ];
+
+    useEffect(() => {
+        if (id) {
+            AdminAPI.getSubmission(id).then(setSubmission);
+        }
+    }, [id]);
+
+    const handleSubmit = async () => {
+        if (!verdict || !reason || !id) return;
+
+        setSubmitting(true);
+        try {
+            await AdminAPI.submitReview(id, verdict, reason, notes);
+            setCompleted(true);
+        } catch (e) {
+            console.error(e);
+            alert('Failed to submit review');
+        } finally {
+            setSubmitting(false);
         }
     };
 
+    if (!submission) return <div className="p-6 text-white">Loading...</div>;
+
     return (
-        <div className="max-w-[1600px] mx-auto p-6 h-[calc(100vh-64px)] overflow-hidden flex flex-col">
+        <div className="max-w-[1600px] mx-auto p-6 h-[calc(100vh-64px)] overflow-hidden flex flex-col text-white">
             <header className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+                    <h1 className="text-xl font-semibold flex items-center gap-2">
                         Review Submission <span className="text-gray-500 font-mono text-base">{submission.id}</span>
+                        {completed && <span className="bg-green-500/20 text-green-500 text-xs px-2 py-0.5 rounded">REVIEWED</span>}
                     </h1>
                     <p className="text-gray-400 text-sm">
-                        Contributor: {submission.contributor} • {submission.type} • {submission.uploadedAt}
+                        Contributor: {submission.contributor?.email} • {submission.uploadStatus} • {new Date(submission.createdAt).toLocaleDateString()}
                     </p>
                 </div>
-                <div className="flex gap-3">
-                    <button className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded border border-red-500/20 flex items-center gap-2 transition-colors">
-                        <X size={16} /> Reject
-                    </button>
-                    <button className="px-4 py-2 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 rounded border border-yellow-500/20 flex items-center gap-2 transition-colors">
-                        <AlertTriangle size={16} /> Partial
-                    </button>
-                    <button className="px-4 py-2 bg-green-500 text-white hover:bg-green-600 rounded flex items-center gap-2 transition-colors shadow-lg shadow-green-900/20">
-                        <Check size={16} /> Approve & Pay
-                    </button>
-                </div>
+
+                {/* Status Indicator if completed */}
+                {completed ? (
+                    <div className="bg-[#141414] border border-[#262626] px-4 py-2 rounded flex items-center gap-2">
+                        {verdict === 'APPROVED' && <Check className="text-green-500" size={16} />}
+                        {verdict === 'REJECTED' && <X className="text-red-500" size={16} />}
+                        {verdict === 'PARTIAL' && <AlertTriangle className="text-yellow-500" size={16} />}
+                        <span>{verdict}</span>
+                        <span className="text-gray-500 text-sm">({reason})</span>
+                    </div>
+                ) : (
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setVerdict(null)}
+                            disabled={!verdict}
+                            className="text-gray-400 hover:text-white px-3 py-2"
+                        >
+                            Reset
+                        </button>
+                    </div>
+                )}
             </header>
 
             <div className="flex-1 grid grid-cols-12 gap-6 min-h-0">
                 {/* Left: Video Player */}
                 <div className="col-span-8 bg-black rounded-xl relative overflow-hidden flex items-center justify-center border border-gray-800">
+                    {/* Placeholder for video player */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none p-6 flex flex-col justify-end">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setPlaying(!playing)}
-                                className="w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white transition-colors"
+                                className="w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white transition-colors pointer-events-auto"
                             >
                                 {playing ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
                             </button>
-                            <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
-                                <div className="w-1/3 h-full bg-blue-500"></div>
-                            </div>
-                            <span className="text-sm font-medium text-white">{submission.duration}</span>
+                            <span className="text-sm font-medium text-white">00:00 / 14:20</span>
                         </div>
                     </div>
-                    <p className="text-gray-500">Video Player Component Placeholder</p>
+                    <p className="text-gray-500">Video Player Component</p>
                 </div>
 
-                {/* Right: Analysis & Logs */}
+                {/* Right: Review Controls */}
                 <div className="col-span-4 flex flex-col gap-6 min-h-0">
 
-                    {/* Metrics Card */}
-                    <AssetQACard score={submission.qaScore} assetName="LEGO Assembly - Session 12" />
+                    {/* Decision Panel */}
+                    {!completed ? (
+                        <div className="bg-[#141414] border border-[#262626] rounded-xl p-4 flex flex-col gap-4">
+                            <h3 className="font-semibold text-lg">Quality Gate</h3>
 
-                    {/* Annotations List */}
-                    <div className="bg-[#141414] border border-gray-800 rounded-xl flex-1 overflow-hidden flex flex-col">
-                        <div className="p-4 border-b border-gray-800 flex justify-between items-center">
-                            <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">Event Log</h3>
-                            <button className="text-blue-400 text-xs hover:text-blue-300">View JSON</button>
-                        </div>
-                        <div className="overflow-y-auto flex-1 p-2 space-y-1">
-                            {submission.autoAnnotations.actions.map((action, i) => (
-                                <div key={i} className="flex items-center justify-between p-3 hover:bg-white/5 rounded transition-colors group cursor-pointer">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-mono text-xs text-blue-400 bg-blue-400/10 px-1.5 py-0.5 rounded">{action.time}</span>
-                                        <span className="text-sm text-gray-300">{action.label}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-gray-600 group-hover:text-gray-500">{(action.conf * 100).toFixed(0)}%</span>
-                                        <ChevronRight size={14} className="text-gray-700 group-hover:text-gray-500" />
-                                    </div>
+                            {/* Verdict Selection */}
+                            <div className="grid grid-cols-3 gap-2">
+                                <button
+                                    onClick={() => { setVerdict('APPROVED'); setReason('High Quality'); }}
+                                    className={`p-3 rounded border flex flex-col items-center gap-2 transition-all ${verdict === 'APPROVED'
+                                            ? 'bg-green-500/20 border-green-500 text-green-500'
+                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <Check size={20} />
+                                    <span className="text-sm font-medium">Approve</span>
+                                </button>
+                                <button
+                                    onClick={() => { setVerdict('PARTIAL'); setReason(''); }}
+                                    className={`p-3 rounded border flex flex-col items-center gap-2 transition-all ${verdict === 'PARTIAL'
+                                            ? 'bg-yellow-500/20 border-yellow-500 text-yellow-500'
+                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <AlertTriangle size={20} />
+                                    <span className="text-sm font-medium">Partial</span>
+                                </button>
+                                <button
+                                    onClick={() => { setVerdict('REJECTED'); setReason(''); }}
+                                    className={`p-3 rounded border flex flex-col items-center gap-2 transition-all ${verdict === 'REJECTED'
+                                            ? 'bg-red-500/20 border-red-500 text-red-500'
+                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <X size={20} />
+                                    <span className="text-sm font-medium">Reject</span>
+                                </button>
+                            </div>
+
+                            {/* Conditional Reason Dropdown */}
+                            {verdict && (
+                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                                    <label className="text-sm text-gray-400">Reason (Mandatory)</label>
+                                    <select
+                                        value={reason}
+                                        onChange={(e) => setReason(e.target.value)}
+                                        className="w-full bg-black border border-[#333] rounded p-2 text-white"
+                                    >
+                                        <option value="">Select a reason...</option>
+                                        {verdict === 'APPROVED' && <option value="High Quality">High Quality (Standard)</option>}
+                                        {verdict === 'REJECTED' && REJECTION_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                                        {verdict === 'PARTIAL' && PARTIAL_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
+
+                                    <label className="text-sm text-gray-400">Notes (Optional)</label>
+                                    <textarea
+                                        value={notes}
+                                        onChange={(e) => setNotes(e.target.value)}
+                                        className="w-full bg-black border border-[#333] rounded p-2 text-white h-20 text-sm"
+                                        placeholder="Add context for the contributor..."
+                                    />
+
+                                    <button
+                                        disabled={!reason || submitting}
+                                        onClick={handleSubmit}
+                                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {submitting ? 'Submitting...' : 'Confirm Decision'}
+                                    </button>
                                 </div>
-                            ))}
-                            {submission.autoAnnotations.failures.map((fail, i) => (
-                                <div key={`fail-${i}`} className="flex items-center justify-between p-3 bg-red-500/5 hover:bg-red-500/10 rounded transition-colors cursor-pointer border border-red-500/10">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-mono text-xs text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded">{fail.time}</span>
-                                        <span className="text-sm text-red-200">{fail.type}</span>
-                                    </div>
-                                    <span className="text-xs text-red-400 uppercase font-medium">{fail.severity}</span>
-                                </div>
-                            ))}
+                            )}
                         </div>
-                    </div>
+                    ) : (
+                        <div className="bg-[#141414] border border-[#262626] rounded-xl p-6 text-center text-gray-400">
+                            Decision recorded. Immutable.
+                        </div>
+                    )}
+
+                    {/* Confidence Score */}
+                    {submission.contributor && (
+                        <div className="bg-[#141414] border border-[#262626] rounded-xl p-4">
+                            <h3 className="text-xs font-medium text-gray-500 uppercase mb-2">Confidence Analysis</h3>
+                            <div className="flex justify-between items-end mb-2">
+                                <span className="text-2xl font-bold text-white">{(submission.contributor.reliabilityScore * 100).toFixed(0)}%</span>
+                                <span className="text-xs text-green-500">High Reliability</span>
+                            </div>
+                            <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-green-500 h-full" style={{ width: `${submission.contributor.reliabilityScore * 100}%` }}></div>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>

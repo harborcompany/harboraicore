@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Upload, DollarSign, Clock, CheckCircle, AlertCircle, FileVideo, X } from 'lucide-react';
+import { Upload, DollarSign, Clock, CheckCircle, AlertCircle, FileVideo, Video } from 'lucide-react'; // Added Video icon
 import { useAuth } from '../../lib/authStore';
 import { useUpload } from '../../hooks/useUpload';
 import { submissionService, Submission } from '../../services/submissionService';
@@ -7,10 +8,18 @@ import { submissionService, Submission } from '../../services/submissionService'
 const ContributorDashboard: React.FC = () => {
     const user = useAuth();
     const [recentUploads, setRecentUploads] = useState<Submission[]>([]);
+    const [uploadCount, setUploadCount] = useState(0);
+    const UPLOAD_LIMIT = 1; // Pilot restriction
 
     const fetchUploads = async () => {
-        const data = await submissionService.getRecentActivity();
-        setRecentUploads(data);
+        try {
+            const data = await submissionService.getRecentActivity();
+            setRecentUploads(data);
+            // Calculate uploads. In a real scenario this might come from a user profile stats endpoint
+            setUploadCount(data.length);
+        } catch (e) {
+            console.error("Failed to fetch uploads", e);
+        }
     };
 
     useEffect(() => {
@@ -22,26 +31,28 @@ const ContributorDashboard: React.FC = () => {
         maxSizeMB: 1024, // 1GB
         onSuccess: async () => {
             // Create a submission record to simulate real backend behavior
-            // In a real app, the upload endpoint would create this.
-            // We'll manually add one to our mock service to show immediate feedback.
             const file = new File([""], fileName || "video.mp4"); // Dummy file for mock creation
             await submissionService.createSubmission(file);
             await fetchUploads();
         }
     });
 
-    const stats = [
-        { label: 'Total Earnings', value: '$0.00', icon: DollarSign, trend: '+0%' },
-        { label: 'Pending Review', value: `${recentUploads.filter(u => u.status === 'pending').length}`, icon: Clock, trend: 'new submissions' },
-        { label: 'Approved Videos', value: `${recentUploads.filter(u => u.status === 'approved').length}`, icon: CheckCircle, trend: 'this week' },
-    ];
+    const canUpload = uploadCount < UPLOAD_LIMIT;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-12">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-brand-dark">Contributor Dashboard</h1>
-                <p className="text-gray-500">Manage your submissions and track earnings.</p>
+            <div className="flex justify-between items-end">
+                <div>
+                    <h1 className="text-2xl font-bold text-brand-dark">Contributor Dashboard</h1>
+                    <p className="text-gray-500">Manage your submissions and track earnings.</p>
+                </div>
+                <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 flex flex-col items-end">
+                    <span className="text-xs text-blue-600 font-semibold uppercase">Pilot Quota</span>
+                    <span className="text-brand-dark font-mono font-medium">
+                        Videos: <span className={uploadCount >= UPLOAD_LIMIT ? "text-red-500" : "text-green-600"}>{uploadCount}</span> / {UPLOAD_LIMIT}
+                    </span>
+                </div>
             </div>
 
             {/* Stats Grid */}
@@ -99,15 +110,28 @@ const ContributorDashboard: React.FC = () => {
             </div>
 
             {/* Quick Upload */}
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h2 className="text-lg font-bold text-brand-dark">Quick Upload</h2>
                         <p className="text-sm text-gray-500">Upload raw footage for processing. Max 1GB.</p>
                     </div>
+                    {!canUpload && (
+                        <div className="bg-yellow-50 text-yellow-800 text-xs px-3 py-1 rounded-full border border-yellow-100 flex items-center gap-1">
+                            <AlertCircle size={12} /> Limit Reached
+                        </div>
+                    )}
                 </div>
 
-                {status === 'idle' || status === 'error' ? (
+                {!canUpload ? (
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-10 flex flex-col items-center justify-center text-center bg-gray-50 opacity-75 cursor-not-allowed">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <Upload size={24} className="text-gray-300" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-400 mb-1">Upload Limit Reached</p>
+                        <p className="text-xs text-gray-400">You have reached the pilot limit of {UPLOAD_LIMIT} upload(s).</p>
+                    </div>
+                ) : status === 'idle' || status === 'error' ? (
                     <div
                         onClick={selectFile}
                         className="border-2 border-dashed border-gray-200 rounded-xl p-10 flex flex-col items-center justify-center text-center hover:border-black hover:bg-gray-50 transition-all cursor-pointer group"
@@ -186,8 +210,8 @@ const ContributorDashboard: React.FC = () => {
                                 <div className="text-right">
                                     <p className="text-sm font-medium text-brand-dark">{upload.payoutAmount ? `$${upload.payoutAmount}` : '-'}</p>
                                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${upload.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                        upload.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                            'bg-yellow-100 text-yellow-800'
+                                            upload.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                                'bg-yellow-100 text-yellow-800'
                                         }`}>
                                         {upload.status}
                                     </span>
@@ -205,8 +229,9 @@ const ContributorDashboard: React.FC = () => {
                             Upload your first video clip above to start earning from your contributions.
                         </p>
                         <button
+                            disabled={!canUpload}
                             onClick={selectFile}
-                            className="px-6 py-2.5 bg-brand-dark text-white text-sm font-medium rounded-lg hover:bg-black transition-colors"
+                            className={`px-6 py-2.5 text-white text-sm font-medium rounded-lg transition-colors ${canUpload ? 'bg-brand-dark hover:bg-black' : 'bg-gray-300 cursor-not-allowed'}`}
                         >
                             Upload Video Now
                         </button>

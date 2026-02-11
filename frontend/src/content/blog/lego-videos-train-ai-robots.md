@@ -1,11 +1,10 @@
 ---
 title: "From Bricks to Bytes: How Your LEGO Videos Can Train AI"
 slug: "lego-videos-train-ai-robots"
-date: "2026-02-06"
+date: "2026-02-11"
 category: "Data Contribution"
 excerpt: "Your LEGO building videos could be worth more than views. Here's how."
 author: "Harbor Team"
-thumbnail: "/blog-images/lego-videos-train-ai-robots.png"
 ---
 
 # From Bricks to Bytes: How Your LEGO Videos Can Train AI

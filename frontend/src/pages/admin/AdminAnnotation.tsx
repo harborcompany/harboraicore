@@ -29,6 +29,11 @@ interface AnnotationItem {
     frameTimestamp: number;
     brickType: string;
     boundingBox: [number, number, number, number];
+    geometry?: {
+        type: 'polygon' | 'keypoints' | 'bbox';
+        points?: [number, number][];
+        landmarks?: Record<string, [number, number]>;
+    };
     confidenceScore: number;
     source: 'auto' | 'crowd' | 'uploader';
     status: 'pending' | 'approved' | 'rejected';
@@ -39,6 +44,48 @@ interface AnnotationItem {
         occlusion: number;
     };
 }
+
+interface AnnotationConfig {
+    id: string;
+    projectName: string;
+    description: string;
+    tools: ('bbox' | 'polygon' | 'keypoints' | 'bbox3d')[];
+    labels: string[];
+    qualityTags: string[];
+    uncertaintyThreshold: number;
+}
+
+const PROJECT_TEMPLATES: Record<string, AnnotationConfig> = {
+    lego_assembly: {
+        id: 'lego',
+        projectName: 'LEGO Assembly QA',
+        description: 'Quality assurance for physical model assembly steps.',
+        tools: ['bbox', 'polygon', 'keypoints'],
+        labels: ['2x4 Red', '1x2 Blue', '2x2 Yellow', '1x4 Green', 'Hand'],
+        qualityTags: ['blur', 'occlusion', 'hand_present'],
+        uncertaintyThreshold: 0.65
+    },
+    medical_ct: {
+        id: 'medical',
+        projectName: 'Medical CT Segmentation',
+        description: 'Spleen and Liver segmentation from lung cavity scans.',
+        tools: ['polygon', 'bbox3d'],
+        labels: ['Spleen', 'Liver', 'Kidney', 'Cyst'],
+        qualityTags: ['motion_blur', 'low_contrast', 'artifact'],
+        uncertaintyThreshold: 0.85
+    },
+    legal_ocr: {
+        id: 'legal',
+        projectName: 'Legal Document OCR',
+        description: 'Entity extraction from 19th-century property deeds.',
+        tools: ['bbox'],
+        labels: ['Grantor', 'Grantee', 'Legal Description', 'Signature Date'],
+        qualityTags: ['ink_bleed', 'tattered_edge', 'faded_text'],
+        uncertaintyThreshold: 0.70
+    }
+};
+
+const DEFAULT_CONFIG = PROJECT_TEMPLATES.lego_assembly;
 
 interface ConfidenceScore {
     overall: number;
@@ -62,6 +109,7 @@ interface FilterState {
     creator: string;
     dateRange: string;
     minConfidence: number;
+    showUncertain: boolean;
 }
 
 // ============================================
@@ -76,7 +124,7 @@ const MOCK_SUBMISSIONS: Submission[] = [
         lightingCondition: 'Day — Natural', locationTag: 'Living Room',
         thumbnailUrl: '', videoUrl: '',
         annotations: [
-            { id: 'ann_001', frameTimestamp: 12.5, brickType: '2x4 Red', boundingBox: [120, 80, 200, 160], confidenceScore: 0.94, source: 'auto', status: 'pending', metaTags: ['hand_present'], contextQuality: { blur: 0.05, lighting: 'good', occlusion: 0.1 } },
+            { id: 'ann_001', frameTimestamp: 12.5, brickType: '2x4 Red', boundingBox: [120, 80, 200, 160], geometry: { type: 'polygon', points: [[120, 80], [200, 80], [200, 160], [120, 160]] }, confidenceScore: 0.94, source: 'auto', status: 'pending', metaTags: ['hand_present'], contextQuality: { blur: 0.05, lighting: 'good', occlusion: 0.1 } },
             { id: 'ann_002', frameTimestamp: 24.1, brickType: '1x2 Blue', boundingBox: [340, 220, 380, 260], confidenceScore: 0.87, source: 'auto', status: 'pending', metaTags: ['edge_occlusion'], contextQuality: { blur: 0.12, lighting: 'good', occlusion: 0.3 } },
             { id: 'ann_003', frameTimestamp: 45.7, brickType: '2x2 Yellow', boundingBox: [200, 150, 260, 210], confidenceScore: 0.72, source: 'auto', status: 'pending', metaTags: ['partial_lighting'], contextQuality: { blur: 0.2, lighting: 'moderate', occlusion: 0.15 } },
             { id: 'ann_004', frameTimestamp: 67.3, brickType: '1x4 Green', boundingBox: [80, 300, 160, 340], confidenceScore: 0.96, source: 'crowd', status: 'approved', metaTags: ['hand_present', 'clear_view'], contextQuality: { blur: 0.02, lighting: 'good', occlusion: 0.05 } },
@@ -91,7 +139,7 @@ const MOCK_SUBMISSIONS: Submission[] = [
         lightingCondition: 'Indoor — LED', locationTag: 'Workshop',
         thumbnailUrl: '', videoUrl: '',
         annotations: [
-            { id: 'ann_005', frameTimestamp: 5.2, brickType: '2x4 White', boundingBox: [100, 100, 180, 160], confidenceScore: 0.91, source: 'auto', status: 'approved', metaTags: ['clear_view'], contextQuality: { blur: 0.03, lighting: 'good', occlusion: 0.08 } },
+            { id: 'ann_005', frameTimestamp: 5.2, brickType: '2x4 White', boundingBox: [100, 100, 180, 160], geometry: { type: 'polygon', points: [[100, 100], [180, 100], [180, 160], [100, 160]] }, confidenceScore: 0.91, source: 'auto', status: 'approved', metaTags: ['clear_view'], contextQuality: { blur: 0.03, lighting: 'good', occlusion: 0.08 } },
             { id: 'ann_006', frameTimestamp: 18.9, brickType: '1x1 Black', boundingBox: [420, 190, 440, 210], confidenceScore: 0.65, source: 'auto', status: 'pending', metaTags: ['small_object', 'edge_occlusion'], contextQuality: { blur: 0.15, lighting: 'moderate', occlusion: 0.4 } },
         ],
         confidenceScore: { overall: 72, modelAgreement: 78, crossUserAgreement: 68, contextQuality: 65, userReliability: 82 },
@@ -172,9 +220,11 @@ function formatDate(iso: string): string {
 export function AdminAnnotation() {
     const [submissions, setSubmissions] = useState<Submission[]>(MOCK_SUBMISSIONS);
     const [selectedId, setSelectedId] = useState<string>(MOCK_SUBMISSIONS[0]?.id || '');
-    const [filters, setFilters] = useState<FilterState>({ status: 'all', creator: '', dateRange: 'all', minConfidence: 0 });
-    const [activeTab, setActiveTab] = useState<'annotations' | 'metadata' | 'confidence' | 'actions'>('annotations');
+    const [filters, setFilters] = useState<FilterState>({ status: 'all', creator: '', dateRange: 'all', minConfidence: 0, showUncertain: false });
+    const [config, setConfig] = useState<AnnotationConfig>(DEFAULT_CONFIG);
+    const [activeTab, setActiveTab] = useState<'annotations' | 'metadata' | 'confidence' | 'actions' | 'insights'>('annotations');
     const [timelinePosition, setTimelinePosition] = useState(0);
+    const [activeTool, setActiveTool] = useState<AnnotationConfig['tools'][number]>('bbox');
 
     const selected = submissions.find(s => s.id === selectedId) || null;
 
@@ -182,6 +232,7 @@ export function AdminAnnotation() {
         if (filters.status !== 'all' && s.status !== filters.status) return false;
         if (filters.creator && !s.contributorName.toLowerCase().includes(filters.creator.toLowerCase())) return false;
         if (filters.minConfidence > 0 && s.confidenceScore.overall < filters.minConfidence) return false;
+        if (filters.showUncertain && s.confidenceScore.overall > config.uncertaintyThreshold * 100) return false;
         return true;
     });
 
@@ -207,8 +258,19 @@ export function AdminAnnotation() {
             {/* ─── TOP BAR ─── */}
             <div style={styles.topBar}>
                 <div>
-                    <h1 style={styles.title}>Reviewer Dashboard</h1>
-                    <p style={styles.subtitle}>Annotation QA &middot; Confidence Scoring &middot; Dataset Curation</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <h1 style={styles.title}>{config.projectName}</h1>
+                        <select
+                            style={styles.templateSwitcher}
+                            value={config.id}
+                            onChange={(e) => setConfig(Object.values(PROJECT_TEMPLATES).find(t => t.id === e.target.value) || DEFAULT_CONFIG)}
+                        >
+                            {Object.values(PROJECT_TEMPLATES).map(t => (
+                                <option key={t.id} value={t.id}>{t.projectName} Template</option>
+                            ))}
+                        </select>
+                    </div>
+                    <p style={styles.subtitle}>{config.description}</p>
                 </div>
                 <div style={styles.statsRow}>
                     <StatPill label="Total" value={stats.total} color="#6366f1" />
@@ -244,6 +306,17 @@ export function AdminAnnotation() {
                         style={styles.slider} />
                     <span style={{ fontSize: 12, color: '#e5e5e5', width: 36, textAlign: 'right' }}>{filters.minConfidence}%</span>
                 </div>
+                <button
+                    style={{
+                        ...styles.filterBtn,
+                        background: filters.showUncertain ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.04)',
+                        borderColor: filters.showUncertain ? '#ef4444' : 'rgba(255,255,255,0.08)',
+                        color: filters.showUncertain ? '#ef4444' : '#a3a3a3'
+                    }}
+                    onClick={() => setFilters(f => ({ ...f, showUncertain: !f.showUncertain }))}
+                >
+                    ⚠️ High Uncertainty
+                </button>
             </div>
 
             {/* ─── MAIN SPLIT ─── */}
@@ -292,9 +365,77 @@ export function AdminAnnotation() {
                             {/* Video Preview */}
                             <div style={styles.videoPreview}>
                                 <div style={styles.previewPlaceholder}>
+                                    {/* ToolBar */}
+                                    <div style={styles.toolbar}>
+                                        {config.tools.includes('bbox') && (
+                                            <button
+                                                style={{ ...styles.toolBtn, border: activeTool === 'bbox' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
+                                                onClick={() => setActiveTool('bbox')} title="Bounding Box"
+                                            >
+                                                ⬚
+                                            </button>
+                                        )}
+                                        {config.tools.includes('polygon') && (
+                                            <button
+                                                style={{ ...styles.toolBtn, border: activeTool === 'polygon' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
+                                                onClick={() => setActiveTool('polygon')} title="Polygon Tool"
+                                            >
+                                                ⌬
+                                            </button>
+                                        )}
+                                        {config.tools.includes('keypoints') && (
+                                            <button
+                                                style={{ ...styles.toolBtn, border: activeTool === 'keypoints' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
+                                                onClick={() => setActiveTool('keypoints')} title="Keypoint Tool"
+                                            >
+                                                ⁕
+                                            </button>
+                                        )}
+                                        {config.tools.includes('bbox3d') && (
+                                            <button
+                                                style={{ ...styles.toolBtn, border: activeTool === 'bbox3d' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
+                                                onClick={() => setActiveTool('bbox3d')} title="3D Bounding Box"
+                                            >
+                                                🧊
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Canvas Overlay */}
+                                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={styles.canvasOverlay}>
+                                        {selected.annotations.map(ann => (
+                                            <React.Fragment key={ann.id}>
+                                                {ann.boundingBox && (
+                                                    <rect
+                                                        x={ann.boundingBox[0] / 10} y={ann.boundingBox[1] / 10}
+                                                        width={(ann.boundingBox[2] - ann.boundingBox[0]) / 10}
+                                                        height={(ann.boundingBox[3] - ann.boundingBox[1]) / 10}
+                                                        fill="none" strokeWidth="0.5" stroke={getConfidenceColor(ann.confidenceScore * 100)}
+                                                    />
+                                                )}
+                                                {ann.geometry?.type === 'polygon' && ann.geometry.points && (
+                                                    <polygon
+                                                        points={ann.geometry.points.map(p => `${p[0] / 10},${p[1] / 10}`).join(' ')}
+                                                        fill={`${getConfidenceColor(ann.confidenceScore * 100)}20`}
+                                                        stroke={getConfidenceColor(ann.confidenceScore * 100)} strokeWidth="0.5"
+                                                    />
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                    </svg>
+
                                     <div style={styles.playIcon}>▶</div>
                                     <div style={styles.previewOverlay}>
                                         <span>{selected.contributorName} &middot; {selected.duration} &middot; {selected.resolution}</span>
+                                    </div>
+
+                                    {/* Label Selector (Config-Driven) */}
+                                    <div style={styles.labelSelector}>
+                                        {config.labels.map(label => (
+                                            <button key={label} style={styles.labelPill}>
+                                                {label}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                                 {/* Timeline */}
@@ -322,12 +463,13 @@ export function AdminAnnotation() {
 
                             {/* Tab Bar */}
                             <div style={styles.tabBar}>
-                                {(['annotations', 'metadata', 'confidence', 'actions'] as const).map(tab => (
+                                {(['annotations', 'insights', 'metadata', 'confidence', 'actions'] as const).map(tab => (
                                     <button key={tab} onClick={() => setActiveTab(tab)}
                                         style={{ ...styles.tab, ...(activeTab === tab ? styles.tabActive : {}) }}>
                                         {tab === 'annotations' ? `Annotations (${selected.annotations.length})` :
-                                            tab === 'metadata' ? 'Metadata' :
-                                                tab === 'confidence' ? 'Confidence Scores' : 'Actions'}
+                                            tab === 'insights' ? 'Model Insights' :
+                                                tab === 'metadata' ? 'Metadata' :
+                                                    tab === 'confidence' ? 'Confidence' : 'Actions'}
                                     </button>
                                 ))}
                             </div>
@@ -335,6 +477,32 @@ export function AdminAnnotation() {
                             {/* Tab Content */}
                             <div style={styles.tabContent}>
                                 {activeTab === 'annotations' && <AnnotationsPanel submission={selected} />}
+                                {activeTab === 'insights' && (
+                                    <div style={styles.insightsPanel}>
+                                        <div style={styles.insightHeader}>
+                                            <span style={{ color: '#ef4444', fontWeight: 600 }}>Active Learning Analysis</span>
+                                            <span style={styles.tag}>High Uncertainty Detected</span>
+                                        </div>
+                                        <p style={{ fontSize: 13, color: '#a3a3a3', margin: '8px 0 16px' }}>
+                                            The model is struggling with objects near the edges or in low-lighting frames.
+                                            Priority review is recommended for frames 124-180.
+                                        </p>
+                                        <div style={styles.metricRow}>
+                                            <div style={styles.metricItem}>
+                                                <span style={styles.metricLabel}>Edge Occlusion Propensity</span>
+                                                <span style={{ ...styles.metricValue, color: '#ef4444' }}>82%</span>
+                                            </div>
+                                            <div style={styles.metricItem}>
+                                                <span style={styles.metricLabel}>Class Confidence Scarcity</span>
+                                                <span style={{ ...styles.metricValue, color: '#f59e0b' }}>45%</span>
+                                            </div>
+                                            <div style={styles.metricItem}>
+                                                <span style={styles.metricLabel}>Spatial Continuity Break</span>
+                                                <span style={{ ...styles.metricValue, color: '#22c55e' }}>12%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 {activeTab === 'metadata' && <MetadataPanel submission={selected} />}
                                 {activeTab === 'confidence' && <ConfidencePanel submission={selected} />}
                                 {activeTab === 'actions' && <ActionsPanel submission={selected} onAction={handleAction} />}
@@ -356,7 +524,7 @@ export function AdminAnnotation() {
                     <PipelineCard name="SAM3" status="active" version="3.0" description="Instance segmentation — pixel-level masks" accuracy={91.8} />
                     <PipelineCard name="MediaPipe" status="active" version="0.10.7" description="Hand pose estimation — 21 keypoints" accuracy={96.1} />
                     <PipelineCard name="Whisper" status="active" version="large-v3" description="Speech-to-text transcription" accuracy={92.5} />
-                    <PipelineCard name="Cognee" status="standby" version="2.0" description="Graph RAG — knowledge extraction" accuracy={0} />
+                    <PipelineCard name="Cognee" status="active" version="2.0" description="Graph RAG — knowledge extraction" accuracy={78.5} />
                     <PipelineCard name="Confidence Scorer" status="active" version="1.0.0" description="4-component annotation quality scoring" accuracy={0} />
                 </div>
             </div>
@@ -386,7 +554,14 @@ function AnnotationsPanel({ submission }: { submission: Submission }) {
                     </div>
                     {submission.annotations.map(ann => (
                         <div key={ann.id} style={styles.annotationRow}>
-                            <span style={{ flex: 1, fontWeight: 500, color: '#e5e5e5' }}>{ann.brickType}</span>
+                            <span style={{ flex: 1, fontWeight: 500, color: '#e5e5e5', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {ann.brickType}
+                                {ann.geometry && (
+                                    <span style={{ fontSize: 10, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, color: '#737373', fontWeight: 400 }}>
+                                        {ann.geometry.type.toUpperCase()}
+                                    </span>
+                                )}
+                            </span>
                             <span style={{ width: 80, color: '#a3a3a3', fontFamily: 'monospace', fontSize: 12 }}>{ann.frameTimestamp.toFixed(1)}s</span>
                             <span style={{ width: 80 }}>
                                 <span style={{ color: getConfidenceColor(ann.confidenceScore * 100), fontWeight: 600, fontSize: 13 }}>
@@ -664,6 +839,19 @@ const styles: Record<string, React.CSSProperties> = {
     pipelineCard: { padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.04)' },
 
     emptyState: { padding: 32, textAlign: 'center' as const, color: '#525252', fontSize: 14 },
+    filterBtn: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '8px 12px', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s ease' },
+    toolbar: { position: 'absolute' as const, top: 12, right: 12, display: 'flex', flexDirection: 'column' as const, gap: 8, zIndex: 10 },
+    toolBtn: { width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all 0.2s ease' },
+    canvasOverlay: { position: 'absolute' as const, top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' as const },
+    labelSelector: { position: 'absolute' as const, bottom: 48, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8, padding: '8px 16px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderTop: '1px solid rgba(255,255,255,0.08)' },
+    labelPill: { padding: '4px 12px', borderRadius: 16, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#e5e5e5', fontSize: 12, cursor: 'pointer', transition: 'all 0.2s ease' },
+    templateSwitcher: { background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '4px 8px', color: '#818cf8', fontSize: 11, outline: 'none', cursor: 'pointer' },
+    insightsPanel: { padding: '8px 4px' },
+    insightHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    metricRow: { display: 'flex', gap: 16, marginBottom: 20 },
+    metricItem: { flex: 1, padding: 12, background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' },
+    metricLabel: { display: 'block', fontSize: 11, color: '#737373', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
+    metricValue: { fontSize: 20, fontWeight: 700 },
 };
 
 export default AdminAnnotation;

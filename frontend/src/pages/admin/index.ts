@@ -1,4 +1,5 @@
 export { AdminLayout } from './AdminLayout';
+export * from './AdminDashboard';
 export { AdminOverview } from './AdminOverview';
 export { AdminUsers } from './AdminUsers';
 export { AdminIngestion } from './AdminIngestion';
@@ -8,6 +9,11 @@ export { AdminMarketplace } from './AdminMarketplace';
 export { AdminAds } from './AdminAds';
 export { AdminRevenue } from './AdminRevenue';
 export { default as AdminContributors } from './AdminContributors';
+export { default as AdminCreators } from './AdminCreators';
+export { default as AdminVideos } from './AdminVideos';
+export { default as AdminLicenses } from './AdminLicenses';
+export { default as AdminPayouts } from './AdminPayouts';
+export { default as AdminLogs } from './AdminLogs';
 export { AdminSubmissionReview } from './AdminSubmissionReview';
 export { AdminInfrastructure } from './AdminInfrastructure';
 export { AdminCompliance } from './AdminCompliance';

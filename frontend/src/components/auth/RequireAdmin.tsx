@@ -7,6 +7,10 @@ export const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children
     const location = useLocation();
 
     // Check if authenticated first
+    if (user.loading) {
+        return null; // Let RequireAuth handle the loading UI or just wait
+    }
+
     if (!user.authenticated) {
         return <Navigate to="/auth/login" state={{ from: location }} replace />;
     }

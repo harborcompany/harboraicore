@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeader, DataTable, Tabs, StatusBadge, Button, KPICard } from '../../components/admin/AdminComponents';
 import { DatasetQADashboard } from '../../components/qa';
+import { X, AlertTriangle } from 'lucide-react';
 
 interface Dataset {
     id: string;
@@ -34,6 +35,7 @@ interface Dataset {
 }
 
 export function AdminDatasets() {
+    const [isFormulating, setIsFormulating] = useState(false);
     const [datasets, setDatasets] = useState<Dataset[]>([
         {
             id: 'd_lego_v1',
@@ -215,7 +217,12 @@ export function AdminDatasets() {
             <PageHeader
                 title="Lab Datasets"
                 subtitle="Data Labeling Pipeline & Registry"
-                actions={<Button variant="primary" onClick={() => fetchDatasets()}>Refresh</Button>}
+                actions={
+                    <div className="flex gap-2">
+                        <Button variant="secondary" onClick={() => fetchDatasets()}>Refresh</Button>
+                        <Button variant="primary" onClick={() => setIsFormulating(true)}>+ Formulate Dataset</Button>
+                    </div>
+                }
             />
 
             <div className="kpi-row">
@@ -275,6 +282,76 @@ export function AdminDatasets() {
                                     <Button variant="ghost" style={{ color: '#ef4444' }}>Unpublish</Button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Formulation Wizard */}
+            {isFormulating && (
+                <div className="fixed inset-0 z-[102] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <div className="bg-[#141414] border border-[#262626] rounded-xl w-[600px] shadow-2xl overflow-hidden">
+                        <div className="p-6 border-b border-[#262626] flex justify-between items-center">
+                            <h2 className="text-lg font-semibold text-white">Formulate New Dataset</h2>
+                            <button onClick={() => setIsFormulating(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm text-gray-400 mb-1 block">Dataset Name</label>
+                                    <input
+                                        className="w-full bg-black border border-[#333] rounded p-2 text-white"
+                                        placeholder="e.g. LEGO Assembly V1"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-400 mb-1 block">Version Tag</label>
+                                    <input
+                                        className="w-full bg-black border border-[#333] rounded p-2 text-white"
+                                        placeholder="v1.0.0"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-sm text-gray-400 mb-1 block">Date Range (Inclusion)</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input type="date" className="bg-black border border-[#333] rounded p-2 text-white" />
+                                    <input type="date" className="bg-black border border-[#333] rounded p-2 text-white" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-sm text-gray-400 mb-1 block flex justify-between">
+                                    <span>Minimum Confidence Threshold</span>
+                                    <span className="text-blue-400">0.85</span>
+                                </label>
+                                <input type="range" min="0" max="1" step="0.05" defaultValue="0.85" className="w-full" />
+                                <p className="text-xs text-gray-600 mt-1">Only assets with confidence score ≥ 0.85 will be included.</p>
+                            </div>
+
+                            <div className="bg-blue-500/5 border border-blue-500/10 rounded p-4">
+                                <h4 className="text-sm font-medium text-blue-400 mb-2">Estimation</h4>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Eligible Videos:</span>
+                                    <span className="text-white">842</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Total Duration:</span>
+                                    <span className="text-white">142 hours</span>
+                                </div>
+                            </div>
+
+                            <div className="bg-yellow-500/5 border border-yellow-500/10 rounded p-3 text-xs text-yellow-500 flex gap-2">
+                                <AlertTriangle size={16} />
+                                <div>
+                                    <strong>Immutable Action:</strong> Once formulated, this dataset cannot be modified. It will be locked for licensing.
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-[#262626] flex justify-end gap-3 bg-[#0a0a0a]">
+                            <Button variant="secondary" onClick={() => setIsFormulating(false)}>Cancel</Button>
+                            <Button variant="primary">Formulate & Lock</Button>
                         </div>
                     </div>
                 </div>

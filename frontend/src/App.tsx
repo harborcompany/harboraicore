@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './lib/authStore';
+import { useAuth, authStore } from './lib/authStore';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { RequireAdmin } from './components/auth/RequireAdmin';
 
@@ -79,6 +79,12 @@ import DocsContributors from './pages/docs/Contributors';
 // Admin Panel Pages
 import {
   AdminLayout,
+  AdminDashboard,
+  AdminCreators,
+  AdminVideos,
+  AdminLicenses,
+  AdminPayouts,
+  AdminLogs,
   AdminOverview,
   AdminUsers,
   AdminIngestion,
@@ -140,6 +146,10 @@ const RedirectIfAuthenticated: React.FC<{ children: React.ReactNode }> = ({ chil
 };
 
 const App: React.FC = () => {
+  React.useEffect(() => {
+    authStore.initialize();
+  }, []);
+
   return (
     <BrowserRouter>
       <ScrollToTopWrapper />
@@ -225,7 +235,6 @@ const App: React.FC = () => {
           <Route path="meet/:room" element={<MeetingPage />} />
           <Route path="workflows/new" element={<WorkflowBuilder />} />
         </Route>
-
         {/* Admin Panel Routes - Internal Only */}
         <Route path="/admin" element={
           <RequireAuth>
@@ -234,27 +243,24 @@ const App: React.FC = () => {
             </RequireAdmin>
           </RequireAuth>
         }>
-          <Route index element={<AdminOverview />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="contributors" element={<AdminContributors />} />
-          <Route path="submission/:id" element={<AdminSubmissionReview />} />
-          <Route path="ingestion" element={<AdminIngestion />} />
-          <Route path="annotation" element={<AdminAnnotation />} />
+          <Route index element={<AdminDashboard />} />
+          <Route path="creators" element={<AdminCreators />} />
+          <Route path="videos" element={<AdminVideos />} />
+          <Route path="annotations" element={<AdminAnnotation />} />
+          <Route path="reviews" element={<AdminSubmissionReview />} /> {/* Or list? */}
           <Route path="datasets" element={<AdminDatasets />} />
-          <Route path="memory" element={<AdminMemory />} />
-          <Route path="realtime" element={<AdminRealtime />} />
-          <Route path="marketplace" element={<AdminMarketplace />} />
-          <Route path="ads" element={<AdminAds />} />
-          <Route path="revenue" element={<AdminRevenue />} />
-          <Route path="infrastructure" element={<AdminInfrastructure />} />
-          <Route path="compliance" element={<AdminCompliance />} />
-          <Route path="settings" element={<AdminSettings />} />
-        </Route>
+          <Route path="licenses" element={<AdminMarketplace />} /> {/* Placeholder */}
+          <Route path="payouts" element={<AdminRevenue />} /> {/* Placeholder */}
+          <Route path="logs" element={<AdminSettings />} /> {/* Placeholder */}
+
+          <Route path="submission/:id" element={<AdminSubmissionReview />} />
+          <Route path="users" element={<AdminUsers />} />
+        </Route >
 
         {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+        < Route path="*" element={< Navigate to="/" replace />} />
+      </Routes >
+    </BrowserRouter >
   );
 };
 

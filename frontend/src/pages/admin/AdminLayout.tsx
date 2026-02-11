@@ -9,20 +9,15 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Overview', path: '/admin', icon: <OverviewIcon /> },
-  { label: 'Users', path: '/admin/users', icon: <UsersIcon /> },
-  { label: 'Contributors', path: '/admin/contributors', icon: <UsersIcon /> }, // Reusing UsersIcon for now
-  { label: 'Content Ingestion', path: '/admin/ingestion', icon: <UploadIcon /> },
-  { label: 'Annotation & QA', path: '/admin/annotation', icon: <AnnotationIcon /> },
+  { label: 'Dashboard', path: '/admin', icon: <OverviewIcon /> },
+  { label: 'Creators', path: '/admin/creators', icon: <UsersIcon /> },
+  { label: 'Videos', path: '/admin/videos', icon: <UploadIcon /> }, // Reusing UploadIcon
+  { label: 'Annotations', path: '/admin/annotations', icon: <AnnotationIcon /> },
+  { label: 'Reviews', path: '/admin/reviews', icon: <AuditIcon /> }, // Reusing AuditIcon
   { label: 'Datasets', path: '/admin/datasets', icon: <DatasetIcon /> },
-  { label: 'Marketplace & Sales', path: '/admin/marketplace', icon: <MarketIcon /> },
-  { label: 'Ads & Creative', path: '/admin/ads', icon: <AdsIcon /> },
-  { label: 'Revenue & Payouts', path: '/admin/revenue', icon: <RevenueIcon /> },
-  { label: 'Infrastructure', path: '/admin/infrastructure', icon: <InfraIcon /> },
-  { label: 'Compliance & Audit', path: '/admin/compliance', icon: <AuditIcon /> },
-  { label: 'Memory System', path: '/admin/memory', icon: <MemoryIcon /> },
-  { label: 'Real-time & Voice', path: '/admin/realtime', icon: <RealtimeIcon /> },
-  { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon /> },
+  { label: 'Licenses', path: '/admin/licenses', icon: <MarketIcon /> },
+  { label: 'Payouts', path: '/admin/payouts', icon: <RevenueIcon /> },
+  { label: 'System Logs', path: '/admin/logs', icon: <SettingsIcon /> }, // Reusing SettingsIcon or find a better one
 ];
 
 export function AdminLayout() {

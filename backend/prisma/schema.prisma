@@ -100,6 +100,12 @@ model MediaAsset {
   uploadMetadata        UploadMetadata?
   annotations           UserAnnotation[]
   qaScore               AssetQAScore?
+  
+  // HarborML Specific
+  autoQCScore           Float?
+  reviewNotes           String?
+  reviewedBy            String?
+  reviewedAt            DateTime?
 }
 
 model AssetAuditLog {
@@ -166,6 +172,8 @@ model UserAnnotation {
   labels              String[]
   startTime           Float?
   status              String                    @default("pending")
+  geometry            Json?                     // For polygons, masks, keypoints
+  metaTags            String[]                  // For quality tags like 'blur', 'occlusion'
   asset               MediaAsset                @relation(fields: [mediaId], references: [id])
   user                User                      @relation(fields: [userId], references: [id])
   confidenceBreakdown AnnotationConfidenceScore?
@@ -254,6 +262,12 @@ model Dataset {
   outreachAssets      OutreachAsset[]
   submissions         Submission[]
   qaScore             DatasetQAScore?
+  
+  // HarborML Specific
+  isLocked            Boolean                    @default(false)
+  formulatedAt        DateTime?
+  formulatedBy        String?
+  licenses            License[]
 }
 
 model DatasetAccess {
@@ -654,6 +668,8 @@ model ObjectDetection {
   timestampMs  Float
   objectType   String
   bbox         Json
+  polygon      Json?      // Added for Label Studio-like rich annotations
+  mask         Json?      // Segmentation mask pointer or data
   confidence   Float
   category     String?
   orientation  Json?
@@ -1032,6 +1048,9 @@ enum MediaStatus {
   PROCESSING
   READY
   ERROR
+  UPLOADED
+  ANNOTATED
+  REVIEWED
 }
 
 enum DatasetVertical {
@@ -1053,6 +1072,7 @@ enum LicenseType {
   COMMERCIAL
   RESEARCH
   HYBRID
+  PILOT
 }
 
 enum PricingModel {
@@ -1224,6 +1244,11 @@ model Contributor {
   applications  ContributorApplication[]
   submissions   Submission[]
   payments      ContributorPayment[]
+  
+  // HarborML Specific
+  lastUploadDate  DateTime?
+  videosThisMonth Int             @default(0)
+  reliabilityScore Float          @default(0.5)
 }
 
 model ContributorApplication {
@@ -1294,6 +1319,11 @@ model ContributorPayment {
   status        PaymentStatus @default(PENDING)
   eligibleAt    DateTime?
   paidAt        DateTime?
+  
+  // HarborML Specific
+  platformFee   Float         @default(0)
+  netAmount     Float         @default(0)
+  
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   
@@ -1415,4 +1445,27 @@ model UserReliabilityProfile {
   updatedAt           DateTime @updatedAt
 
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SystemLog {
+  id        String   @id @default(uuid())
+  action    String
+  actorId   String
+  targetId  String?
+  targetType String
+  details   Json?
+  ipAddress String?
+  timestamp DateTime @default(now())
+}
+
+model License {
+  id           String      @id @default(uuid())
+  datasetId    String
+  licenseeName String
+  type         LicenseType
+  status       String      @default("ACTIVE")
+  issuedAt     DateTime    @default(now())
+  expiresAt    DateTime?
+  termsBlob    String?
+  dataset      Dataset     @relation(fields: [datasetId], references: [id])
 }

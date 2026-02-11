@@ -9,6 +9,7 @@ export interface UserProfile {
     name?: string;
     avatarUrl?: string;
     authenticated: boolean;
+    loading: boolean; // Added loading state
     emailVerified: boolean;
     onboardingComplete: boolean;
     intent: 'ai_ml' | 'dataset_licensing' | 'ads' | 'contributor' | 'explore' | null;
@@ -37,6 +38,7 @@ const defaultProfile: UserProfile = {
     id: '',
     email: '',
     authenticated: false,
+    loading: true, // Default to loading
     emailVerified: false,
     onboardingComplete: false,
     intent: null,
@@ -55,7 +57,7 @@ const defaultProfile: UserProfile = {
 
 // Convert Supabase user to our profile
 const mapSupabaseUser = (user: SupabaseUser | null): UserProfile => {
-    if (!user) return defaultProfile;
+    if (!user) return { ...defaultProfile, loading: false };
 
     return {
         ...defaultProfile,
@@ -64,6 +66,7 @@ const mapSupabaseUser = (user: SupabaseUser | null): UserProfile => {
         name: user.user_metadata?.full_name || user.user_metadata?.name,
         avatarUrl: user.user_metadata?.avatar_url,
         authenticated: true,
+        loading: false, // Not loading
         emailVerified: !!user.email_confirmed_at,
         onboardingComplete: !!user.user_metadata?.onboardingComplete,
         intent: user.user_metadata?.intent || null,
@@ -101,6 +104,12 @@ export const authStore = {
         } else {
             currentSession = session;
             currentProfile = mapSupabaseUser(session?.user ?? null);
+            notifyListeners();
+        }
+
+        // Ensure loading is false if mapSupabaseUser didn't run or devLogin didn't set it (though they should)
+        if (currentProfile.loading) {
+            currentProfile = { ...currentProfile, loading: false };
             notifyListeners();
         }
 
@@ -272,6 +281,7 @@ export const authStore = {
             email: mockUser.email || '',
             name: 'Dev Admin',
             authenticated: true,
+            loading: false, // Not loading
             emailVerified: true,
             onboardingComplete: true, // Bypass onboarding
             intent: 'ai_ml',
