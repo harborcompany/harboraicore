@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harbor Investor Deck V2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: white;
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem 6rem;
+            position: relative;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .accent-text {
+            color: #34D399;
+        }
+
+        /* Emerald-400 */
+        .grid-bg {
+            background-image: radial-gradient(#333 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.1;
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Specific Visuals */
+        .timeline-line {
+            height: 2px;
+            background: #333;
+            width: 100%;
+            position: relative;
+            margin: 4rem 0;
+        }
+
+        .timeline-point {
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: -5px;
+        }
+
+        .timeline-point.active {
+            background: #34D399;
+            box-shadow: 0 0 15px #34D399;
+        }
+
+        .stack-layer {
+            border: 1px solid #333;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background: #111;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stack-layer:hover {
+            border-color: #34D399;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="fixed top-6 right-6 text-stone-600 text-sm font-mono z-50">
+        HARBOR LAB <span id="slide-count">01/12</span>
+    </div>
+
+    <!-- Background -->
+    <div class="grid-bg"></div>
+
+    <!-- Slide 1: Cover -->
+    <div class="slide active" id="slide-1">
+        <div class="max-w-4xl">
+            <h1 class="text-8xl font-serif mb-6 tracking-tight">Harbor</h1>
+            <p class="text-3xl text-stone-300 font-light mb-12">The Operating System for <span
+                    class="accent-text">Physical Intelligence</span>.</p>
+            <div class="h-1 w-24 bg-emerald-500 mb-8"></div>
+            <p class="text-sm text-stone-500 font-mono tracking-widest uppercase">Pre-Seed &nbsp;|&nbsp; 2026</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: The Shift -->
+    <div class="slide" id="slide-2">
+        <h2 class="text-sm font-mono text-emerald-500 mb-4">THE SHIFT</h2>
+        <h3 class="text-5xl font-serif mb-16">AI is moving from the Screen <br /> to the <span
+                class="italic text-stone-400">Physical World</span>.</h3>
+
+        <div class="relative w-full max-w-5xl">
+            <div class="timeline-line">
+                <div class="timeline-point" style="left: 0%"></div>
+                <div class="timeline-point" style="left: 40%"></div>
+                <div class="timeline-point active" style="left: 80%"></div>
+            </div>
+            <div class="flex justify-between text-lg">
+                <div class="w-1/3 pr-8">
+                    <div class="text-stone-500 font-mono mb-2">2010s</div>
+                    <div class="font-bold mb-1">Digital Intelligence</div>
+                    <div class="text-sm text-stone-400">Text & Images<br />(Scale AI)</div>
+                </div>
+                <div class="w-1/3 px-4 text-center">
+                    <div class="text-stone-500 font-mono mb-2">2023</div>
+                    <div class="font-bold mb-1">Digital Agents</div>
+                    <div class="text-sm text-stone-400">Reasoning & Code<br />(Prime Intellect)</div>
+                </div>
+                <div class="w-1/3 pl-8 text-right">
+                    <div class="text-emerald-500 font-mono mb-2">2026+</div>
+                    <div class="font-bold text-emerald-400 mb-1">Physical Intelligence</div>
+                    <div class="text-sm text-stone-300">Robotics & Physics<br /><span
+                            class="text-white font-bold">HARBOR</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The Problem -->
+    <div class="slide" id="slide-3">
+        <h2 class="text-sm font-mono text-pink-500 mb-4">THE PROBLEM</h2>
+        <h3 class="text-5xl font-serif mb-12">Physical AI is <span class="text-pink-500">starved</span> of Reality.</h3>
+
+        <div class="grid grid-cols-2 gap-16">
+            <div class="border border-stone-800 p-8 rounded-xl bg-stone-900/50">
+                <h4 class="text-xl font-bold mb-4">Static Datasets</h4>
+                <p class="text-stone-400 mb-4">COCO and ImageNet are flat, 2D, and semantic-only. Robots need depth,
+                    physics, and causal intent.</p>
+                <div class="text-xs font-mono text-red-400">ERROR: NO_DEPTH_CHANNEL</div>
+            </div>
+            <div class="border border-stone-800 p-8 rounded-xl bg-stone-900/50">
+                <h4 class="text-xl font-bold mb-4">Sim-to-Real Gap</h4>
+                <p class="text-stone-400 mb-4">Companies burn millions building "Sims" (Unity/Unreal) that fail to
+                    capture the entropy of the real world.</p>
+                <div class="text-xs font-mono text-red-400">WARN: PHYSICS_MISMATCH</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: The Harbor Stack -->
+    <div class="slide" id="slide-4">
+        <h2 class="text-sm font-mono text-emerald-500 mb-4">THE SOLUTION</h2>
+        <h3 class="text-5xl font-serif mb-12">The "Harbor Lab" Stack</h3>
+
+        <div class="max-w-4xl w-full space-y-4">
+            <div class="stack-layer border-emerald-900/50 bg-emerald-900/10">
+                <div>
+                    <div class="text-xs font-mono text-emerald-500 mb-1">LAYER 3: THE FOUNDRY</div>
+                    <div class="text-2xl font-bold">Policy Training</div>
+                </div>
+                <div class="text-right text-stone-400">On-demand VLA Fine-tuning</div>
+            </div>
+
+            <div class="py-2 flex justify-center">
+                <div class="h-8 w-px bg-stone-700"></div>
+            </div>
+
+            <div class="stack-layer border-emerald-800/50 bg-emerald-900/20">
+                <div>
+                    <div class="text-xs font-mono text-emerald-500 mb-1">LAYER 2: THE ANALYST</div>
+                    <div class="text-2xl font-bold">Spatial Intelligence</div>
+                </div>
+                <div class="text-right text-stone-400">Gemini Zero-Shot Labeling</div>
+            </div>
+
+            <div class="py-2 flex justify-center">
+                <div class="h-8 w-px bg-stone-700"></div>
+            </div>
+
+            <div class="stack-layer border-stone-700">
+                <div>
+                    <div class="text-xs font-mono text-stone-500 mb-1">LAYER 1: THE ENVIRONMENT</div>
+                    <div class="text-2xl font-bold">Data Lake</div>
+                </div>
+                <div class="text-right text-stone-400">Farm-to-Fork Ingestion</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Ingestion -->
+    <div class="slide" id="slide-5">
+        <div class="flex items-center gap-12">
+            <div class="w-1/2">
+                <h2 class="text-sm font-mono text-emerald-500 mb-4">LAYER 1: INGESTION</h2>
+                <h3 class="text-4xl font-serif mb-6">Ingestion at the Speed of Reality.</h3>
+                <p class="text-stone-400 text-lg leading-relaxed mb-8">
+                    Real-time upload, processing, and storage. Automated metadata extraction. No humans required in the
+                    loop until needed.
+                </p>
+                <div class="inline-block bg-stone-800 px-4 py-2 rounded text-sm font-mono text-emerald-400">
+                    STATUS: 10,000+ HOURS INGESTED
+                </div>
+            </div>
+            <div
+                class="w-1/2 bg-stone-900 rounded-xl aspect-video border border-stone-800 flex items-center justify-center relative overflow-hidden">
+                <!-- Real Lab UI -->
+                <img src="/harbor_lab_dashboard_deep.png" class="absolute inset-0 w-full h-full object-cover opacity-80"
+                    alt="Harbor Lab Dashboard" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                <div class="absolute bottom-4 left-4 z-10">
+                    <div class="font-mono text-xs text-emerald-400">LIVE FEED: H100 CLUSTER</div>
+                    <div class="text-xl font-bold">Training Run #001</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Spatial Intelligence -->
+    <div class="slide" id="slide-6">
+        <div class="flex items-center gap-12">
+            <div class="w-1/2 order-2">
+                <h2 class="text-sm font-mono text-emerald-500 mb-4">LAYER 2: INTELLIGENCE</h2>
+                <h3 class="text-4xl font-serif mb-6">AI that Understands the Physical World.</h3>
+                <p class="text-stone-400 text-lg leading-relaxed mb-8">
+                    We don't just store pixels; we index meaning. Our <strong>Spatial Service</strong> uses Gemini 2.5
+                    to automatically detect objects, depth, and affordances.
+                </p>
+                <div class="inline-block bg-stone-800 px-4 py-2 rounded text-sm font-mono text-emerald-400">
+                    ZERO-SHOT DETECTION: ACTIVE
+                </div>
+            </div>
+            <div
+                class="w-1/2 order-1 bg-stone-900 rounded-xl aspect-video border border-stone-800 flex items-center justify-center relative overflow-hidden group">
+                <img src="https://source.unsplash.com/random/800x600?lego"
+                    class="opacity-30 absolute inset-0 w-full h-full object-cover grayscale" />
+                <div class="absolute border-2 border-emerald-500 w-32 h-24 top-1/4 left-1/3">
+                    <div class="absolute -top-6 left-0 bg-emerald-500 text-black text-xs font-bold px-2 py-1">LEGO BRICK
+                        99%</div>
+                </div>
+                <div class="absolute border-2 border-blue-500 w-40 h-40 bottom-1/4 right-1/4">
+                    <div class="absolute -top-6 left-0 bg-blue-500 text-black text-xs font-bold px-2 py-1">HAND 95%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Flywheel -->
+    <div class="slide" id="slide-7">
+        <h2 class="text-sm font-mono text-emerald-500 mb-4">BUSINESS MODEL</h2>
+        <h3 class="text-5xl font-serif mb-16 text-center">A Self-Funding Intelligence Lab</h3>
+
+        <div class="relative w-full max-w-4xl mx-auto aspect-[2/1] flex items-center justify-center">
+
+            <div
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-64 p-6 border border-stone-700 rounded-xl bg-stone-900 text-center">
+                <div class="text-xl font-bold mb-2">Creative AI Revenue</div>
+                <div class="text-sm text-stone-400">Ads & Marketing Data<br />High Margin</div>
+            </div>
+
+            <div class="text-4xl text-stone-600">→</div>
+
+            <div
+                class="w-64 p-6 border border-emerald-600 rounded-xl bg-emerald-900/20 text-center shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                <div class="text-xl font-bold mb-2 text-emerald-400">Robot Data Collection</div>
+                <div class="text-sm text-stone-400">Subsidized by Creative $$</div>
+            </div>
+
+            <div class="text-4xl text-stone-600">→</div>
+
+            <div
+                class="absolute right-0 top-1/2 -translate-y-1/2 w-64 p-6 border border-stone-700 rounded-xl bg-stone-900 text-center">
+                <div class="text-xl font-bold mb-2">Better Models</div>
+                <div class="text-sm text-stone-400">Higher Value Asset</div>
+            </div>
+
+        </div>
+        <p class="text-center text-stone-500 mt-12 font-mono">"We monetize the data twice: once for Creative AI, once
+            for Physical AI."</p>
+    </div>
+
+    <!-- Slide 8: Flagship Data -->
+    <div class="slide" id="slide-8">
+        <div class="flex flex-col items-center text-center">
+            <h2 class="text-sm font-mono text-emerald-500 mb-6">FLAGSHIP DATASET</h2>
+            <h3 class="text-6xl font-serif mb-6">Teaching Machines How Humans <span class="text-white">Build</span>.
+            </h3>
+            <p class="text-xl text-stone-400 max-w-2xl mb-12">"Hard to scrape. Impossible to fake. Extremely valuable."
+            </p>
+
+            <div
+                class="w-full max-w-5xl aspect-video bg-black border border-stone-800 rounded-xl overflow-hidden relative">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-stone-700 font-mono text-sm">[ VIDEO PLAYBACK: LEGO ASSEMBLY TASK 042 ]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Unfair Advantage -->
+    <div class="slide" id="slide-9">
+        <h2 class="text-sm font-mono text-emerald-500 mb-4">UNFAIR ADVANTAGE</h2>
+        <h3 class="text-5xl font-serif mb-16">50,000+ Human Sensors</h3>
+
+        <div class="grid grid-cols-3 gap-8 text-center">
+            <div>
+                <div class="text-7xl font-bold text-white mb-4">50k+</div>
+                <div class="text-stone-400 uppercase tracking-widest text-sm">Contributors</div>
+            </div>
+            <div>
+                <div class="text-7xl font-bold text-white mb-4">20+</div>
+                <div class="text-stone-400 uppercase tracking-widest text-sm">Global Regions</div>
+            </div>
+            <div>
+                <div class="text-7xl font-bold text-white mb-4">250k</div>
+                <div class="text-stone-400 uppercase tracking-widest text-sm">Annotated Frames</div>
+            </div>
+        </div>
+
+        <div class="mt-16 text-center">
+            <div class="inline-grid grid-cols-12 gap-1 opacity-50">
+                <!-- Mini grid visual -->
+                <script>
+                    for (let i = 0; i < 36; i++) {
+                        document.write(`<div class="w-8 h-8 bg-stone-800 rounded-sm"></div>`);
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Traction -->
+    <div class="slide" id="slide-10">
+        <h2 class="text-sm font-mono text-emerald-500 mb-4">TRACTION</h2>
+        <h3 class="text-5xl font-serif mb-16">Early Launch. Real Revenue.</h3>
+
+        <div class="grid grid-cols-3 gap-8">
+            <div class="p-8 border border-stone-800 rounded-xl bg-stone-900/30">
+                <div class="text-5xl font-bold text-emerald-400 mb-2">$11k</div>
+                <div class="text-sm font-mono text-stone-500">MRR (Monthly)</div>
+            </div>
+            <div class="p-8 border border-stone-800 rounded-xl bg-stone-900/30">
+                <div class="text-5xl font-bold text-emerald-400 mb-2">32</div>
+                <div class="text-sm font-mono text-stone-500">Active Clients</div>
+            </div>
+            <div class="p-8 border border-stone-800 rounded-xl bg-stone-900/30">
+                <div class="text-5xl font-bold text-emerald-400 mb-2">$50k</div>
+                <div class="text-sm font-mono text-stone-500">Projected Q2</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Team -->
+    <div class="slide" id="slide-11">
+        <h2 class="text-sm font-mono text-emerald-500 mb-4">TEAM</h2>
+        <h3 class="text-5xl font-serif mb-12">Built by Operators.</h3>
+
+        <div class="flex gap-16 justify-center">
+            <div class="text-left">
+                <div class="w-48 h-64 bg-stone-800 mb-4 grayscale hover:grayscale-0 transition-all"></div>
+                <div class="font-bold text-xl">Founder 1</div>
+                <div class="text-stone-400 text-sm">Ex-Scale, Ex-Uber</div>
+            </div>
+            <div class="text-left">
+                <div class="w-48 h-64 bg-stone-800 mb-4 grayscale hover:grayscale-0 transition-all"></div>
+                <div class="font-bold text-xl">Founder 2</div>
+                <div class="text-stone-400 text-sm">Ex-IBM, Ex-Adobe</div>
+            </div>
+        </div>
+        <div class="mt-8 flex gap-8 justify-center opacity-50 grayscale">
+            <!-- Logos -->
+            <span class="text-2xl font-serif">IBM</span>
+            <span class="text-2xl font-serif">Adobe</span>
+            <span class="text-2xl font-serif">Uber</span>
+        </div>
+    </div>
+
+    <!-- Slide 12: Vision -->
+    <div class="slide" id="slide-12">
+        <div class="text-center max-w-4xl">
+            <h3 class="text-6xl font-serif mb-8 leading-tight">The Standard for <br /> <span
+                    class="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">Physical
+                    Intelligence</span>.</h3>
+            <p class="text-xl text-stone-400 mb-12">Every robot will need a Harbor.</p>
+
+            <button
+                class="bg-emerald-600 text-black px-8 py-4 text-lg font-bold rounded hover:bg-emerald-500 transition-colors">
+                Join the Lab
+            </button>
+
+            <div class="mt-24 text-stone-600 font-mono text-xs">
+                CONFIDENTIAL | HARBOR 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="fixed bottom-6 right-6 flex gap-4 text-stone-500 z-50">
+        <button onclick="prevSlide()" class="hover:text-white">← PREV</button>
+        <button onclick="nextSlide()" class="hover:text-white">NEXT →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            if (n < 1 || n > slides.length) return;
+
+            slides.forEach(s => s.classList.remove('active'));
+            document.getElementById(`slide-${n}`).classList.add('active');
+            document.getElementById('slide-count').innerText = `${n.toString().padStart(2, '0')}/${slides.length}`;
+            currentSlide = n;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+
+</html>

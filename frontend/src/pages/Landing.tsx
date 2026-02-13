@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import SeoHead from '../components/SeoHead';
+import LabGridSection from '../components/landing/LabGridSection';
 const Landing: React.FC = () => {
    return (
       <div className="w-full bg-[#FAFAFA] text-[#111]">
@@ -261,6 +262,9 @@ const Landing: React.FC = () => {
          </section>
 
 
+
+         {/* SECTION: LAB GRID / HIRING */}
+         <LabGridSection />
 
          {/* SECTION 6: FINAL CTA */}
          <section className="py-32 px-6 md:px-12 lg:px-16 text-center">

@@ -2,25 +2,29 @@ import React from 'react';
 import { Database, Video, FileAudio, Users, Info } from 'lucide-react';
 
 import { datasetService } from '../../../services/datasetService';
+import { useAuth } from '../../../lib/authStore';
 
 export const DataOverview: React.FC = () => {
+    const user = useAuth();
     const [stats, setStats] = React.useState({ count: 0, size: 0, videoHours: 0 });
 
     React.useEffect(() => {
         const loadStats = async () => {
             try {
-                const datasets = await datasetService.getDatasets();
+                // If org is available in user metadata, use it
+                const orgId = user.organization?.name || 'org_harbor';
+                const datasets = await datasetService.getDatasets({ orgId });
                 const count = datasets.length;
                 const size = datasets.reduce((acc, ds) => acc + (ds.size_bytes || 0), 0);
                 // Rough estimate for video hours if not tracked
-                const videoHours = datasets.filter(d => d.media_type === 'video').length * 2.5;
+                const videoHours = datasets.filter(d => (d.media_type || d.mediaType) === 'video').length * 2.5;
                 setStats({ count, size, videoHours });
             } catch (e) {
                 console.error(e);
             }
         };
         loadStats();
-    }, []);
+    }, [user.organization?.name]);
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return '0 B';

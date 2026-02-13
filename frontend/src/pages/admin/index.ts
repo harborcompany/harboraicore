@@ -20,3 +20,7 @@ export { AdminCompliance } from './AdminCompliance';
 export { AdminSettings } from './AdminSettings';
 export { AdminMemory } from './AdminMemory';
 export { AdminRealtime } from './AdminRealtime';
+export { AdminAutoChecks } from './AdminAutoChecks';
+export { AdminQAReport } from './AdminQAReport';
+export { AdminDelivery } from './AdminDelivery';
+

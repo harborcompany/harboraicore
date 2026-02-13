@@ -74,7 +74,7 @@ const Reset: React.FC = () => {
             setError(error.message);
         } else {
             // Password updated, redirect to app or login
-            navigate('/app');
+            navigate('/creator');
         }
     };
 

@@ -12,10 +12,12 @@ import {
     LogOut,
     Menu,
     X,
-    Mail
+    Mail,
+    MessageSquare
 } from 'lucide-react';
 import { authStore, useAuth } from '../../lib/authStore';
 import { uiStore } from '../../lib/uiStore';
+import { messagingService } from '../../services/messagingService';
 import SmartOnboardingModal from '../onboarding/SmartOnboardingModal';
 import ApiDocsDrawer from '../docs/ApiDocsDrawer';
 
@@ -33,6 +35,7 @@ const AppLayout: React.FC = () => {
         ...(isContributor ? [
             { path: '/app/contribute', icon: Upload, label: 'Captures' },
             { path: '/app/contributor', icon: Key, label: 'Earnings' },
+            { path: '/app/messages', icon: MessageSquare, label: 'Messages' },
         ] : [
             // Removed Command
             { path: '/app/inbox', icon: Mail, label: 'Inbox' },
@@ -42,6 +45,18 @@ const AppLayout: React.FC = () => {
             { path: '/app/api', icon: Key, label: 'API' },
         ])
     ];
+
+    const [unreadCount, setUnreadCount] = React.useState(0);
+
+    React.useEffect(() => {
+        if (user.authenticated) {
+            setUnreadCount(messagingService.getUnreadCount(user.id));
+            const interval = setInterval(() => {
+                setUnreadCount(messagingService.getUnreadCount(user.id));
+            }, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [user.id, user.authenticated]);
 
     // ... (rest of code)
 
@@ -238,13 +253,18 @@ const AppLayout: React.FC = () => {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm ${isActive
+                                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all text-sm relative ${isActive
                                     ? 'bg-black text-white font-medium shadow-sm'
                                     : 'text-gray-500 hover:text-[#111] hover:bg-gray-50'
                                     }`}
                             >
                                 <item.icon size={16} strokeWidth={isActive ? 2 : 1.5} />
                                 <span className={isActive ? 'tracking-tight' : 'font-normal tracking-tight'}>{item.label}</span>
+                                {item.label === 'Messages' && unreadCount > 0 && (
+                                    <span className="absolute right-3 top-2.5 w-4 h-4 bg-blue-600 text-white text-[10px] flex items-center justify-center rounded-full animate-in zoom-in duration-300">
+                                        {unreadCount}
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}

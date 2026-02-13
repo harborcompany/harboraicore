@@ -7,12 +7,18 @@ let datasets: Dataset[] = [
         name: 'Harbor-Core-Action-v1',
         description: 'High-fidelity humuan action alignment dataset.',
         media_type: 'video',
+        mediaType: 'video',
         version: '1.0.0',
         license: 'Harbor-Commercial-v1',
         status: 'active',
+        datasetStatus: 'active',
+        isLocked: false,
         privacy: 'public',
+        org_id: 'org_harbor',
         created_at: new Date(Date.now() - 86400000 * 30).toISOString(),
         updated_at: new Date(Date.now() - 86400000).toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+        updatedAt: new Date(Date.now() - 86400000).toISOString(),
         asset_count: 14205,
         size_bytes: 45 * 1024 * 1024 * 1024, // 45 GB
         embedding_status: 'completed',
@@ -24,12 +30,18 @@ let datasets: Dataset[] = [
         name: 'Urban-Audio-Soundscape',
         description: 'City environment audio event detection.',
         media_type: 'audio',
+        mediaType: 'audio',
         version: '0.9.beta',
         license: 'CC-BY-4.0',
         status: 'processing',
+        datasetStatus: 'processing',
+        isLocked: false,
         privacy: 'org-restricted',
+        org_id: 'org_harbor',
         created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
         updated_at: new Date().toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        updatedAt: new Date().toISOString(),
         asset_count: 850,
         size_bytes: 12 * 1024 * 1024 * 1024,
         embedding_status: 'embedding',
@@ -69,8 +81,11 @@ let assets: Record<string, DatasetAsset[]> = {
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const mockDatasetService = {
-    async getDatasets(): Promise<Dataset[]> {
+    async getDatasets(orgId?: string): Promise<Dataset[]> {
         await delay(600);
+        if (orgId) {
+            return datasets.filter(d => d.org_id === orgId || d.privacy === 'public');
+        }
         return [...datasets];
     },
 
@@ -86,12 +101,18 @@ export const mockDatasetService = {
             name: payload.name || 'Untitled Dataset',
             description: payload.description || '',
             media_type: payload.media_type || 'multimodal',
+            mediaType: payload.media_type || 'multimodal',
             version: '0.1.0',
             license: payload.license || 'Proprietary',
             status: 'draft',
+            datasetStatus: 'draft',
+            isLocked: false,
             privacy: 'private',
+            org_id: payload.org_id || 'org_harbor',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
             asset_count: 0,
             size_bytes: 0,
             embedding_status: 'none',

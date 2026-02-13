@@ -6,10 +6,10 @@ import { PageHeader, StatusBadge, Button } from '../../components/admin/AdminCom
 const AdminCreators: React.FC = () => {
     // Mock Data
     const creators = [
-        { id: '1', email: 'alex.chen@example.com', dataset: 'LEGO_VIDEO', country: 'US', status: 'pending', appliedAt: '2026-02-06 09:30 AM', reliability: 0.5, videosMonth: 0 },
-        { id: '2', email: 'maria.g@example.com', dataset: 'LEGO_VIDEO', country: 'BR', status: 'pending', appliedAt: '2026-02-06 10:15 AM', reliability: 0.5, videosMonth: 0 },
-        { id: '3', email: 'john.d@example.com', dataset: 'LEGO_VIDEO', country: 'UK', status: 'approved', appliedAt: '2026-02-05 02:20 PM', reliability: 0.92, videosMonth: 1 },
-        { id: '4', email: 'super.builder@example.com', dataset: 'LEGO_VIDEO', country: 'DE', status: 'approved', appliedAt: '2026-01-10', reliability: 0.98, videosMonth: 0 },
+        { id: '1', email: 'chen.a@harbor-partners.ai', dataset: 'LEGO_VIDEO', country: 'US', status: 'pending', appliedAt: '2026-02-06 09:30 AM', score: 75, tier: 'Standard' },
+        { id: '2', email: 'g.maria@harbor-labs.org', dataset: 'LEGO_VIDEO', country: 'BR', status: 'pending', appliedAt: '2026-02-06 10:15 AM', score: 62, tier: 'At Risk' },
+        { id: '3', email: 'j.davies@independent-builder.com', dataset: 'LEGO_VIDEO', country: 'UK', status: 'approved', appliedAt: '2026-02-05 02:20 PM', score: 88, tier: 'Trusted' },
+        { id: '4', email: 'super.builder.99@harbor.ai', dataset: 'LEGO_VIDEO', country: 'DE', status: 'approved', appliedAt: '2026-01-10', score: 96, tier: 'Elite' },
     ];
 
     return (
@@ -42,8 +42,8 @@ const AdminCreators: React.FC = () => {
                         <tr>
                             <th className="px-6 py-3">Email</th>
                             <th className="px-6 py-3">Dataset</th>
-                            <th className="px-6 py-3">Reliability</th>
-                            <th className="px-6 py-3">Videos (Feb)</th>
+                            <th className="px-6 py-3">Score</th>
+                            <th className="px-6 py-3">Tier</th>
                             <th className="px-6 py-3">Status</th>
                             <th className="px-6 py-3">Applied At</th>
                             <th className="px-6 py-3 text-right">Actions</th>
@@ -60,15 +60,18 @@ const AdminCreators: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-1.5">
-                                        <Star size={14} className={creator.reliability > 0.8 ? "text-yellow-500 fill-yellow-500" : "text-gray-600"} />
-                                        <span>{(creator.reliability * 100).toFixed(0)}%</span>
+                                        <Star size={14} className={creator.score >= 80 ? "text-yellow-500 fill-yellow-500" : "text-gray-600"} />
+                                        <span className="font-mono font-bold">{creator.score}</span>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <div className="flex items-center gap-1.5">
-                                        <PlayCircle size={14} className="text-gray-500" />
-                                        <span>{creator.videosMonth} / 1</span>
-                                    </div>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${creator.tier === 'Elite' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' :
+                                        creator.tier === 'Trusted' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20' :
+                                            creator.tier === 'Standard' ? 'bg-gray-500/20 text-gray-400 border border-gray-500/20' :
+                                                'bg-red-500/20 text-red-400 border border-red-500/20'
+                                        }`}>
+                                        {creator.tier}
+                                    </span>
                                 </td>
                                 <td className="px-6 py-4">
                                     <StatusBadge label={creator.status} variant={creator.status === 'approved' ? 'success' : 'neutral'} />

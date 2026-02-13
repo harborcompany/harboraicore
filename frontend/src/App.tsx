@@ -100,7 +100,30 @@ import {
   AdminSettings,
   AdminContributors,
   AdminSubmissionReview,
+  AdminAutoChecks,
+  AdminQAReport,
+  AdminDelivery,
 } from './pages/admin';
+
+// Harbor Lab Pages
+import LabLayout from './pages/lab/LabLayout';
+import LabDashboard from './pages/lab/LabDashboard';
+import ExperimentView from './pages/lab/ExperimentView';
+
+// Creator Dashboard (Creator Mode v2)
+import CreatorLayout from './components/layouts/CreatorLayout';
+import CreatorHome from './pages/creator/CreatorHome';
+import CreatorUpload from './pages/creator/CreatorUpload';
+import CreatorSubmissions from './pages/creator/CreatorSubmissions';
+import CreatorEarnings from './pages/creator/CreatorEarnings';
+import CreatorOpportunities from './pages/creator/CreatorOpportunities';
+import CreatorGuidelines from './pages/creator/CreatorGuidelines';
+import CreatorReferrals from './pages/creator/CreatorReferrals';
+import CreatorSettings from './pages/creator/CreatorSettings';
+import CreatorNotifications from './pages/creator/CreatorNotifications';
+import CreatorAgreement from './pages/creator/CreatorAgreement';
+import CreatorMessages from './pages/creator/CreatorMessages';
+import AdminManualUpload from './pages/admin/AdminManualUpload';
 
 // ScrollToTop component
 const ScrollToTopWrapper: React.FC = () => {
@@ -135,10 +158,12 @@ const RedirectIfAuthenticated: React.FC<{ children: React.ReactNode }> = ({ chil
   const user = useAuth();
 
   if (user.authenticated && user.onboardingComplete) {
-    return <Navigate to="/app" replace />;
+    const dest = user.role === 'admin' ? "/admin" : "/creator";
+    return <Navigate to={dest} replace />;
   }
 
   if (user.authenticated && !user.onboardingComplete) {
+    if (user.role === 'admin') return <Navigate to="/admin" replace />;
     return <Navigate to="/onboarding/intent" replace />;
   }
 
@@ -235,6 +260,30 @@ const App: React.FC = () => {
           <Route path="meet/:room" element={<MeetingPage />} />
           <Route path="workflows/new" element={<WorkflowBuilder />} />
         </Route>
+
+        {/* Creator Dashboard v2 — Creator Mode (Individual Creators) */}
+        <Route path="/creator" element={<RequireAuth><CreatorLayout /></RequireAuth>}>
+          <Route index element={<CreatorHome />} />
+          <Route path="upload" element={<CreatorUpload />} />
+          <Route path="submissions" element={<CreatorSubmissions />} />
+          <Route path="earnings" element={<CreatorEarnings />} />
+          <Route path="messages" element={<CreatorMessages />} />
+          <Route path="opportunities" element={<CreatorOpportunities />} />
+          <Route path="guidelines" element={<CreatorGuidelines />} />
+          <Route path="referrals" element={<CreatorReferrals />} />
+          <Route path="settings" element={<CreatorSettings />} />
+          <Route path="agreement" element={<CreatorAgreement />} />
+          <Route path="notifications" element={<CreatorNotifications />} />
+          <Route path="support" element={<CreatorHome />} />
+        </Route>
+
+        {/* Harbor Lab - Frontier Research Interface */}
+        <Route path="/lab" element={<LabLayout />}>
+          <Route index element={<LabDashboard />} />
+          <Route path="experiments" element={<LabDashboard />} />
+          <Route path="experiments/:id" element={<ExperimentView />} />
+        </Route>
+
         {/* Admin Panel Routes - Internal Only */}
         <Route path="/admin" element={
           <RequireAuth>
@@ -244,17 +293,22 @@ const App: React.FC = () => {
           </RequireAuth>
         }>
           <Route index element={<AdminDashboard />} />
-          <Route path="creators" element={<AdminCreators />} />
-          <Route path="videos" element={<AdminVideos />} />
+          <Route path="uploads" element={<AdminIngestion />} />
+          <Route path="manual-upload" element={<AdminManualUpload />} />
+          <Route path="auto-checks" element={<AdminAutoChecks />} />
           <Route path="annotations" element={<AdminAnnotation />} />
-          <Route path="reviews" element={<AdminSubmissionReview />} /> {/* Or list? */}
+          <Route path="reviews" element={<AdminSubmissionReview />} />
           <Route path="datasets" element={<AdminDatasets />} />
-          <Route path="licenses" element={<AdminMarketplace />} /> {/* Placeholder */}
-          <Route path="payouts" element={<AdminRevenue />} /> {/* Placeholder */}
-          <Route path="logs" element={<AdminSettings />} /> {/* Placeholder */}
-
+          <Route path="qa-report" element={<AdminQAReport />} />
+          <Route path="delivery" element={<AdminDelivery />} />
+          <Route path="creators" element={<AdminCreators />} />
+          <Route path="payouts" element={<AdminRevenue />} />
+          <Route path="settings" element={<AdminSettings />} />
           <Route path="submission/:id" element={<AdminSubmissionReview />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="videos" element={<AdminVideos />} />
+          <Route path="licenses" element={<AdminMarketplace />} />
+          <Route path="logs" element={<AdminSettings />} />
         </Route >
 
         {/* Catch-all redirect */}

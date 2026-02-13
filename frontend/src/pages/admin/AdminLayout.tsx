@@ -10,14 +10,16 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/admin', icon: <OverviewIcon /> },
-  { label: 'Creators', path: '/admin/creators', icon: <UsersIcon /> },
-  { label: 'Videos', path: '/admin/videos', icon: <UploadIcon /> }, // Reusing UploadIcon
+  { label: 'Uploads', path: '/admin/uploads', icon: <UploadIcon /> },
+  { label: 'Auto-Checks', path: '/admin/auto-checks', icon: <AuditIcon /> },
   { label: 'Annotations', path: '/admin/annotations', icon: <AnnotationIcon /> },
-  { label: 'Reviews', path: '/admin/reviews', icon: <AuditIcon /> }, // Reusing AuditIcon
+  { label: 'QA Review', path: '/admin/reviews', icon: <RealtimeIcon /> },
   { label: 'Datasets', path: '/admin/datasets', icon: <DatasetIcon /> },
-  { label: 'Licenses', path: '/admin/licenses', icon: <MarketIcon /> },
+  { label: 'QA Reports', path: '/admin/qa-report', icon: <InfraIcon /> },
+  { label: 'Delivery', path: '/admin/delivery', icon: <MarketIcon /> },
+  { label: 'Creators', path: '/admin/creators', icon: <UsersIcon /> },
   { label: 'Payouts', path: '/admin/payouts', icon: <RevenueIcon /> },
-  { label: 'System Logs', path: '/admin/logs', icon: <SettingsIcon /> }, // Reusing SettingsIcon or find a better one
+  { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon /> },
 ];
 
 export function AdminLayout() {

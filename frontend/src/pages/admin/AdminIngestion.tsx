@@ -1,336 +1,299 @@
-import React, { useState } from 'react';
-import { PageHeader, DataTable, Tabs, StatusBadge, Button, ChartCard } from '../../components/admin/AdminComponents';
-
-interface Asset {
-    id: string;
-    filename: string;
-    type: 'video' | 'audio' | 'image';
-    duration: number;
-    size: string;
-    user: string;
-    status: 'PROCESSING' | 'READY' | 'ERROR';
-    source: string;
-    createdAt: string;
-    auditStage: string;
-}
-
-const mockAssets: Asset[] = [
-    { id: 'ast_001', filename: 'driving_scene_001.mp4', type: 'video', duration: 124, size: '2.4 GB', user: 'alice@studio.com', status: 'PROCESSING', source: 'API', createdAt: '5 min ago', auditStage: 'fingerprint' },
-    { id: 'ast_002', filename: 'podcast_ep_42.wav', type: 'audio', duration: 3600, size: '890 MB', user: 'bob@creator.net', status: 'READY', source: 'Mobile', createdAt: '12 min ago', auditStage: 'completed' },
-    { id: 'ast_003', filename: 'street_batch_099.zip', type: 'image', duration: 0, size: '1.2 GB', user: 'carol@media.io', status: 'ERROR', source: 'API', createdAt: '18 min ago', auditStage: 'web_scrape' },
-    { id: 'ast_004', filename: 'interview_raw.mp4', type: 'video', duration: 2400, size: '4.8 GB', user: 'dave@studio.co', status: 'PROCESSING', source: 'Mobile', createdAt: '25 min ago', auditStage: 'similarity' },
-    { id: 'ast_005', filename: 'nature_sounds.wav', type: 'audio', duration: 900, size: '210 MB', user: 'eve@content.tv', status: 'READY', source: 'API', createdAt: '32 min ago', auditStage: 'completed' },
-];
+import React, { useState, useEffect } from 'react';
+import {
+    getUploads,
+    getAutoChecks,
+    recheckUpload,
+    forceReject,
+    createAnnotationJob,
+    classifyAutoScore,
+    formatBytes,
+    formatDuration,
+    formatDate,
+    type Upload,
+    type AutoCheck,
+    type AutoCheckSummary,
+} from '../../services/adminPipelineService';
 
 export function AdminIngestion() {
-    const [activeTab, setActiveTab] = useState('all');
-    const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+    const [uploads, setUploads] = useState<Upload[]>([]);
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [selectedUpload, setSelectedUpload] = useState<Upload | null>(null);
+    const [selectedChecks, setSelectedChecks] = useState<AutoCheck[]>([]);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-    const tabs = [
-        { id: 'all', label: 'All', count: mockAssets.length },
-        { id: 'pending', label: 'Pending Scan', count: mockAssets.filter(a => a.status === 'PROCESSING').length },
-        { id: 'approved', label: 'Approved', count: mockAssets.filter(a => a.status === 'READY').length },
-        { id: 'rejected', label: 'Rejected', count: mockAssets.filter(a => a.status === 'ERROR').length },
-    ];
+    useEffect(() => {
+        loadUploads();
+    }, [statusFilter]);
 
-    const filteredAssets = mockAssets.filter(asset => {
-        if (activeTab === 'pending') return asset.status === 'PROCESSING';
-        if (activeTab === 'approved') return asset.status === 'READY';
-        if (activeTab === 'rejected') return asset.status === 'ERROR';
-        return true;
-    });
+    function loadUploads() {
+        const filters = statusFilter !== 'all' ? { status: statusFilter } : undefined;
+        setUploads(getUploads(filters));
+    }
 
-    const columns = [
-        {
-            key: 'filename',
-            label: 'Asset',
-            render: (asset: Asset) => (
-                <div className="asset-cell">
-                    <span className="asset-type-icon">{asset.type === 'video' ? '🎬' : asset.type === 'audio' ? '🎵' : '🖼️'}</span>
-                    <div>
-                        <span className="asset-filename">{asset.filename}</span>
-                        <span className="asset-id">{asset.id}</span>
-                    </div>
-                </div>
-            )
-        },
-        { key: 'type', label: 'Type' },
-        {
-            key: 'duration',
-            label: 'Duration',
-            render: (asset: Asset) => asset.duration > 0 ? formatDuration(asset.duration) : '—'
-        },
-        { key: 'size', label: 'Size' },
-        { key: 'user', label: 'User' },
-        { key: 'source', label: 'Source' },
-        {
-            key: 'status',
-            label: 'Status',
-            render: (asset: Asset) => (
-                <StatusBadge
-                    label={asset.status}
-                    variant={asset.status === 'READY' ? 'success' : asset.status === 'ERROR' ? 'error' : 'warning'}
-                />
-            )
-        },
-        { key: 'auditStage', label: 'Audit Stage' },
-        { key: 'createdAt', label: 'Ingested' },
-    ];
+    function handleInspect(upload: Upload) {
+        setSelectedUpload(upload);
+        setSelectedChecks(getAutoChecks(upload.id));
+    }
+
+    function handleRecheck(id: string) {
+        recheckUpload(id);
+        loadUploads();
+    }
+
+    function handleForceReject(id: string) {
+        const note = prompt('Rejection note:');
+        if (note) {
+            forceReject(id, note);
+            loadUploads();
+            setSelectedUpload(null);
+        }
+    }
+
+    function handlePushToAnnotation() {
+        if (selectedIds.size === 0) return;
+        const ids = Array.from(selectedIds);
+        createAnnotationJob(ids, 'lego_assembly');
+        setSelectedIds(new Set());
+        loadUploads();
+    }
+
+    function toggleSelect(id: string) {
+        const next = new Set(selectedIds);
+        if (next.has(id)) next.delete(id); else next.add(id);
+        setSelectedIds(next);
+    }
 
     return (
-        <div className="admin-ingestion">
-            <PageHeader
-                title="Content Ingestion"
-                subtitle="Media upload queue and audit pipeline"
-            />
-
-            {/* Queue Stats */}
-            <div className="queue-stats">
-                <ChartCard title="Ingestion Queue">
-                    <div className="queue-visual">
-                        <div className="queue-bar">
-                            <div className="queue-segment processing" style={{ width: '40%' }}>
-                                <span>Processing (2)</span>
-                            </div>
-                            <div className="queue-segment approved" style={{ width: '40%' }}>
-                                <span>Approved (2)</span>
-                            </div>
-                            <div className="queue-segment rejected" style={{ width: '20%' }}>
-                                <span>Rejected (1)</span>
-                            </div>
-                        </div>
-                    </div>
-                </ChartCard>
-            </div>
-
-            <div className="ingestion-toolbar">
-                <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
-                <div className="toolbar-actions">
-                    <Button variant="secondary">Bulk Approve</Button>
-                    <Button variant="secondary">Run Audit</Button>
+        <div className="p-6 text-white max-w-[1400px]">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold">Uploads & Ingest Queue</h1>
+                    <p className="text-[#737373] mt-1">{uploads.length} assets in pipeline</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    {selectedIds.size > 0 && (
+                        <button
+                            onClick={handlePushToAnnotation}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                            Push {selectedIds.size} to Annotation →
+                        </button>
+                    )}
                 </div>
             </div>
 
-            <DataTable
-                columns={columns}
-                data={filteredAssets}
-                onRowClick={(asset) => setSelectedAsset(asset)}
-            />
+            {/* Filters */}
+            <div className="flex items-center gap-2 mb-5">
+                {['all', 'pending', 'passed', 'flagged', 'failed'].map(s => (
+                    <button
+                        key={s}
+                        onClick={() => setStatusFilter(s)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${statusFilter === s
+                                ? 'bg-blue-600/20 border-blue-500/30 text-blue-400'
+                                : 'bg-[#141414] border-[#262626] text-[#a3a3a3] hover:text-white hover:border-[#404040]'
+                            }`}
+                    >
+                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </button>
+                ))}
+            </div>
 
-            {/* Asset Detail Drawer */}
-            {selectedAsset && (
-                <div className="asset-drawer">
-                    <div className="drawer-overlay" onClick={() => setSelectedAsset(null)} />
-                    <div className="drawer-content">
-                        <div className="drawer-header">
-                            <h2>{selectedAsset.filename}</h2>
-                            <button className="close-btn" onClick={() => setSelectedAsset(null)}>×</button>
+            {/* Table */}
+            <div className="bg-[#141414] border border-[#262626] rounded-xl overflow-hidden">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b border-[#262626] text-[#737373] text-xs uppercase tracking-wider">
+                            <th className="p-3 text-left w-10">
+                                <input
+                                    type="checkbox"
+                                    className="accent-blue-500"
+                                    onChange={e => {
+                                        if (e.target.checked) setSelectedIds(new Set(uploads.filter(u => u.autoCheckStatus === 'passed').map(u => u.id)));
+                                        else setSelectedIds(new Set());
+                                    }}
+                                />
+                            </th>
+                            <th className="p-3 text-left">Filename</th>
+                            <th className="p-3 text-left">Uploader</th>
+                            <th className="p-3 text-left">Campaign</th>
+                            <th className="p-3 text-right">Duration</th>
+                            <th className="p-3 text-right">Size</th>
+                            <th className="p-3 text-center">Auto Score</th>
+                            <th className="p-3 text-center">Status</th>
+                            <th className="p-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {uploads.map(u => {
+                            const cls = u.autoScore !== null ? classifyAutoScore(u.autoScore) : null;
+                            return (
+                                <tr key={u.id} className="border-b border-[#1a1a1a] hover:bg-[#1a1a1a] transition-colors">
+                                    <td className="p-3">
+                                        <input
+                                            type="checkbox"
+                                            className="accent-blue-500"
+                                            checked={selectedIds.has(u.id)}
+                                            onChange={() => toggleSelect(u.id)}
+                                            disabled={u.autoCheckStatus !== 'passed'}
+                                        />
+                                    </td>
+                                    <td className="p-3">
+                                        <div className="text-sm font-medium">{u.filename}</div>
+                                        <div className="text-xs text-[#525252]">{u.id}</div>
+                                    </td>
+                                    <td className="p-3 text-sm text-[#a3a3a3]">{u.uploaderName}</td>
+                                    <td className="p-3 text-sm text-[#a3a3a3]">{u.campaignName || '—'}</td>
+                                    <td className="p-3 text-sm text-right text-[#a3a3a3] font-mono">{formatDuration(u.duration)}</td>
+                                    <td className="p-3 text-sm text-right text-[#a3a3a3] font-mono">{formatBytes(u.sizeBytes)}</td>
+                                    <td className="p-3 text-center">
+                                        {u.autoScore !== null && cls ? (
+                                            <span className="text-sm font-mono font-bold" style={{ color: cls.color }}>{u.autoScore}</span>
+                                        ) : (
+                                            <span className="text-[#525252]">—</span>
+                                        )}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                        <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full ${u.autoCheckStatus === 'passed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                                                u.autoCheckStatus === 'flagged' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                                    u.autoCheckStatus === 'failed' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                        u.autoCheckStatus === 'pending' ? 'bg-gray-500/10 text-gray-400 border border-gray-500/20' :
+                                                            'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                                            }`}>
+                                            {u.autoCheckStatus}
+                                        </span>
+                                    </td>
+                                    <td className="p-3 text-center">
+                                        <div className="flex items-center justify-center gap-1">
+                                            <button
+                                                onClick={() => handleInspect(u)}
+                                                className="p-1.5 rounded-md text-[#a3a3a3] hover:text-white hover:bg-[#262626] transition-colors"
+                                                title="Inspect"
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleRecheck(u.id)}
+                                                className="p-1.5 rounded-md text-[#a3a3a3] hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                                title="Re-check"
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleForceReject(u.id)}
+                                                className="p-1.5 rounded-md text-[#a3a3a3] hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                title="Force reject"
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Inspect Panel */}
+            {selectedUpload && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedUpload(null)} />
+                    <div className="relative bg-[#141414] border border-[#262626] rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl">
+                        <div className="flex items-center justify-between p-6 border-b border-[#262626]">
+                            <div>
+                                <h2 className="text-lg font-bold">{selectedUpload.filename}</h2>
+                                <p className="text-sm text-[#737373]">{selectedUpload.id} · {selectedUpload.uploaderName}</p>
+                            </div>
+                            <button onClick={() => setSelectedUpload(null)} className="p-2 rounded-lg hover:bg-[#262626] text-[#a3a3a3]">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            </button>
                         </div>
-                        <div className="drawer-body">
-                            <div className="detail-section">
-                                <h3>Metadata</h3>
-                                <div className="detail-row">
-                                    <span className="detail-label">Asset ID</span>
-                                    <span className="detail-value mono">{selectedAsset.id}</span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Type</span>
-                                    <span className="detail-value">{selectedAsset.type}</span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Duration</span>
-                                    <span className="detail-value">{formatDuration(selectedAsset.duration)}</span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Size</span>
-                                    <span className="detail-value">{selectedAsset.size}</span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Source</span>
-                                    <span className="detail-value">{selectedAsset.source}</span>
+
+                        <div className="p-6 space-y-6">
+                            {/* Video placeholder */}
+                            <div className="aspect-video bg-[#0a0a0a] rounded-xl border border-[#262626] flex items-center justify-center">
+                                <div className="text-center text-[#525252]">
+                                    <svg className="mx-auto mb-2" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                    <p className="text-sm">Video Preview</p>
+                                    <p className="text-xs">{selectedUpload.resolution} · {formatDuration(selectedUpload.duration)}</p>
                                 </div>
                             </div>
 
-                            <div className="detail-section">
-                                <h3>Audit Trail</h3>
-                                <div className="audit-timeline">
-                                    <AuditStep stage="fingerprint" status="passed" time="5 min ago" />
-                                    <AuditStep stage="similarity" status="passed" time="4 min ago" />
-                                    <AuditStep stage="web_scrape" status={selectedAsset.status === 'ERROR' ? 'failed' : 'passed'} time="3 min ago" />
-                                    <AuditStep stage="human_review" status={selectedAsset.status === 'PROCESSING' ? 'pending' : 'passed'} time={selectedAsset.status === 'PROCESSING' ? 'Pending' : '1 min ago'} />
+                            {/* Auto-check summary */}
+                            {selectedUpload.autoCheckJson && (
+                                <div>
+                                    <h3 className="text-sm font-semibold uppercase tracking-wider text-[#737373] mb-3">Auto-Check Scores</h3>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {([
+                                            ['Framing', selectedUpload.autoCheckJson.framing],
+                                            ['Object Coverage', selectedUpload.autoCheckJson.objectCoverage],
+                                            ['Continuity', selectedUpload.autoCheckJson.continuity],
+                                            ['Tech Quality', selectedUpload.autoCheckJson.technicalQuality],
+                                            ['Annotation Coverage', selectedUpload.autoCheckJson.annotationCoverage],
+                                        ] as [string, number][]).map(([label, score]) => (
+                                            <div key={label} className="bg-[#0a0a0a] rounded-lg p-3 border border-[#262626]">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-xs text-[#a3a3a3]">{label}</span>
+                                                    <span className="text-sm font-mono font-bold" style={{ color: score >= 85 ? '#22c55e' : score >= 70 ? '#f59e0b' : '#ef4444' }}>{score}</span>
+                                                </div>
+                                                <div className="w-full h-1.5 bg-[#262626] rounded-full">
+                                                    <div className="h-full rounded-full transition-all" style={{ width: `${score}%`, background: score >= 85 ? '#22c55e' : score >= 70 ? '#f59e0b' : '#ef4444' }} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="bg-[#0a0a0a] rounded-lg p-3 border border-blue-500/20">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-blue-400">Composite Score</span>
+                                                <span className="text-lg font-mono font-bold text-blue-400">{selectedUpload.autoCheckJson.compositeScore}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="detail-section">
-                                <h3>Manual Review</h3>
-                                <div className="review-actions">
-                                    <Button variant="primary">Approve</Button>
-                                    <Button variant="ghost" style={{ color: '#ef4444' }}>Reject</Button>
+                            {/* Flags */}
+                            {selectedUpload.autoCheckJson?.flags && selectedUpload.autoCheckJson.flags.length > 0 && (
+                                <div>
+                                    <h3 className="text-sm font-semibold uppercase tracking-wider text-[#737373] mb-3">Flags</h3>
+                                    <div className="space-y-1">
+                                        {selectedUpload.autoCheckJson.flags.map((flag, i) => (
+                                            <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-red-500/5 border border-red-500/10 text-red-400 text-sm">
+                                                <span>⚠️</span>
+                                                <span>{flag}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <textarea className="review-notes" placeholder="Add review notes..." />
-                            </div>
+                            )}
+
+                            {/* Per-check details */}
+                            {selectedChecks.length > 0 && (
+                                <div>
+                                    <h3 className="text-sm font-semibold uppercase tracking-wider text-[#737373] mb-3">Individual Checks</h3>
+                                    <div className="space-y-2">
+                                        {selectedChecks.map(c => (
+                                            <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-[#0a0a0a] border border-[#262626]">
+                                                <div>
+                                                    <div className="text-sm font-medium">{c.checkType.replace(/_/g, ' ')}</div>
+                                                    <div className="text-xs text-[#525252]">{c.modelVersion} · {c.latencyMs}ms</div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-sm font-mono" style={{ color: c.passed ? '#22c55e' : '#ef4444' }}>{c.score}</span>
+                                                    <span className={`text-xs px-2 py-0.5 rounded-full ${c.passed ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                        {c.passed ? 'PASS' : 'FAIL'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
-
-            <style>{`
-        .admin-ingestion { max-width: 1400px; }
-        .queue-stats { margin-bottom: 24px; }
-        .queue-visual { padding: 8px 0; }
-        .queue-bar {
-          display: flex;
-          height: 40px;
-          border-radius: 6px;
-          overflow: hidden;
-        }
-        .queue-segment {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 500;
-          color: #fff;
-        }
-        .queue-segment.processing { background: #f59e0b; }
-        .queue-segment.approved { background: #22c55e; }
-        .queue-segment.rejected { background: #ef4444; }
-        .ingestion-toolbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-        }
-        .toolbar-actions { display: flex; gap: 8px; }
-        .asset-cell {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .asset-type-icon { font-size: 20px; }
-        .asset-filename { display: block; color: #fafafa; }
-        .asset-id { display: block; color: #525252; font-size: 11px; font-family: monospace; }
-        
-        /* Drawer */
-        .asset-drawer {
-          position: fixed;
-          inset: 0;
-          z-index: 100;
-        }
-        .drawer-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-        }
-        .drawer-content {
-          position: absolute;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          width: 450px;
-          background: #141414;
-          border-left: 1px solid #262626;
-          display: flex;
-          flex-direction: column;
-        }
-        .drawer-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px;
-          border-bottom: 1px solid #262626;
-        }
-        .drawer-header h2 { margin: 0; font-size: 16px; }
-        .close-btn {
-          background: none;
-          border: none;
-          color: #a3a3a3;
-          font-size: 24px;
-          cursor: pointer;
-        }
-        .drawer-body {
-          flex: 1;
-          overflow-y: auto;
-          padding: 20px;
-        }
-        .detail-section { margin-bottom: 24px; }
-        .detail-section h3 {
-          font-size: 12px;
-          color: #a3a3a3;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 12px;
-        }
-        .detail-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 8px 0;
-          border-bottom: 1px solid #262626;
-        }
-        .detail-label { color: #a3a3a3; font-size: 13px; }
-        .detail-value { color: #fafafa; font-size: 13px; }
-        .detail-value.mono { font-family: monospace; }
-        .audit-timeline { display: flex; flex-direction: column; gap: 8px; }
-        .review-actions { display: flex; gap: 12px; margin-bottom: 12px; }
-        .review-notes {
-          width: 100%;
-          height: 80px;
-          background: #1a1a1a;
-          border: 1px solid #262626;
-          border-radius: 6px;
-          color: #fafafa;
-          padding: 12px;
-          font-size: 13px;
-          resize: none;
-        }
-      `}</style>
         </div>
     );
-}
-
-function AuditStep({ stage, status, time }: { stage: string; status: 'passed' | 'failed' | 'pending'; time: string }) {
-    return (
-        <div className="audit-step">
-            <span className={`audit-dot ${status}`}></span>
-            <div className="audit-info">
-                <span className="audit-stage">{stage.replace('_', ' ')}</span>
-                <span className="audit-time">{time}</span>
-            </div>
-            <StatusBadge
-                label={status}
-                variant={status === 'passed' ? 'success' : status === 'failed' ? 'error' : 'warning'}
-            />
-            <style>{`
-        .audit-step {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 8px 0;
-        }
-        .audit-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-        }
-        .audit-dot.passed { background: #22c55e; }
-        .audit-dot.failed { background: #ef4444; }
-        .audit-dot.pending { background: #f59e0b; }
-        .audit-info { flex: 1; }
-        .audit-stage { display: block; color: #fafafa; font-size: 13px; text-transform: capitalize; }
-        .audit-time { display: block; color: #525252; font-size: 11px; }
-      `}</style>
-        </div>
-    );
-}
-
-function formatDuration(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    if (h > 0) return `${h}h ${m}m`;
-    if (m > 0) return `${m}m ${s}s`;
-    return `${s}s`;
 }
 
 export default AdminIngestion;

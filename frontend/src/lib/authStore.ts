@@ -113,8 +113,13 @@ export const authStore = {
             notifyListeners();
         }
 
-        // Listen for auth changes
+        // Listen for auth changes — skip in dev mode to avoid overwriting mock session
         supabase.auth.onAuthStateChange((_event, session) => {
+            const isDevMode = localStorage.getItem('harbor_dev_mode') === 'true';
+            if (isDevMode && !session) {
+                // Don't overwrite dev session with unauthenticated state
+                return;
+            }
             currentSession = session;
             currentProfile = mapSupabaseUser(session?.user ?? null);
             notifyListeners();

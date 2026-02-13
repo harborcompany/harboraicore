@@ -1,423 +1,306 @@
 import React, { useState, useEffect } from 'react';
-import { PageHeader, DataTable, Tabs, StatusBadge, Button, KPICard } from '../../components/admin/AdminComponents';
-import { DatasetQADashboard } from '../../components/qa';
-import { X, AlertTriangle } from 'lucide-react';
-
-interface Dataset {
-    id: string;
-    name: string;
-    vertical: string;
-    modality: string[];
-    hours: number;
-    assetCount: number;
-    license: string;
-    status: 'DRAFT' | 'PUBLISHED' | 'DEPRECATED';
-    revenue: number;
-    clients: number;
-    createdAt: string;
-    videos?: any[]; // Raw backend videos
-    qaScore?: {
-        overallScore: number;
-        medianAssetScore: number;
-        meanAssetScore: number;
-        lowQualityPenalty: number;
-        status: 'PRODUCTION_GRADE' | 'TRAINING_READY' | 'RESEARCH_ONLY' | 'NOT_DELIVERABLE';
-        distributionBuckets: {
-            '90-100': number;
-            '80-89': number;
-            '70-79': number;
-            '<70': number;
-        };
-        totalAssets: number;
-        exportReady: boolean;
-        lastCalculatedAt: string;
-    };
-}
+import {
+    getDatasetBuilds,
+    getUploads,
+    getQAReviews,
+    createDatasetBuild,
+    formatDate,
+    type DatasetBuild,
+    type Upload,
+} from '../../services/adminPipelineService';
+import { Link } from 'react-router-dom';
+import { datasetCertificationService, CertificationResult } from '../../services/datasetCertificationService';
+import { CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export function AdminDatasets() {
-    const [isFormulating, setIsFormulating] = useState(false);
-    const [datasets, setDatasets] = useState<Dataset[]>([
-        {
-            id: 'd_lego_v1',
-            name: 'LEGO Assembly Instructions',
-            vertical: 'ROBOTICS',
-            modality: ['video', 'annotation'],
-            hours: 450,
-            assetCount: 1240,
-            license: 'COMMERCIAL',
-            status: 'PUBLISHED',
-            revenue: 12500,
-            clients: 8,
-            createdAt: '2026-01-15',
-            videos: [],
-            qaScore: {
-                overallScore: 91,
-                medianAssetScore: 92.5,
-                meanAssetScore: 89.4,
-                lowQualityPenalty: 0,
-                status: 'PRODUCTION_GRADE',
-                distributionBuckets: { '90-100': 45, '80-89': 30, '70-79': 15, '<70': 5 },
-                totalAssets: 95,
-                exportReady: true,
-                lastCalculatedAt: new Date().toISOString()
-            }
-        },
-        {
-            id: 'd_audio_conversational',
-            name: 'Multilingual Conversational Audio',
-            vertical: 'SPEECH',
-            modality: ['audio', 'transcription'],
-            hours: 1200,
-            assetCount: 5600,
-            license: 'COMMERCIAL',
-            status: 'DRAFT',
-            revenue: 0,
-            clients: 0,
-            createdAt: '2026-02-01',
-            videos: [],
-            qaScore: {
-                overallScore: 68,
-                medianAssetScore: 72.0,
-                meanAssetScore: 65.5,
-                lowQualityPenalty: 25,
-                status: 'NOT_DELIVERABLE',
-                distributionBuckets: { '90-100': 5, '80-89': 15, '70-79': 40, '<70': 40 },
-                totalAssets: 100,
-                exportReady: false,
-                lastCalculatedAt: new Date().toISOString()
-            }
-        }
-    ]);
-    const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('all');
-    const [selectedDataset, setSelectedDataset] = useState<any | null>(null);
+    const [builds, setBuilds] = useState<DatasetBuild[]>([]);
+    const [showCreate, setShowCreate] = useState(false);
+    const [newTitle, setNewTitle] = useState('');
+    const [newDescription, setNewDescription] = useState('');
+    const [eligibleUploads, setEligibleUploads] = useState<Upload[]>([]);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [splitConfig, setSplitConfig] = useState({ train: 0.8, val: 0.1, test: 0.1 });
+    const [expandedBuild, setExpandedBuild] = useState<string | null>(null);
+    const [certifying, setCertifying] = useState<string | null>(null);
+    const [certError, setCertError] = useState<{ id: string, messages: string[] } | null>(null);
 
-    // Fetch Datasets from API
     useEffect(() => {
-        fetchDatasets();
+        setBuilds(getDatasetBuilds());
+        // Only approved uploads are eligible
+        const reviews = getQAReviews();
+        const approvedIds = new Set(reviews.filter(r => r.action === 'approve' && r.includeInDataset).map(r => r.uploadId));
+        const allUploads = getUploads();
+        setEligibleUploads(allUploads.filter(u => approvedIds.has(u.id)));
     }, []);
 
-    const fetchDatasets = async () => {
-        try {
-            const res = await fetch('/api/lab/datasets');
-            const json = await res.json();
-            // Map Prisma model to UI model
-            const mapped = json.data.map((d: any) => ({
-                id: d.id,
-                name: d.title,
-                vertical: d.category.toUpperCase(),
-                modality: ['video', 'annotation'],
-                hours: d.videos.reduce((acc: number, v: any) => acc + (v.duration || 0), 0),
-                assetCount: d.videos.length,
-                license: 'COMMERCIAL',
-                status: d.isPublic ? 'PUBLISHED' : 'DRAFT',
-                revenue: d.price * 10, // Mock revenue logic
-                clients: Math.floor(Math.random() * 20),
-                createdAt: new Date(d.createdAt).toISOString().split('T')[0],
-                videos: d.videos, // Keep raw videos for details
-                qaScore: {
-                    overallScore: 91,
-                    medianAssetScore: 92.5,
-                    meanAssetScore: 89.4,
-                    lowQualityPenalty: 0,
-                    status: 'PRODUCTION_GRADE',
-                    distributionBuckets: { '90-100': 45, '80-89': 30, '70-79': 15, '<70': 5 },
-                    totalAssets: 95,
-                    exportReady: true,
-                    lastCalculatedAt: new Date().toISOString()
-                }
-            }));
-            setDatasets(mapped);
-        } catch (e) {
-            console.error("Failed to fetch datasets", e);
-        } finally {
-            setLoading(false);
+    function handleCreate() {
+        if (!newTitle || selectedIds.size === 0) return;
+        createDatasetBuild({
+            title: newTitle,
+            description: newDescription,
+            mediaIds: Array.from(selectedIds),
+            splitConfig,
+            license: { type: 'Commercial', scope: 'Non-exclusive' },
+            schemaName: 'lego_assembly',
+        });
+        setBuilds(getDatasetBuilds());
+        setShowCreate(false);
+        setNewTitle('');
+        setNewDescription('');
+        setSelectedIds(new Set());
+    }
+
+    async function handleCertify(id: string) {
+        setCertifying(id);
+        const result = await datasetCertificationService.certifyDataset(id);
+        if (result.success) {
+            setBuilds(prev => prev.map(b => b.datasetId === id ? { ...b, status: 'ready' } : b));
+            setCertError(null);
+        } else {
+            setCertError({ id, messages: result.errors });
         }
-    };
-
-    const handleProcessVideo = async () => {
-        if (!selectedDataset) return;
-
-        try {
-            await fetch('/api/lab/process-video', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    datasetId: selectedDataset.id,
-                    filename: `upload_${Date.now()}.mp4`,
-                    duration: 300 // 5 minutes
-                })
-            });
-            alert("Started Processing 5-minute video! Check back in a few seconds.");
-            fetchDatasets(); // Refresh
-            setSelectedDataset(null);
-        } catch (e) {
-            alert("Failed to start processing");
-        }
-    };
-
-    const tabs = [
-        { id: 'all', label: 'All', count: datasets.length },
-        { id: 'published', label: 'Published', count: datasets.filter(d => d.status === 'PUBLISHED').length },
-        { id: 'draft', label: 'Draft', count: datasets.filter(d => d.status === 'DRAFT').length },
-    ];
-
-    const columns = [
-        {
-            key: 'name',
-            label: 'Dataset',
-            render: (ds: Dataset) => (
-                <div>
-                    <span style={{ color: '#fafafa' }}>{ds.name}</span>
-                    <span style={{ display: 'block', fontSize: 11, color: '#525252', fontFamily: 'monospace' }}>{ds.id.substring(0, 8)}</span>
-                </div>
-            )
-        },
-        {
-            key: 'vertical',
-            label: 'Vertical',
-            render: (ds: Dataset) => <StatusBadge label={ds.vertical} variant="info" />
-        },
-        {
-            key: 'assetCount',
-            label: 'Labeled Videos',
-            render: (ds: any) => (
-                <div className="flex gap-2 items-center">
-                    <span>{ds.assetCount}</span>
-                    {ds.videos?.some((v: any) => v.status === 'PROCESSING') && (
-                        <span className="text-xs text-blue-400 animate-pulse">Processing...</span>
-                    )}
-                </div>
-            )
-        },
-        {
-            key: 'status',
-            label: 'Status',
-            render: (ds: Dataset) => (
-                <StatusBadge
-                    label={ds.status}
-                    variant={ds.status === 'PUBLISHED' ? 'success' : 'neutral'}
-                />
-            )
-        }
-    ];
-
-    const filteredDatasets = datasets.filter(ds => {
-        if (activeTab === 'published') return ds.status === 'PUBLISHED';
-        if (activeTab === 'draft') return ds.status === 'DRAFT';
-        return true;
-    });
-
-    const totalRevenue = datasets.reduce((sum, d) => sum + d.revenue, 0);
-    const totalHours = datasets.reduce((sum, d) => sum + d.hours, 0);
-    const totalAssets = datasets.reduce((sum, d) => sum + d.assetCount, 0);
+        setCertifying(false as any);
+    }
 
     return (
-        <div className="admin-datasets">
-            <PageHeader
-                title="Lab Datasets"
-                subtitle="Data Labeling Pipeline & Registry"
-                actions={
-                    <div className="flex gap-2">
-                        <Button variant="secondary" onClick={() => fetchDatasets()}>Refresh</Button>
-                        <Button variant="primary" onClick={() => setIsFormulating(true)}>+ Formulate Dataset</Button>
-                    </div>
-                }
-            />
-
-            <div className="kpi-row">
-                <KPICard label="Total Datasets" value={datasets.length} />
-                <KPICard label="Published" value={datasets.filter(d => d.status === 'PUBLISHED').length} />
-                <KPICard label="Total Seconds" value={totalHours.toLocaleString()} />
-                <KPICard label="Total Assets" value={totalAssets.toLocaleString()} />
-                <KPICard label="Total Revenue" value={`$${(totalRevenue / 1000).toFixed(0)}K`} />
-            </div>
-
-            <div className="dataset-toolbar">
-                <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
-            </div>
-
-            <DataTable
-                columns={columns}
-                data={filteredDatasets}
-                onRowClick={(ds) => setSelectedDataset(ds)}
-            />
-
-            {selectedDataset && (
-                <div className="dataset-drawer">
-                    <div className="drawer-overlay" onClick={() => setSelectedDataset(null)} />
-                    <div className="drawer-content">
-                        <div className="drawer-header">
-                            <h2>{selectedDataset.name}</h2>
-                            <button className="close-btn" onClick={() => setSelectedDataset(null)}>×</button>
-                        </div>
-                        <div className="drawer-body">
-                            <div className="detail-section">
-                                <h3>Overview</h3>
-                                <DetailRow label="Dataset ID" value={selectedDataset.id} mono />
-                                <DetailRow label="Vertical" value={selectedDataset.vertical} />
-                                <DetailRow label="Status" value={selectedDataset.status} />
-                            </div>
-                            <div className="detail-section">
-                                <h3>Pipeline Controls</h3>
-                                <div className="p-4 bg-gray-900 rounded border border-gray-800 mb-4">
-                                    <h4 className="text-sm font-semibold text-gray-300 mb-2">Simulate Data Ingestion</h4>
-                                    <p className="text-xs text-gray-500 mb-3">Upload a 5-minute video for mock VLM analysis.</p>
-                                    <Button variant="primary" onClick={handleProcessVideo}>
-                                        Upload & Label Video (5m)
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className="detail-section">
-                                <h3>Metrics</h3>
-                                <DetailRow label="Total Seconds" value={`${selectedDataset.hours}`} />
-                                <DetailRow label="Labeled Videos" value={selectedDataset.assetCount.toString()} />
-                            </div>
-                            <div className="detail-section">
-                                <h3>Actions</h3>
-                                <div className="action-buttons">
-                                    {selectedDataset.status === 'DRAFT' && <Button variant="primary">Publish Dataset</Button>}
-                                    <Button variant="secondary">Clone Dataset</Button>
-                                    <Button variant="secondary">View Assets</Button>
-                                    <Button variant="ghost" style={{ color: '#ef4444' }}>Unpublish</Button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div className="p-6 text-white max-w-[1400px]">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold">Dataset Builder</h1>
+                    <p className="text-[#737373] mt-1">Build, version, and export datasets from approved assets</p>
                 </div>
-            )}
+                <button
+                    onClick={() => setShowCreate(!showCreate)}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                    + New Dataset
+                </button>
+            </div>
 
-            {/* Formulation Wizard */}
-            {isFormulating && (
-                <div className="fixed inset-0 z-[102] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-                    <div className="bg-[#141414] border border-[#262626] rounded-xl w-[600px] shadow-2xl overflow-hidden">
-                        <div className="p-6 border-b border-[#262626] flex justify-between items-center">
-                            <h2 className="text-lg font-semibold text-white">Formulate New Dataset</h2>
-                            <button onClick={() => setIsFormulating(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
+            {/* Create dataset panel */}
+            {showCreate && (
+                <div className="bg-[#141414] border border-blue-500/20 rounded-xl p-6 mb-6">
+                    <h3 className="font-semibold mb-4">Create Dataset Build</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label className="block text-xs text-[#737373] mb-1">Title</label>
+                            <input
+                                value={newTitle}
+                                onChange={e => setNewTitle(e.target.value)}
+                                className="w-full p-2.5 rounded-lg bg-[#0a0a0a] border border-[#262626] text-sm text-white focus:border-blue-500 focus:outline-none"
+                                placeholder="e.g. Harbor_Assemble_LEGO_v2"
+                            />
                         </div>
-                        <div className="p-6 space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-sm text-gray-400 mb-1 block">Dataset Name</label>
+                        <div>
+                            <label className="block text-xs text-[#737373] mb-1">Description</label>
+                            <input
+                                value={newDescription}
+                                onChange={e => setNewDescription(e.target.value)}
+                                className="w-full p-2.5 rounded-lg bg-[#0a0a0a] border border-[#262626] text-sm text-white focus:border-blue-500 focus:outline-none"
+                                placeholder="Assembly primitives for robotics..."
+                            />
+                        </div>
+                    </div>
+
+                    {/* Split config */}
+                    <div className="mb-4">
+                        <label className="block text-xs text-[#737373] mb-2">Train / Val / Test Split</label>
+                        <div className="flex gap-4">
+                            {(['train', 'val', 'test'] as const).map(key => (
+                                <div key={key} className="flex items-center gap-2">
+                                    <span className="text-xs text-[#a3a3a3] capitalize">{key}:</span>
                                     <input
-                                        className="w-full bg-black border border-[#333] rounded p-2 text-white"
-                                        placeholder="e.g. LEGO Assembly V1"
+                                        type="number"
+                                        min={0} max={1} step={0.05}
+                                        value={splitConfig[key]}
+                                        onChange={e => setSplitConfig({ ...splitConfig, [key]: parseFloat(e.target.value) })}
+                                        className="w-16 p-1.5 rounded bg-[#0a0a0a] border border-[#262626] text-sm text-white text-center"
                                     />
                                 </div>
-                                <div>
-                                    <label className="text-sm text-gray-400 mb-1 block">Version Tag</label>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Select approved uploads */}
+                    <div className="mb-4">
+                        <label className="block text-xs text-[#737373] mb-2">Approved Assets ({eligibleUploads.length} eligible)</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                            {eligibleUploads.map(u => (
+                                <label key={u.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer ${selectedIds.has(u.id) ? 'bg-blue-500/5 border-blue-500/20' : 'bg-[#0a0a0a] border-[#262626]'
+                                    }`}>
                                     <input
-                                        className="w-full bg-black border border-[#333] rounded p-2 text-white"
-                                        placeholder="v1.0.0"
+                                        type="checkbox"
+                                        className="accent-blue-500"
+                                        checked={selectedIds.has(u.id)}
+                                        onChange={() => {
+                                            const next = new Set(selectedIds);
+                                            if (next.has(u.id)) next.delete(u.id); else next.add(u.id);
+                                            setSelectedIds(next);
+                                        }}
                                     />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="text-sm text-gray-400 mb-1 block">Date Range (Inclusion)</label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <input type="date" className="bg-black border border-[#333] rounded p-2 text-white" />
-                                    <input type="date" className="bg-black border border-[#333] rounded p-2 text-white" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="text-sm text-gray-400 mb-1 block flex justify-between">
-                                    <span>Minimum Confidence Threshold</span>
-                                    <span className="text-blue-400">0.85</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium truncate">{u.filename}</div>
+                                        <div className="text-xs text-[#525252]">Score: {u.autoScore}</div>
+                                    </div>
                                 </label>
-                                <input type="range" min="0" max="1" step="0.05" defaultValue="0.85" className="w-full" />
-                                <p className="text-xs text-gray-600 mt-1">Only assets with confidence score ≥ 0.85 will be included.</p>
-                            </div>
-
-                            <div className="bg-blue-500/5 border border-blue-500/10 rounded p-4">
-                                <h4 className="text-sm font-medium text-blue-400 mb-2">Estimation</h4>
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-400">Eligible Videos:</span>
-                                    <span className="text-white">842</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-400">Total Duration:</span>
-                                    <span className="text-white">142 hours</span>
-                                </div>
-                            </div>
-
-                            <div className="bg-yellow-500/5 border border-yellow-500/10 rounded p-3 text-xs text-yellow-500 flex gap-2">
-                                <AlertTriangle size={16} />
-                                <div>
-                                    <strong>Immutable Action:</strong> Once formulated, this dataset cannot be modified. It will be locked for licensing.
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-6 border-t border-[#262626] flex justify-end gap-3 bg-[#0a0a0a]">
-                            <Button variant="secondary" onClick={() => setIsFormulating(false)}>Cancel</Button>
-                            <Button variant="primary">Formulate & Lock</Button>
+                            ))}
                         </div>
                     </div>
-                </div>
-            )}
 
-            {selectedDataset && selectedDataset.qaScore && (
-                <div className="fixed inset-0 z-[101] pointer-events-none flex items-center justify-center">
-                    <div className="pointer-events-auto w-[600px] shadow-2xl">
-                        <DatasetQADashboard
-                            data={selectedDataset.qaScore}
-                            datasetName={selectedDataset.name}
-                            onRecalculate={() => alert('Recalculating score...')}
-                            onExport={() => alert('Exporting...')}
-                        />
-                        <button
-                            onClick={() => setSelectedDataset(null)}
-                            className="absolute top-[-40px] right-0 text-white bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full text-sm backdrop-blur"
-                        >
-                            Close Overlay
+                    <div className="flex justify-end gap-3">
+                        <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm text-[#a3a3a3] hover:text-white">Cancel</button>
+                        <button onClick={handleCreate} disabled={!newTitle || selectedIds.size === 0}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg">
+                            Build Dataset
                         </button>
                     </div>
                 </div>
             )}
 
-            <style>{`
-        .admin-datasets { max-width: 1400px; }
-        .kpi-row {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 16px;
-          margin-bottom: 24px;
-        }
-        .dataset-toolbar { margin-bottom: 16px; }
-        .dataset-drawer { position: fixed; inset: 0; z-index: 100; }
-        .drawer-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
-        .drawer-content {
-          position: absolute; right: 0; top: 0; bottom: 0; width: 450px;
-          background: #141414; border-left: 1px solid #262626;
-          display: flex; flex-direction: column;
-        }
-        .drawer-header {
-          display: flex; justify-content: space-between; align-items: center;
-          padding: 20px; border-bottom: 1px solid #262626;
-        }
-        .drawer-header h2 { margin: 0; font-size: 16px; }
-        .close-btn { background: none; border: none; color: #a3a3a3; font-size: 24px; cursor: pointer; }
-        .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
-        .detail-section { margin-bottom: 24px; }
-        .detail-section h3 { font-size: 12px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-        .action-buttons { display: flex; flex-direction: column; gap: 8px; }
-      `}</style>
-        </div>
-    );
-}
+            {/* Dataset builds list */}
+            <div className="space-y-4">
+                {builds.map(build => {
+                    const expanded = expandedBuild === build.datasetId;
+                    return (
+                        <div key={build.datasetId} className="bg-[#141414] border border-[#262626] rounded-xl overflow-hidden hover:border-[#404040] transition-all">
+                            <button
+                                onClick={() => setExpandedBuild(expanded ? null : build.datasetId)}
+                                className="w-full text-left p-5"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3">
+                                            <h3 className="text-lg font-bold">{build.title}</h3>
+                                            <span className="text-xs font-mono px-2 py-0.5 bg-[#262626] rounded text-[#a3a3a3]">{build.version}</span>
+                                            <span className={`text-xs px-2 py-0.5 rounded-full ${build.status === 'ready' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                                                build.status === 'delivered' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                                    'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                                }`}>
+                                                {build.status}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-[#737373] mt-1">{build.description}</p>
+                                    </div>
+                                    <svg
+                                        width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                        className={`flex-shrink-0 text-[#525252] transition-transform ${expanded ? 'rotate-180' : ''}`}
+                                    >
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                </div>
 
-function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-    return (
-        <div className="detail-row">
-            <span className="detail-label">{label}</span>
-            <span className={`detail-value ${mono ? 'mono' : ''}`}>{value}</span>
-            <style>{`
-        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #262626; }
-        .detail-label { color: #a3a3a3; font-size: 13px; }
-        .detail-value { color: #fafafa; font-size: 13px; }
-        .detail-value.mono { font-family: monospace; }
-      `}</style>
+                                {/* Summary metrics row */}
+                                <div className="grid grid-cols-6 gap-4 mt-4">
+                                    <div>
+                                        <div className="text-xs text-[#525252]">Hours</div>
+                                        <div className="text-sm font-bold">{build.totalHours}h</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#525252]">Clips</div>
+                                        <div className="text-sm font-bold">{build.totalClips}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#525252]">Contributors</div>
+                                        <div className="text-sm font-bold">{build.contributorsCount}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#525252]">Dataset Score</div>
+                                        <div className="text-sm font-bold" style={{ color: build.finalDatasetScore >= 85 ? '#22c55e' : '#f59e0b' }}>
+                                            {build.finalDatasetScore}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#525252]">Human QA%</div>
+                                        <div className="text-sm font-bold">{build.humanCheckedPct}%</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-[#525252]">Created</div>
+                                        <div className="text-sm text-[#a3a3a3]">{formatDate(build.createdAt)}</div>
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* Expanded detail */}
+                            {expanded && (
+                                <div className="border-t border-[#262626] p-5 space-y-5">
+                                    {/* QA summary */}
+                                    <div>
+                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[#737373] mb-3">Quality Summary</h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {[
+                                                { label: 'Auto-Check Pass', value: `${build.qaSummary.autoCheckPassRate}%`, color: '#22c55e' },
+                                                { label: 'Human QA Pass', value: `${build.qaSummary.humanQAPassRate}%`, color: '#3b82f6' },
+                                                { label: 'Median Auto', value: `${build.qaSummary.medianAutoScore}`, color: '#8b5cf6' },
+                                                { label: 'Median Human', value: `${build.qaSummary.medianHumanScore}`, color: '#f59e0b' },
+                                                { label: 'Avg SNR', value: `${build.qaSummary.avgSNR} dB`, color: '#22d3ee' },
+                                                { label: 'Clipping Rate', value: `${build.qaSummary.clippingRate}%`, color: '#ef4444' },
+                                                { label: 'Frame Coverage', value: `${build.qaSummary.frameCoverage}%`, color: '#a3e635' },
+                                                { label: 'Annotation IoU', value: `${build.qaSummary.annotationAgreement}`, color: '#ec4899' },
+                                            ].map(m => (
+                                                <div key={m.label} className="bg-[#0a0a0a] rounded-lg p-3 border border-[#262626]">
+                                                    <div className="text-xs text-[#737373] mb-1">{m.label}</div>
+                                                    <div className="text-lg font-mono font-bold" style={{ color: m.color }}>{m.value}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Split config */}
+                                    <div>
+                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[#737373] mb-3">Split Configuration</h4>
+                                        <div className="flex gap-3">
+                                            {Object.entries(build.splitConfig).map(([key, val]) => (
+                                                <div key={key} className="bg-[#0a0a0a] rounded-lg p-3 border border-[#262626] flex-1 text-center">
+                                                    <div className="text-xs text-[#737373] capitalize mb-1">{key}</div>
+                                                    <div className="text-lg font-bold">{(val * 100).toFixed(0)}%</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex items-center gap-3 pt-2">
+                                        {build.status !== 'ready' && build.status !== 'delivered' && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleCertify(build.datasetId); }}
+                                                disabled={certifying === build.datasetId}
+                                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg flex items-center gap-2"
+                                            >
+                                                {certifying === build.datasetId ? 'Certifying...' : <><ShieldCheck size={16} /> Certify Version</>}
+                                            </button>
+                                        )}
+                                        {certError?.id === build.datasetId && (
+                                            <div className="flex-1 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                                                <div className="flex items-center gap-2 text-red-400 text-xs font-bold mb-1 uppercase">
+                                                    <AlertTriangle size={12} /> Certification Failed
+                                                </div>
+                                                {certError.messages.map(m => (
+                                                    <div key={m} className="text-xs text-red-300/80">• {m}</div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <Link
+                                            to={`/admin/qa-report?dataset=${build.datasetId}`}
+                                            className="px-4 py-2 bg-purple-600/20 text-purple-400 border border-purple-500/20 text-sm rounded-lg hover:bg-purple-600/30 transition-colors"
+                                        >
+                                            📊 View QA Report
+                                        </Link>
+                                        <Link
+                                            to="/admin/delivery"
+                                            className="px-4 py-2 bg-green-600/20 text-green-400 border border-green-500/20 text-sm rounded-lg hover:bg-green-600/30 transition-colors"
+                                        >
+                                            📦 Deliver to Client
+                                        </Link>
+                                        <button className="px-4 py-2 bg-[#0a0a0a] border border-[#262626] text-[#a3a3a3] text-sm rounded-lg hover:text-white hover:border-[#404040] transition-colors">
+                                            ⬇︎ Export Manifest
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }

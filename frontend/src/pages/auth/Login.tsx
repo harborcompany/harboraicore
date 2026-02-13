@@ -3,9 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import AuthSplitLayout from '../../components/layouts/AuthSplitLayout';
 import { authStore } from '../../lib/authStore';
+import { useLocation } from 'react-router-dom';
 
 const Login = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || null;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -30,7 +33,9 @@ const Login = () => {
                 setError(error.message);
             }
         } else {
-            navigate('/app');
+            const user = authStore.getUser();
+            const destination = from || (user.role === 'admin' ? '/admin' : '/creator');
+            navigate(destination);
         }
     };
 
@@ -134,7 +139,11 @@ const Login = () => {
                 <button
                     type="button"
                     onClick={() => {
-                        authStore.devLogin().then(() => navigate('/app'));
+                        authStore.devLogin().then(() => {
+                            const user = authStore.getUser();
+                            const destination = from || (user.role === 'admin' ? '/admin' : '/creator');
+                            navigate(destination);
+                        });
                     }}
                     className="w-full flex items-center justify-center gap-2 bg-stone-100 text-stone-600 py-3 px-4 rounded-lg font-medium hover:bg-stone-200 transition-colors"
                 >

@@ -2,9 +2,11 @@ import React from 'react';
 import { DataGrid } from '../shared/DataGrid';
 import { StatusBadge, StatusType } from '../shared/StatusBadge';
 import { MoreHorizontal } from 'lucide-react';
+import { useAuth } from '../../../lib/authStore';
 
 interface Project {
     id: string;
+    orgId: string;
     name: string;
     type: 'Annotation' | 'RAG Evaluation' | 'Data Generation';
     progress: number;
@@ -14,22 +16,26 @@ interface Project {
 }
 
 const mockProjects: Project[] = [
-    { id: '1', name: 'Maritime Vessel Classification - Batch A', type: 'Annotation', progress: 100, status: 'completed', lastUpdated: '2 hours ago', items: 1250 },
-    { id: '2', name: 'RAG Knowledge Base - Q1 Financials', type: 'RAG Evaluation', progress: 45, status: 'active', lastUpdated: '5 mins ago', items: 500 },
-    { id: '3', name: 'Synthetic Drone Footage Gen', type: 'Data Generation', progress: 12, status: 'processing', lastUpdated: '1 min ago', items: 10000 },
-    { id: '4', name: 'Customer Support Chat RLHF', type: 'Annotation', progress: 0, status: 'pending', lastUpdated: '1 day ago', items: 2500 },
+    { id: '1', orgId: 'org_harbor', name: 'Maritime Vessel Classification - Batch A', type: 'Annotation', progress: 100, status: 'completed', lastUpdated: '2 hours ago', items: 1250 },
+    { id: '2', orgId: 'org_harbor', name: 'RAG Knowledge Base - Q1 Financials', type: 'RAG Evaluation', progress: 45, status: 'active', lastUpdated: '5 mins ago', items: 500 },
+    { id: '3', orgId: 'org_other', name: 'Synthetic Drone Footage Gen', type: 'Data Generation', progress: 12, status: 'processing', lastUpdated: '1 min ago', items: 10000 },
+    { id: '4', orgId: 'org_harbor', name: 'Customer Support Chat RLHF', type: 'Annotation', progress: 0, status: 'pending', lastUpdated: '1 day ago', items: 2500 },
 ];
 
 export const ProjectList: React.FC = () => {
+    const user = useAuth();
+    const currentOrgId = user.organization?.name || 'org_harbor';
+    const filteredProjects = mockProjects.filter(p => p.orgId === currentOrgId);
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-[#1A1A1A]">Active Projects</h3>
-                <button className="text-sm text-stone-500 hover:text-[#1A1A1A]">View all</button>
+                <button className="text-sm text-stone-500 hover:text-[#1A1A1A]">View all ({filteredProjects.length})</button>
             </div>
 
             <DataGrid
-                data={mockProjects}
+                data={filteredProjects}
                 columns={[
                     {
                         header: 'Project Name',

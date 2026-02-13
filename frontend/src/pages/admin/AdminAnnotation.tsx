@@ -1,857 +1,230 @@
-import React, { useState, useEffect, useCallback } from 'react';
-
-// ============================================
-// TYPES
-// ============================================
-
-interface Submission {
-    id: string;
-    contributorName: string;
-    contributorEmail: string;
-    uploadDate: string;
-    duration: string;
-    durationSeconds: number;
-    setPieceEstimate: number;
-    status: 'pending' | 'in_review' | 'approved' | 'rejected' | 'partial';
-    resolution: string;
-    device: string;
-    lightingCondition: string;
-    locationTag: string;
-    thumbnailUrl?: string;
-    videoUrl?: string;
-    annotations: AnnotationItem[];
-    confidenceScore: ConfidenceScore;
-    metadata: SubmissionMetadata;
-}
-
-interface AnnotationItem {
-    id: string;
-    frameTimestamp: number;
-    brickType: string;
-    boundingBox: [number, number, number, number];
-    geometry?: {
-        type: 'polygon' | 'keypoints' | 'bbox';
-        points?: [number, number][];
-        landmarks?: Record<string, [number, number]>;
-    };
-    confidenceScore: number;
-    source: 'auto' | 'crowd' | 'uploader';
-    status: 'pending' | 'approved' | 'rejected';
-    metaTags: string[];
-    contextQuality: {
-        blur: number;
-        lighting: string;
-        occlusion: number;
-    };
-}
-
-interface AnnotationConfig {
-    id: string;
-    projectName: string;
-    description: string;
-    tools: ('bbox' | 'polygon' | 'keypoints' | 'bbox3d')[];
-    labels: string[];
-    qualityTags: string[];
-    uncertaintyThreshold: number;
-}
-
-const PROJECT_TEMPLATES: Record<string, AnnotationConfig> = {
-    lego_assembly: {
-        id: 'lego',
-        projectName: 'LEGO Assembly QA',
-        description: 'Quality assurance for physical model assembly steps.',
-        tools: ['bbox', 'polygon', 'keypoints'],
-        labels: ['2x4 Red', '1x2 Blue', '2x2 Yellow', '1x4 Green', 'Hand'],
-        qualityTags: ['blur', 'occlusion', 'hand_present'],
-        uncertaintyThreshold: 0.65
-    },
-    medical_ct: {
-        id: 'medical',
-        projectName: 'Medical CT Segmentation',
-        description: 'Spleen and Liver segmentation from lung cavity scans.',
-        tools: ['polygon', 'bbox3d'],
-        labels: ['Spleen', 'Liver', 'Kidney', 'Cyst'],
-        qualityTags: ['motion_blur', 'low_contrast', 'artifact'],
-        uncertaintyThreshold: 0.85
-    },
-    legal_ocr: {
-        id: 'legal',
-        projectName: 'Legal Document OCR',
-        description: 'Entity extraction from 19th-century property deeds.',
-        tools: ['bbox'],
-        labels: ['Grantor', 'Grantee', 'Legal Description', 'Signature Date'],
-        qualityTags: ['ink_bleed', 'tattered_edge', 'faded_text'],
-        uncertaintyThreshold: 0.70
-    }
-};
-
-const DEFAULT_CONFIG = PROJECT_TEMPLATES.lego_assembly;
-
-interface ConfidenceScore {
-    overall: number;
-    modelAgreement: number;
-    crossUserAgreement: number;
-    contextQuality: number;
-    userReliability: number;
-}
-
-interface SubmissionMetadata {
-    totalFrames: number;
-    fps: number;
-    totalAnnotations: number;
-    autoAnnotations: number;
-    humanAnnotations: number;
-    modelVersions: string[];
-}
-
-interface FilterState {
-    status: string;
-    creator: string;
-    dateRange: string;
-    minConfidence: number;
-    showUncertain: boolean;
-}
-
-// ============================================
-// MOCK DATA (wired to real API shape)
-// ============================================
-
-const MOCK_SUBMISSIONS: Submission[] = [
-    {
-        id: 'sub_001', contributorName: 'John D.', contributorEmail: 'john@example.com',
-        uploadDate: '2026-02-09T14:30:00Z', duration: '30:12', durationSeconds: 1812,
-        setPieceEstimate: 350, status: 'pending', resolution: '1920x1080', device: 'iPhone 15 Pro',
-        lightingCondition: 'Day — Natural', locationTag: 'Living Room',
-        thumbnailUrl: '', videoUrl: '',
-        annotations: [
-            { id: 'ann_001', frameTimestamp: 12.5, brickType: '2x4 Red', boundingBox: [120, 80, 200, 160], geometry: { type: 'polygon', points: [[120, 80], [200, 80], [200, 160], [120, 160]] }, confidenceScore: 0.94, source: 'auto', status: 'pending', metaTags: ['hand_present'], contextQuality: { blur: 0.05, lighting: 'good', occlusion: 0.1 } },
-            { id: 'ann_002', frameTimestamp: 24.1, brickType: '1x2 Blue', boundingBox: [340, 220, 380, 260], confidenceScore: 0.87, source: 'auto', status: 'pending', metaTags: ['edge_occlusion'], contextQuality: { blur: 0.12, lighting: 'good', occlusion: 0.3 } },
-            { id: 'ann_003', frameTimestamp: 45.7, brickType: '2x2 Yellow', boundingBox: [200, 150, 260, 210], confidenceScore: 0.72, source: 'auto', status: 'pending', metaTags: ['partial_lighting'], contextQuality: { blur: 0.2, lighting: 'moderate', occlusion: 0.15 } },
-            { id: 'ann_004', frameTimestamp: 67.3, brickType: '1x4 Green', boundingBox: [80, 300, 160, 340], confidenceScore: 0.96, source: 'crowd', status: 'approved', metaTags: ['hand_present', 'clear_view'], contextQuality: { blur: 0.02, lighting: 'good', occlusion: 0.05 } },
-        ],
-        confidenceScore: { overall: 87, modelAgreement: 92, crossUserAgreement: 85, contextQuality: 78, userReliability: 90 },
-        metadata: { totalFrames: 54360, fps: 30, totalAnnotations: 847, autoAnnotations: 720, humanAnnotations: 127, modelVersions: ['YOLOv8', 'SAM3', 'MediaPipe'] },
-    },
-    {
-        id: 'sub_002', contributorName: 'Sarah L.', contributorEmail: 'sarah@example.com',
-        uploadDate: '2026-02-09T11:15:00Z', duration: '19:45', durationSeconds: 1185,
-        setPieceEstimate: 220, status: 'in_review', resolution: '3840x2160', device: 'Samsung Galaxy S24',
-        lightingCondition: 'Indoor — LED', locationTag: 'Workshop',
-        thumbnailUrl: '', videoUrl: '',
-        annotations: [
-            { id: 'ann_005', frameTimestamp: 5.2, brickType: '2x4 White', boundingBox: [100, 100, 180, 160], geometry: { type: 'polygon', points: [[100, 100], [180, 100], [180, 160], [100, 160]] }, confidenceScore: 0.91, source: 'auto', status: 'approved', metaTags: ['clear_view'], contextQuality: { blur: 0.03, lighting: 'good', occlusion: 0.08 } },
-            { id: 'ann_006', frameTimestamp: 18.9, brickType: '1x1 Black', boundingBox: [420, 190, 440, 210], confidenceScore: 0.65, source: 'auto', status: 'pending', metaTags: ['small_object', 'edge_occlusion'], contextQuality: { blur: 0.15, lighting: 'moderate', occlusion: 0.4 } },
-        ],
-        confidenceScore: { overall: 72, modelAgreement: 78, crossUserAgreement: 68, contextQuality: 65, userReliability: 82 },
-        metadata: { totalFrames: 35550, fps: 30, totalAnnotations: 412, autoAnnotations: 380, humanAnnotations: 32, modelVersions: ['YOLOv8', 'MediaPipe'] },
-    },
-    {
-        id: 'sub_003', contributorName: 'Mark T.', contributorEmail: 'mark@example.com',
-        uploadDate: '2026-02-08T22:00:00Z', duration: '52:18', durationSeconds: 3138,
-        setPieceEstimate: 480, status: 'approved', resolution: '1920x1080', device: 'Logitech C920',
-        lightingCondition: 'Day — Diffused', locationTag: 'Office Desk',
-        thumbnailUrl: '', videoUrl: '',
-        annotations: [
-            { id: 'ann_007', frameTimestamp: 10.0, brickType: '2x6 Red', boundingBox: [150, 90, 280, 170], confidenceScore: 0.98, source: 'auto', status: 'approved', metaTags: ['hand_present', 'clear_view'], contextQuality: { blur: 0.01, lighting: 'good', occlusion: 0.02 } },
-        ],
-        confidenceScore: { overall: 95, modelAgreement: 97, crossUserAgreement: 94, contextQuality: 91, userReliability: 96 },
-        metadata: { totalFrames: 94140, fps: 30, totalAnnotations: 1842, autoAnnotations: 1600, humanAnnotations: 242, modelVersions: ['YOLOv8', 'SAM3', 'MediaPipe', 'Whisper'] },
-    },
-    {
-        id: 'sub_004', contributorName: 'Emily R.', contributorEmail: 'emily@example.com',
-        uploadDate: '2026-02-08T16:30:00Z', duration: '15:22', durationSeconds: 922,
-        setPieceEstimate: 150, status: 'rejected', resolution: '1280x720', device: 'iPad Air',
-        lightingCondition: 'Night — Lamp', locationTag: 'Kitchen Table',
-        thumbnailUrl: '', videoUrl: '',
-        annotations: [],
-        confidenceScore: { overall: 34, modelAgreement: 40, crossUserAgreement: 0, contextQuality: 28, userReliability: 45 },
-        metadata: { totalFrames: 27660, fps: 30, totalAnnotations: 89, autoAnnotations: 89, humanAnnotations: 0, modelVersions: ['YOLOv8'] },
-    },
-    {
-        id: 'sub_005', contributorName: 'Alex K.', contributorEmail: 'alex@example.com',
-        uploadDate: '2026-02-09T08:45:00Z', duration: '28:03', durationSeconds: 1683,
-        setPieceEstimate: 310, status: 'pending', resolution: '3840x2160', device: 'iPhone 15 Pro Max',
-        lightingCondition: 'Day — Natural', locationTag: 'Patio',
-        thumbnailUrl: '', videoUrl: '',
-        annotations: [
-            { id: 'ann_008', frameTimestamp: 3.1, brickType: '2x4 Blue', boundingBox: [200, 120, 300, 200], confidenceScore: 0.89, source: 'auto', status: 'pending', metaTags: ['hand_present'], contextQuality: { blur: 0.08, lighting: 'good', occlusion: 0.1 } },
-        ],
-        confidenceScore: { overall: 81, modelAgreement: 85, crossUserAgreement: 80, contextQuality: 74, userReliability: 88 },
-        metadata: { totalFrames: 50490, fps: 30, totalAnnotations: 623, autoAnnotations: 540, humanAnnotations: 83, modelVersions: ['YOLOv8', 'SAM3', 'MediaPipe'] },
-    },
-];
-
-// ============================================
-// HELPER COMPONENTS
-// ============================================
-
-function getStatusColor(status: string): string {
-    switch (status) {
-        case 'approved': return '#22c55e';
-        case 'rejected': return '#ef4444';
-        case 'in_review': return '#6366f1';
-        case 'pending': return '#f59e0b';
-        case 'partial': return '#f97316';
-        default: return '#a3a3a3';
-    }
-}
-
-function getConfidenceColor(score: number): string {
-    if (score >= 80) return '#22c55e';
-    if (score >= 60) return '#f59e0b';
-    return '#ef4444';
-}
-
-function formatDate(iso: string): string {
-    const d = new Date(iso);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-}
-
-// ============================================
-// MAIN COMPONENT
-// ============================================
+import React, { useState, useEffect } from 'react';
+import {
+    Search, Filter, MoreHorizontal, User,
+    ArrowUpCircle, AlertCircle, Clock, CheckCircle,
+    LayoutGrid, List as ListIcon, Calendar
+} from 'lucide-react';
+import { annotationService, type AnnotationQueueItem } from '../../services/annotationService';
+import { StatusBadge, PageHeader, DataTable, Button } from '../../components/admin/AdminComponents';
+import { AnnotationDetail } from './AnnotationDetail';
 
 export function AdminAnnotation() {
-    const [submissions, setSubmissions] = useState<Submission[]>(MOCK_SUBMISSIONS);
-    const [selectedId, setSelectedId] = useState<string>(MOCK_SUBMISSIONS[0]?.id || '');
-    const [filters, setFilters] = useState<FilterState>({ status: 'all', creator: '', dateRange: 'all', minConfidence: 0, showUncertain: false });
-    const [config, setConfig] = useState<AnnotationConfig>(DEFAULT_CONFIG);
-    const [activeTab, setActiveTab] = useState<'annotations' | 'metadata' | 'confidence' | 'actions' | 'insights'>('annotations');
-    const [timelinePosition, setTimelinePosition] = useState(0);
-    const [activeTool, setActiveTool] = useState<AnnotationConfig['tools'][number]>('bbox');
+    const [queue, setQueue] = useState<AnnotationQueueItem[]>([]);
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedItem, setSelectedItem] = useState<AnnotationQueueItem | null>(null);
 
-    const selected = submissions.find(s => s.id === selectedId) || null;
+    useEffect(() => {
+        setQueue(annotationService.getQueue());
+    }, []);
 
-    const filtered = submissions.filter(s => {
-        if (filters.status !== 'all' && s.status !== filters.status) return false;
-        if (filters.creator && !s.contributorName.toLowerCase().includes(filters.creator.toLowerCase())) return false;
-        if (filters.minConfidence > 0 && s.confidenceScore.overall < filters.minConfidence) return false;
-        if (filters.showUncertain && s.confidenceScore.overall > config.uncertaintyThreshold * 100) return false;
-        return true;
-    });
-
-    // Stats
-    const stats = {
-        total: submissions.length,
-        pending: submissions.filter(s => s.status === 'pending').length,
-        approved: submissions.filter(s => s.status === 'approved').length,
-        rejected: submissions.filter(s => s.status === 'rejected').length,
-        avgConfidence: Math.round(submissions.reduce((sum, s) => sum + s.confidenceScore.overall, 0) / submissions.length),
-        totalAnnotations: submissions.reduce((sum, s) => sum + s.metadata.totalAnnotations, 0),
+    const handleAssign = (id: string) => {
+        annotationService.assignJob(id, 'Current Admin');
+        const updatedQueue = annotationService.getQueue();
+        setQueue(updatedQueue);
+        const item = updatedQueue.find(q => q.id === id);
+        if (item) setSelectedItem(item);
     };
 
-    const handleAction = useCallback((action: string) => {
-        if (!selected) return;
-        setSubmissions(prev => prev.map(s =>
-            s.id === selected.id ? { ...s, status: action as Submission['status'] } : s
-        ));
-    }, [selected]);
+    const handleComplete = (id: string, labels: any) => {
+        annotationService.updateStatus(id, 'completed');
+        setQueue(annotationService.getQueue());
+        setSelectedItem(null);
+    };
 
-    return (
-        <div style={styles.container}>
-            {/* ─── TOP BAR ─── */}
-            <div style={styles.topBar}>
-                <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <h1 style={styles.title}>{config.projectName}</h1>
-                        <select
-                            style={styles.templateSwitcher}
-                            value={config.id}
-                            onChange={(e) => setConfig(Object.values(PROJECT_TEMPLATES).find(t => t.id === e.target.value) || DEFAULT_CONFIG)}
-                        >
-                            {Object.values(PROJECT_TEMPLATES).map(t => (
-                                <option key={t.id} value={t.id}>{t.projectName} Template</option>
-                            ))}
-                        </select>
-                    </div>
-                    <p style={styles.subtitle}>{config.description}</p>
-                </div>
-                <div style={styles.statsRow}>
-                    <StatPill label="Total" value={stats.total} color="#6366f1" />
-                    <StatPill label="Pending" value={stats.pending} color="#f59e0b" />
-                    <StatPill label="Approved" value={stats.approved} color="#22c55e" />
-                    <StatPill label="Rejected" value={stats.rejected} color="#ef4444" />
-                    <StatPill label="Avg Confidence" value={`${stats.avgConfidence}%`} color={getConfidenceColor(stats.avgConfidence)} />
-                    <StatPill label="Annotations" value={stats.totalAnnotations.toLocaleString()} color="#3b82f6" />
-                </div>
-            </div>
+    const handleEscalate = (id: string) => {
+        annotationService.updatePriority(id, 'high');
+        setQueue(annotationService.getQueue());
+    };
 
-            {/* ─── FILTERS ─── */}
-            <div style={styles.filterBar}>
-                <select style={styles.select} value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}>
-                    <option value="all">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="in_review">In Review</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-                <input style={styles.searchInput} placeholder="Search creator..."
-                    value={filters.creator} onChange={e => setFilters(f => ({ ...f, creator: e.target.value }))} />
-                <select style={styles.select} value={filters.dateRange} onChange={e => setFilters(f => ({ ...f, dateRange: e.target.value }))}>
-                    <option value="all">All Time</option>
-                    <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
-                </select>
-                <div style={styles.confidenceFilter}>
-                    <span style={{ fontSize: 12, color: '#a3a3a3' }}>Min Confidence</span>
-                    <input type="range" min={0} max={100} value={filters.minConfidence}
-                        onChange={e => setFilters(f => ({ ...f, minConfidence: Number(e.target.value) }))}
-                        style={styles.slider} />
-                    <span style={{ fontSize: 12, color: '#e5e5e5', width: 36, textAlign: 'right' }}>{filters.minConfidence}%</span>
-                </div>
-                <button
-                    style={{
-                        ...styles.filterBtn,
-                        background: filters.showUncertain ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.04)',
-                        borderColor: filters.showUncertain ? '#ef4444' : 'rgba(255,255,255,0.08)',
-                        color: filters.showUncertain ? '#ef4444' : '#a3a3a3'
-                    }}
-                    onClick={() => setFilters(f => ({ ...f, showUncertain: !f.showUncertain }))}
+    const columns = [
+        {
+            key: 'filename', label: 'Media', render: (item: AnnotationQueueItem) => (
+                <div
+                    className="flex items-center gap-3 cursor-pointer group"
+                    onClick={() => setSelectedItem(item)}
                 >
-                    ⚠️ High Uncertainty
-                </button>
-            </div>
-
-            {/* ─── MAIN SPLIT ─── */}
-            <div style={styles.mainGrid}>
-                {/* LEFT: Video List */}
-                <div style={styles.videoList}>
-                    <div style={styles.panelHeader}>
-                        <span style={styles.panelTitle}>Submissions</span>
-                        <span style={styles.panelCount}>{filtered.length}</span>
+                    <div className="w-8 h-8 bg-[#1a1a1a] rounded flex items-center justify-center group-hover:bg-[#2563EB] transition-colors">
+                        <LayoutGrid size={14} className="text-[#525252] group-hover:text-white" />
                     </div>
-                    {filtered.map(sub => (
-                        <div
-                            key={sub.id}
-                            style={{
-                                ...styles.videoCard,
-                                borderColor: selectedId === sub.id ? '#6366f1' : 'transparent',
-                                background: selectedId === sub.id ? 'rgba(99,102,241,0.08)' : 'transparent',
-                            }}
-                            onClick={() => setSelectedId(sub.id)}
-                        >
-                            {/* Thumbnail placeholder */}
-                            <div style={styles.thumbnail}>
-                                <div style={{ ...styles.statusDot, background: getStatusColor(sub.status) }} />
-                                <span style={styles.durationBadge}>{sub.duration}</span>
-                            </div>
-                            <div style={styles.videoInfo}>
-                                <div style={styles.videoName}>{sub.contributorName}</div>
-                                <div style={styles.videoMeta}>
-                                    {sub.setPieceEstimate}pcs &middot; {sub.resolution} &middot; {formatDate(sub.uploadDate)}
-                                </div>
-                                <div style={styles.videoConfRow}>
-                                    <div style={styles.miniBar}>
-                                        <div style={{ ...styles.miniBarFill, width: `${sub.confidenceScore.overall}%`, background: getConfidenceColor(sub.confidenceScore.overall) }} />
-                                    </div>
-                                    <span style={{ fontSize: 11, color: getConfidenceColor(sub.confidenceScore.overall), fontWeight: 600 }}>{sub.confidenceScore.overall}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                    <div>
+                        <div className="text-sm font-medium group-hover:text-blue-400 transition-colors">{item.filename}</div>
+                        <div className="text-[10px] text-[#525252] font-mono">{item.uploadId}</div>
+                    </div>
                 </div>
-
-                {/* RIGHT: Detail Panels */}
-                <div style={styles.detailArea}>
-                    {selected ? (
-                        <>
-                            {/* Video Preview */}
-                            <div style={styles.videoPreview}>
-                                <div style={styles.previewPlaceholder}>
-                                    {/* ToolBar */}
-                                    <div style={styles.toolbar}>
-                                        {config.tools.includes('bbox') && (
-                                            <button
-                                                style={{ ...styles.toolBtn, border: activeTool === 'bbox' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
-                                                onClick={() => setActiveTool('bbox')} title="Bounding Box"
-                                            >
-                                                ⬚
-                                            </button>
-                                        )}
-                                        {config.tools.includes('polygon') && (
-                                            <button
-                                                style={{ ...styles.toolBtn, border: activeTool === 'polygon' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
-                                                onClick={() => setActiveTool('polygon')} title="Polygon Tool"
-                                            >
-                                                ⌬
-                                            </button>
-                                        )}
-                                        {config.tools.includes('keypoints') && (
-                                            <button
-                                                style={{ ...styles.toolBtn, border: activeTool === 'keypoints' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
-                                                onClick={() => setActiveTool('keypoints')} title="Keypoint Tool"
-                                            >
-                                                ⁕
-                                            </button>
-                                        )}
-                                        {config.tools.includes('bbox3d') && (
-                                            <button
-                                                style={{ ...styles.toolBtn, border: activeTool === 'bbox3d' ? '2px solid #6366f1' : '1px solid rgba(255,255,255,0.1)' }}
-                                                onClick={() => setActiveTool('bbox3d')} title="3D Bounding Box"
-                                            >
-                                                🧊
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {/* Canvas Overlay */}
-                                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={styles.canvasOverlay}>
-                                        {selected.annotations.map(ann => (
-                                            <React.Fragment key={ann.id}>
-                                                {ann.boundingBox && (
-                                                    <rect
-                                                        x={ann.boundingBox[0] / 10} y={ann.boundingBox[1] / 10}
-                                                        width={(ann.boundingBox[2] - ann.boundingBox[0]) / 10}
-                                                        height={(ann.boundingBox[3] - ann.boundingBox[1]) / 10}
-                                                        fill="none" strokeWidth="0.5" stroke={getConfidenceColor(ann.confidenceScore * 100)}
-                                                    />
-                                                )}
-                                                {ann.geometry?.type === 'polygon' && ann.geometry.points && (
-                                                    <polygon
-                                                        points={ann.geometry.points.map(p => `${p[0] / 10},${p[1] / 10}`).join(' ')}
-                                                        fill={`${getConfidenceColor(ann.confidenceScore * 100)}20`}
-                                                        stroke={getConfidenceColor(ann.confidenceScore * 100)} strokeWidth="0.5"
-                                                    />
-                                                )}
-                                            </React.Fragment>
-                                        ))}
-                                    </svg>
-
-                                    <div style={styles.playIcon}>▶</div>
-                                    <div style={styles.previewOverlay}>
-                                        <span>{selected.contributorName} &middot; {selected.duration} &middot; {selected.resolution}</span>
-                                    </div>
-
-                                    {/* Label Selector (Config-Driven) */}
-                                    <div style={styles.labelSelector}>
-                                        {config.labels.map(label => (
-                                            <button key={label} style={styles.labelPill}>
-                                                {label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                {/* Timeline */}
-                                <div style={styles.timeline}>
-                                    <div style={styles.timelineTrack}>
-                                        {selected.annotations.map(ann => (
-                                            <div
-                                                key={ann.id}
-                                                style={{
-                                                    ...styles.timelineMarker,
-                                                    left: `${(ann.frameTimestamp / selected.durationSeconds) * 100}%`,
-                                                    background: ann.status === 'approved' ? '#22c55e' : ann.status === 'rejected' ? '#ef4444' : '#f59e0b',
-                                                }}
-                                                title={`${ann.brickType} @ ${ann.frameTimestamp.toFixed(1)}s — ${(ann.confidenceScore * 100).toFixed(0)}%`}
-                                            />
-                                        ))}
-                                        <div style={{ ...styles.timelinePlayhead, left: `${timelinePosition}%` }} />
-                                    </div>
-                                    <div style={styles.timelineLabels}>
-                                        <span>0:00</span>
-                                        <span>{selected.duration}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Tab Bar */}
-                            <div style={styles.tabBar}>
-                                {(['annotations', 'insights', 'metadata', 'confidence', 'actions'] as const).map(tab => (
-                                    <button key={tab} onClick={() => setActiveTab(tab)}
-                                        style={{ ...styles.tab, ...(activeTab === tab ? styles.tabActive : {}) }}>
-                                        {tab === 'annotations' ? `Annotations (${selected.annotations.length})` :
-                                            tab === 'insights' ? 'Model Insights' :
-                                                tab === 'metadata' ? 'Metadata' :
-                                                    tab === 'confidence' ? 'Confidence' : 'Actions'}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Tab Content */}
-                            <div style={styles.tabContent}>
-                                {activeTab === 'annotations' && <AnnotationsPanel submission={selected} />}
-                                {activeTab === 'insights' && (
-                                    <div style={styles.insightsPanel}>
-                                        <div style={styles.insightHeader}>
-                                            <span style={{ color: '#ef4444', fontWeight: 600 }}>Active Learning Analysis</span>
-                                            <span style={styles.tag}>High Uncertainty Detected</span>
-                                        </div>
-                                        <p style={{ fontSize: 13, color: '#a3a3a3', margin: '8px 0 16px' }}>
-                                            The model is struggling with objects near the edges or in low-lighting frames.
-                                            Priority review is recommended for frames 124-180.
-                                        </p>
-                                        <div style={styles.metricRow}>
-                                            <div style={styles.metricItem}>
-                                                <span style={styles.metricLabel}>Edge Occlusion Propensity</span>
-                                                <span style={{ ...styles.metricValue, color: '#ef4444' }}>82%</span>
-                                            </div>
-                                            <div style={styles.metricItem}>
-                                                <span style={styles.metricLabel}>Class Confidence Scarcity</span>
-                                                <span style={{ ...styles.metricValue, color: '#f59e0b' }}>45%</span>
-                                            </div>
-                                            <div style={styles.metricItem}>
-                                                <span style={styles.metricLabel}>Spatial Continuity Break</span>
-                                                <span style={{ ...styles.metricValue, color: '#22c55e' }}>12%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                {activeTab === 'metadata' && <MetadataPanel submission={selected} />}
-                                {activeTab === 'confidence' && <ConfidencePanel submission={selected} />}
-                                {activeTab === 'actions' && <ActionsPanel submission={selected} onAction={handleAction} />}
-                            </div>
-                        </>
-                    ) : (
-                        <div style={styles.emptyState}>Select a submission to review</div>
+            )
+        },
+        // ... (remaining columns remain same)
+        {
+            key: 'contributor', label: 'Contributor', render: (item: AnnotationQueueItem) => (
+                <span className="text-sm text-[#737373]">{item.contributorName}</span>
+            )
+        },
+        {
+            key: 'metrics', label: 'QA Metrics', render: (item: AnnotationQueueItem) => (
+                <div className="flex items-center gap-4">
+                    <div title="Auto Score">
+                        <span className="text-[10px] text-[#525252] block uppercase tracking-wider">Auto</span>
+                        <span className={`text-sm font-semibold ${item.autoScore > 80 ? 'text-green-500' : 'text-amber-500'}`}>{item.autoScore}</span>
+                    </div>
+                    <div title="YOLO Confidence">
+                        <span className="text-[10px] text-[#525252] block uppercase tracking-wider">YOLO</span>
+                        <span className="text-sm text-[#a3a3a3]">{(item.yoloConfidence * 100).toFixed(0)}%</span>
+                    </div>
+                    <div title="SAM Coverage">
+                        <span className="text-[10px] text-[#525252] block uppercase tracking-wider">SAM</span>
+                        <span className="text-sm text-[#a3a3a3]">{(item.samCoverage * 100).toFixed(0)}%</span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            key: 'assigned', label: 'Assigned To', render: (item: AnnotationQueueItem) => (
+                <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center border border-[#262626]">
+                        <User size={10} className="text-[#525252]" />
+                    </div>
+                    <span className="text-xs text-[#a3a3a3]">{item.assignedTo || 'Unassigned'}</span>
+                </div>
+            )
+        },
+        {
+            key: 'priority', label: 'Priority', render: (item: AnnotationQueueItem) => (
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tighter ${item.priority === 'high' ? 'bg-red-500/10 text-red-500' :
+                    item.priority === 'normal' ? 'bg-blue-500/10 text-blue-500' :
+                        'bg-gray-500/10 text-gray-500'
+                    }`}>
+                    {item.priority}
+                </span>
+            )
+        },
+        {
+            key: 'status', label: 'Status', render: (item: AnnotationQueueItem) => (
+                <StatusBadge
+                    label={item.status.replace('_', ' ')}
+                    variant={
+                        item.status === 'completed' ? 'success' :
+                            item.status === 'in_progress' ? 'info' :
+                                item.status === 'assigned' ? 'warning' : 'info'
+                    }
+                />
+            )
+        },
+        {
+            key: 'queue_time', label: 'In Queue', render: (item: AnnotationQueueItem) => (
+                <div className="flex items-center gap-1.5 text-xs text-[#525252]">
+                    <Clock size={12} />
+                    {item.timeInQueue}
+                </div>
+            )
+        },
+        {
+            key: 'actions', label: '', render: (item: AnnotationQueueItem) => (
+                <div className="flex gap-2">
+                    {!item.assignedTo && (
+                        <button
+                            onClick={() => handleAssign(item.id)}
+                            className="px-2 py-1 text-[10px] font-bold bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
+                        >
+                            ASSIGN
+                        </button>
+                    )}
+                    {item.assignedTo && item.status !== 'completed' && (
+                        <button
+                            onClick={() => setSelectedItem(item)}
+                            className="px-2 py-1 text-[10px] font-bold bg-green-600 hover:bg-green-500 text-white rounded transition-colors"
+                        >
+                            LABELS
+                        </button>
+                    )}
+                    {item.priority !== 'high' && (
+                        <button
+                            onClick={() => handleEscalate(item.id)}
+                            className="p-1 text-[#525252] hover:text-red-500 transition-colors"
+                            title="Escalate Priority"
+                        >
+                            <ArrowUpCircle size={16} />
+                        </button>
                     )}
                 </div>
-            </div>
+            )
+        },
+    ];
 
-            {/* ─── ML Pipeline Status ─── */}
-            <div style={styles.pipelineBar}>
-                <div style={styles.panelHeader}>
-                    <span style={styles.panelTitle}>ML Pipeline</span>
-                </div>
-                <div style={styles.pipelineGrid}>
-                    <PipelineCard name="YOLOv8" status="active" version="8.0.0" description="Object detection — bricks, hands, tools" accuracy={94.2} />
-                    <PipelineCard name="SAM3" status="active" version="3.0" description="Instance segmentation — pixel-level masks" accuracy={91.8} />
-                    <PipelineCard name="MediaPipe" status="active" version="0.10.7" description="Hand pose estimation — 21 keypoints" accuracy={96.1} />
-                    <PipelineCard name="Whisper" status="active" version="large-v3" description="Speech-to-text transcription" accuracy={92.5} />
-                    <PipelineCard name="Cognee" status="active" version="2.0" description="Graph RAG — knowledge extraction" accuracy={78.5} />
-                    <PipelineCard name="Confidence Scorer" status="active" version="1.0.0" description="4-component annotation quality scoring" accuracy={0} />
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// ============================================
-// PANEL COMPONENTS
-// ============================================
-
-function AnnotationsPanel({ submission }: { submission: Submission }) {
     return (
-        <div>
-            {submission.annotations.length === 0 ? (
-                <div style={styles.emptyState}>No annotations found. Run auto-annotation pipeline first.</div>
-            ) : (
-                <div style={styles.annotationList}>
-                    <div style={styles.annotationHeader}>
-                        <span style={{ flex: 1 }}>Brick Type</span>
-                        <span style={{ width: 80 }}>Time</span>
-                        <span style={{ width: 80 }}>Confidence</span>
-                        <span style={{ width: 80 }}>Source</span>
-                        <span style={{ width: 80 }}>Status</span>
-                        <span style={{ width: 120 }}>Tags</span>
-                        <span style={{ width: 100 }}>Actions</span>
-                    </div>
-                    {submission.annotations.map(ann => (
-                        <div key={ann.id} style={styles.annotationRow}>
-                            <span style={{ flex: 1, fontWeight: 500, color: '#e5e5e5', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {ann.brickType}
-                                {ann.geometry && (
-                                    <span style={{ fontSize: 10, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, color: '#737373', fontWeight: 400 }}>
-                                        {ann.geometry.type.toUpperCase()}
-                                    </span>
-                                )}
-                            </span>
-                            <span style={{ width: 80, color: '#a3a3a3', fontFamily: 'monospace', fontSize: 12 }}>{ann.frameTimestamp.toFixed(1)}s</span>
-                            <span style={{ width: 80 }}>
-                                <span style={{ color: getConfidenceColor(ann.confidenceScore * 100), fontWeight: 600, fontSize: 13 }}>
-                                    {(ann.confidenceScore * 100).toFixed(0)}%
-                                </span>
-                            </span>
-                            <span style={{ width: 80 }}>
-                                <span style={{ ...styles.sourceBadge, background: ann.source === 'auto' ? 'rgba(99,102,241,0.15)' : ann.source === 'crowd' ? 'rgba(34,197,94,0.15)' : 'rgba(249,115,22,0.15)', color: ann.source === 'auto' ? '#818cf8' : ann.source === 'crowd' ? '#4ade80' : '#fb923c' }}>
-                                    {ann.source}
-                                </span>
-                            </span>
-                            <span style={{ width: 80 }}>
-                                <span style={{ ...styles.statusBadge, background: `${getStatusColor(ann.status)}20`, color: getStatusColor(ann.status) }}>
-                                    {ann.status}
-                                </span>
-                            </span>
-                            <span style={{ width: 120, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                {ann.metaTags.slice(0, 2).map(tag => (
-                                    <span key={tag} style={styles.tag}>{tag}</span>
-                                ))}
-                            </span>
-                            <span style={{ width: 100, display: 'flex', gap: 4 }}>
-                                <button style={styles.approveBtn} title="Approve">✓</button>
-                                <button style={styles.rejectBtn} title="Reject">✗</button>
-                            </span>
-                        </div>
-                    ))}
-                </div>
+        <div className="p-6 text-white max-w-[1500px]">
+            {selectedItem && (
+                <AnnotationDetail
+                    item={selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                    onComplete={handleComplete}
+                />
             )}
-        </div>
-    );
-}
+            <div className="flex items-start justify-between mb-8">
+                {/* ... (Header content) */}
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Annotation Bin</h1>
+                    <p className="text-[#737373] mt-1 text-sm tracking-wide uppercase">Stage 3 — Human-in-the-loop Labeling Queue</p>
+                </div>
+                <div className="flex gap-3">
+                    <div className="flex bg-[#141414] border border-[#262626] rounded-lg p-1">
+                        <button
+                            onClick={() => setViewMode('table')}
+                            className={`p-1.5 rounded transition-colors ${viewMode === 'table' ? 'bg-[#262626] text-white' : 'text-[#525252]'}`}
+                        >
+                            <ListIcon size={16} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-1.5 rounded transition-colors ${viewMode === 'grid' ? 'bg-[#262626] text-white' : 'text-[#525252]'}`}
+                        >
+                            <LayoutGrid size={16} />
+                        </button>
+                    </div>
+                    <Button variant="primary">Export Labels</Button>
+                </div>
+            </div>
 
-function MetadataPanel({ submission }: { submission: Submission }) {
-    return (
-        <div style={styles.metadataGrid}>
-            <MetaRow label="Creator" value={`${submission.contributorName} (${submission.contributorEmail})`} />
-            <MetaRow label="Upload Date" value={new Date(submission.uploadDate).toLocaleString()} />
-            <MetaRow label="Duration" value={submission.duration} />
-            <MetaRow label="Resolution" value={submission.resolution} />
-            <MetaRow label="Device" value={submission.device} />
-            <MetaRow label="Set Piece Estimate" value={`${submission.setPieceEstimate} pieces`} />
-            <MetaRow label="Lighting Condition" value={submission.lightingCondition} />
-            <MetaRow label="Location" value={submission.locationTag} />
-            <MetaRow label="Total Frames" value={submission.metadata.totalFrames.toLocaleString()} />
-            <MetaRow label="FPS" value={String(submission.metadata.fps)} />
-            <MetaRow label="Total Annotations" value={submission.metadata.totalAnnotations.toLocaleString()} />
-            <MetaRow label="Auto Annotations" value={submission.metadata.autoAnnotations.toLocaleString()} />
-            <MetaRow label="Human Annotations" value={submission.metadata.humanAnnotations.toLocaleString()} />
-            <MetaRow label="ML Models Used" value={submission.metadata.modelVersions.join(', ')} />
-        </div>
-    );
-}
-
-function ConfidencePanel({ submission }: { submission: Submission }) {
-    const cs = submission.confidenceScore;
-    return (
-        <div style={styles.confidenceGrid}>
-            {/* Overall */}
-            <div style={styles.overallScore}>
-                <div style={styles.scoreCircle}>
-                    <svg viewBox="0 0 120 120" style={{ width: 120, height: 120 }}>
-                        <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
-                        <circle cx="60" cy="60" r="52" fill="none" stroke={getConfidenceColor(cs.overall)} strokeWidth="8"
-                            strokeDasharray={`${(cs.overall / 100) * 327} 327`} strokeLinecap="round"
-                            transform="rotate(-90 60 60)" />
-                    </svg>
-                    <div style={styles.scoreText}>
-                        <span style={{ fontSize: 32, fontWeight: 700, color: getConfidenceColor(cs.overall) }}>{cs.overall}</span>
-                        <span style={{ fontSize: 12, color: '#a3a3a3' }}>Overall</span>
+            <div className="flex gap-4 mb-6">
+                <div className="flex-1 relative">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#525252]" />
+                    <input
+                        type="text"
+                        placeholder="Filter queue by filename, contributor, or annotator..."
+                        className="w-full bg-[#0a0a0a] border border-[#262626] rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                <button className="flex items-center gap-2 px-4 py-2 bg-[#141414] border border-[#262626] rounded-xl text-sm text-[#a3a3a3] hover:text-white transition-colors">
+                    <Filter size={16} />
+                    Filters
+                </button>
+                <div className="flex items-center gap-6 px-6 bg-[#141414] border border-[#262626] rounded-xl text-xs">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                        <span className="text-[#a3a3a3]">High Priority: <span className="text-white font-bold">{queue.filter(q => q.priority === 'high').length}</span></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        <span className="text-[#a3a3a3]">In Progress: <span className="text-white font-bold">{queue.filter(q => q.status === 'in_progress').length}</span></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-green-500" />
+                        <span className="text-[#a3a3a3]">Avg Throughput: <span className="text-white font-bold">14.2m/item</span></span>
                     </div>
                 </div>
             </div>
 
-            {/* Breakdown */}
-            <div style={styles.breakdownList}>
-                <ConfidenceBar label="Model Agreement" value={cs.modelAgreement} weight="40%" description="User labels vs auto-annotation predictions" />
-                <ConfidenceBar label="Cross-User Agreement" value={cs.crossUserAgreement} weight="30%" description="Consensus across multiple annotators" />
-                <ConfidenceBar label="User Reliability" value={cs.userReliability} weight="20%" description="Historical accuracy of this contributor" />
-                <ConfidenceBar label="Context Quality" value={cs.contextQuality} weight="10%" description="Image clarity, stability, and occlusion levels" />
-            </div>
-
-            {/* Formula */}
-            <div style={styles.formulaBox}>
-                <code style={styles.formula}>
-                    confidence = 0.4 × model_agreement + 0.3 × cross_user + 0.2 × reliability + 0.1 × context
-                </code>
+            <div className="border border-[#262626] rounded-2xl overflow-hidden bg-[#0a0a0a] shadow-2xl">
+                <DataTable
+                    columns={columns}
+                    data={queue.filter(q => q.filename.toLowerCase().includes(searchQuery.toLowerCase()))}
+                />
             </div>
         </div>
     );
 }
-
-function ActionsPanel({ submission, onAction }: { submission: Submission; onAction: (action: string) => void }) {
-    return (
-        <div style={styles.actionsGrid}>
-            <ActionButton label="Approve" icon="✓" description="Mark all annotations as approved and add to training set" color="#22c55e" onClick={() => onAction('approved')} />
-            <ActionButton label="Request Re-submission" icon="↺" description="Ask contributor to re-record with better quality" color="#f59e0b" onClick={() => onAction('pending')} />
-            <ActionButton label="Partial Approve" icon="≈" description="Approve some annotations, flag others for review" color="#6366f1" onClick={() => onAction('partial')} />
-            <ActionButton label="Reject" icon="✗" description="Reject submission — does not meet quality standards" color="#ef4444" onClick={() => onAction('rejected')} />
-
-            <div style={styles.actionDivider} />
-
-            <div style={styles.exportSection}>
-                <h4 style={{ color: '#e5e5e5', margin: '0 0 8px', fontSize: 14 }}>Dataset Export</h4>
-                <p style={{ color: '#a3a3a3', fontSize: 12, margin: '0 0 12px' }}>Package approved annotations for licensing</p>
-                <div style={{ display: 'flex', gap: 8 }}>
-                    <button style={styles.exportBtn}>Export COCO JSON</button>
-                    <button style={styles.exportBtn}>Export YOLO Format</button>
-                    <button style={styles.exportBtn}>Export CSV</button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// ============================================
-// MICRO COMPONENTS
-// ============================================
-
-function StatPill({ label, value, color }: { label: string; value: string | number; color: string }) {
-    return (
-        <div style={styles.statPill}>
-            <span style={{ fontSize: 11, color: '#a3a3a3', textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>{label}</span>
-            <span style={{ fontSize: 18, fontWeight: 700, color }}>{value}</span>
-        </div>
-    );
-}
-
-function MetaRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div style={styles.metaRow}>
-            <span style={styles.metaLabel}>{label}</span>
-            <span style={styles.metaValue}>{value}</span>
-        </div>
-    );
-}
-
-function ConfidenceBar({ label, value, weight, description }: { label: string; value: number; weight: string; description: string }) {
-    return (
-        <div style={styles.confBar}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontSize: 13, color: '#e5e5e5', fontWeight: 500 }}>{label}</span>
-                <span style={{ fontSize: 13, color: getConfidenceColor(value), fontWeight: 600 }}>{value}%</span>
-            </div>
-            <div style={styles.barTrack}>
-                <div style={{ ...styles.barFill, width: `${value}%`, background: getConfidenceColor(value) }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                <span style={{ fontSize: 11, color: '#737373' }}>{description}</span>
-                <span style={{ fontSize: 11, color: '#525252' }}>Weight: {weight}</span>
-            </div>
-        </div>
-    );
-}
-
-function ActionButton({ label, icon, description, color, onClick }: { label: string; icon: string; description: string; color: string; onClick: () => void }) {
-    return (
-        <button style={{ ...styles.actionButton, borderColor: `${color}30` }} onClick={onClick}>
-            <span style={{ fontSize: 20, color }}>{icon}</span>
-            <div>
-                <span style={{ fontWeight: 600, color: '#e5e5e5', display: 'block', fontSize: 14 }}>{label}</span>
-                <span style={{ color: '#737373', fontSize: 12 }}>{description}</span>
-            </div>
-        </button>
-    );
-}
-
-function PipelineCard({ name, status, version, description, accuracy }: { name: string; status: 'active' | 'standby' | 'error'; version: string; description: string; accuracy: number }) {
-    const statusColor = status === 'active' ? '#22c55e' : status === 'standby' ? '#f59e0b' : '#ef4444';
-    return (
-        <div style={styles.pipelineCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor, boxShadow: `0 0 6px ${statusColor}` }} />
-                <span style={{ fontWeight: 600, color: '#e5e5e5', fontSize: 14 }}>{name}</span>
-                <span style={{ fontSize: 11, color: '#525252', marginLeft: 'auto' }}>v{version}</span>
-            </div>
-            <p style={{ color: '#a3a3a3', fontSize: 12, margin: '0 0 4px' }}>{description}</p>
-            {accuracy > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{ ...styles.miniBar, flex: 1 }}>
-                        <div style={{ ...styles.miniBarFill, width: `${accuracy}%`, background: '#22c55e' }} />
-                    </div>
-                    <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 600 }}>{accuracy}%</span>
-                </div>
-            )}
-        </div>
-    );
-}
-
-// ============================================
-// STYLES
-// ============================================
-
-const styles: Record<string, React.CSSProperties> = {
-    container: { maxWidth: 1600, margin: '0 auto', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" },
-    topBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 16 },
-    title: { fontSize: 28, fontWeight: 700, color: '#e5e5e5', margin: 0 },
-    subtitle: { fontSize: 14, color: '#737373', margin: '4px 0 0' },
-    statsRow: { display: 'flex', gap: 12, flexWrap: 'wrap' as const },
-    statPill: { display: 'flex', flexDirection: 'column' as const, alignItems: 'center', padding: '8px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', minWidth: 80 },
-
-    filterBar: { display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' as const, alignItems: 'center' },
-    select: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '8px 12px', color: '#e5e5e5', fontSize: 13, outline: 'none', cursor: 'pointer' },
-    searchInput: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '8px 12px', color: '#e5e5e5', fontSize: 13, outline: 'none', width: 200 },
-    confidenceFilter: { display: 'flex', alignItems: 'center', gap: 8, padding: '4px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' },
-    slider: { width: 100, accentColor: '#6366f1' },
-
-    mainGrid: { display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, marginBottom: 24 },
-    videoList: { background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', maxHeight: 700, overflowY: 'auto' as const },
-    panelHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' },
-    panelTitle: { fontSize: 13, fontWeight: 600, color: '#a3a3a3', textTransform: 'uppercase' as const, letterSpacing: 1 },
-    panelCount: { fontSize: 12, color: '#6366f1', fontWeight: 600, background: 'rgba(99,102,241,0.12)', padding: '2px 8px', borderRadius: 10 },
-
-    videoCard: { display: 'flex', gap: 12, padding: '12px 16px', cursor: 'pointer', borderLeft: '3px solid transparent', transition: 'all 0.15s ease' },
-    thumbnail: { width: 64, height: 48, borderRadius: 6, background: 'rgba(255,255,255,0.06)', position: 'relative' as const, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    statusDot: { width: 8, height: 8, borderRadius: '50%', position: 'absolute' as const, top: 4, right: 4 },
-    durationBadge: { fontSize: 10, color: '#a3a3a3', fontFamily: 'monospace' },
-    videoInfo: { flex: 1, minWidth: 0 },
-    videoName: { fontSize: 14, fontWeight: 500, color: '#e5e5e5', whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis' },
-    videoMeta: { fontSize: 11, color: '#737373', marginTop: 2 },
-    videoConfRow: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 },
-    miniBar: { height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.06)', flex: 1 },
-    miniBarFill: { height: '100%', borderRadius: 2, transition: 'width 0.3s ease' },
-
-    detailArea: { background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' },
-    videoPreview: { borderBottom: '1px solid rgba(255,255,255,0.06)' },
-    previewPlaceholder: { height: 280, background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(59,130,246,0.06))', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' as const },
-    playIcon: { width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#e5e5e5', backdropFilter: 'blur(10px)' },
-    previewOverlay: { position: 'absolute' as const, bottom: 12, left: 16, fontSize: 12, color: '#a3a3a3' },
-
-    timeline: { padding: '12px 16px' },
-    timelineTrack: { height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, position: 'relative' as const },
-    timelineMarker: { position: 'absolute' as const, width: 10, height: 10, borderRadius: '50%', top: -2, border: '2px solid rgba(0,0,0,0.4)', cursor: 'pointer' },
-    timelinePlayhead: { position: 'absolute' as const, width: 2, height: 14, background: '#e5e5e5', top: -4, borderRadius: 1 },
-    timelineLabels: { display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 11, color: '#525252' },
-
-    tabBar: { display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)' },
-    tab: { flex: 1, padding: '10px 16px', background: 'none', border: 'none', color: '#737373', fontSize: 13, cursor: 'pointer', fontWeight: 500, borderBottom: '2px solid transparent', transition: 'all 0.15s ease' },
-    tabActive: { color: '#e5e5e5', borderBottomColor: '#6366f1' },
-    tabContent: { padding: 16, maxHeight: 320, overflowY: 'auto' as const },
-
-    annotationList: {},
-    annotationHeader: { display: 'flex', gap: 8, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', fontSize: 11, color: '#525252', textTransform: 'uppercase' as const, letterSpacing: 0.5, fontWeight: 600 },
-    annotationRow: { display: 'flex', alignItems: 'center', gap: 8, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' },
-    sourceBadge: { padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 500 },
-    statusBadge: { padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 500, textTransform: 'capitalize' as const },
-    tag: { padding: '1px 6px', borderRadius: 4, fontSize: 10, background: 'rgba(255,255,255,0.06)', color: '#a3a3a3' },
-    approveBtn: { width: 28, height: 28, borderRadius: 6, border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.1)', color: '#22c55e', cursor: 'pointer', fontSize: 14 },
-    rejectBtn: { width: 28, height: 28, borderRadius: 6, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.1)', color: '#ef4444', cursor: 'pointer', fontSize: 14 },
-
-    metadataGrid: {},
-    metaRow: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' },
-    metaLabel: { fontSize: 13, color: '#737373' },
-    metaValue: { fontSize: 13, color: '#e5e5e5', fontWeight: 500 },
-
-    confidenceGrid: { display: 'grid', gridTemplateColumns: '140px 1fr', gap: 24, alignItems: 'start' },
-    overallScore: { display: 'flex', justifyContent: 'center', paddingTop: 8 },
-    scoreCircle: { position: 'relative' as const },
-    scoreText: { position: 'absolute' as const, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' as const, display: 'flex', flexDirection: 'column' as const, alignItems: 'center' },
-    breakdownList: { display: 'flex', flexDirection: 'column' as const, gap: 16 },
-    confBar: {},
-    barTrack: { height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)' },
-    barFill: { height: '100%', borderRadius: 3, transition: 'width 0.5s ease' },
-    formulaBox: { gridColumn: 'span 2', background: 'rgba(99,102,241,0.06)', borderRadius: 8, padding: '10px 16px', marginTop: 8 },
-    formula: { fontSize: 12, color: '#818cf8', fontFamily: "'SF Mono', 'Fira Code', monospace" },
-
-    actionsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 },
-    actionButton: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid', borderRadius: 10, cursor: 'pointer', textAlign: 'left' as const, transition: 'all 0.15s ease' },
-    actionDivider: { gridColumn: 'span 2', height: 1, background: 'rgba(255,255,255,0.06)', margin: '4px 0' },
-    exportSection: { gridColumn: 'span 2', padding: '8px 0' },
-    exportBtn: { padding: '8px 14px', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)', background: 'rgba(99,102,241,0.08)', color: '#818cf8', fontSize: 12, fontWeight: 500, cursor: 'pointer' },
-
-    pipelineBar: { background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', marginBottom: 24 },
-    pipelineGrid: { display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12, padding: '12px 16px' },
-    pipelineCard: { padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.04)' },
-
-    emptyState: { padding: 32, textAlign: 'center' as const, color: '#525252', fontSize: 14 },
-    filterBtn: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '8px 12px', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s ease' },
-    toolbar: { position: 'absolute' as const, top: 12, right: 12, display: 'flex', flexDirection: 'column' as const, gap: 8, zIndex: 10 },
-    toolBtn: { width: 36, height: 36, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all 0.2s ease' },
-    canvasOverlay: { position: 'absolute' as const, top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' as const },
-    labelSelector: { position: 'absolute' as const, bottom: 48, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8, padding: '8px 16px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', borderTop: '1px solid rgba(255,255,255,0.08)' },
-    labelPill: { padding: '4px 12px', borderRadius: 16, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#e5e5e5', fontSize: 12, cursor: 'pointer', transition: 'all 0.2s ease' },
-    templateSwitcher: { background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '4px 8px', color: '#818cf8', fontSize: 11, outline: 'none', cursor: 'pointer' },
-    insightsPanel: { padding: '8px 4px' },
-    insightHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    metricRow: { display: 'flex', gap: 16, marginBottom: 20 },
-    metricItem: { flex: 1, padding: 12, background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' },
-    metricLabel: { display: 'block', fontSize: 11, color: '#737373', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
-    metricValue: { fontSize: 20, fontWeight: 700 },
-};
 
 export default AdminAnnotation;
+
